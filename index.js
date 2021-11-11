@@ -1,6 +1,6 @@
 // Some settings for getting into spotify...
 const client_id = "2ed0e6e8b06842fb854cb15e1690a7b5";
-const redirect_uri = "http://localhost:5500/index.html";
+const redirect_uri = window.location.href;
 const scopes = "user-follow-read";
 
 (async () => {
