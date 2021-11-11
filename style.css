@@ -1,3 +1,12 @@
+@font-face {
+    font-family: 'Vulf Sans';
+    src: url('https://grantshandy.github.io/textrip/vulf-sans/VulfSans-Regular.woff2') format('woff2'),
+    url('https://grantshandy.github.io/textrip/vulf-sans/VulfSans-Regular.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
 body {
-    text-align: center;
+    font-family: 'Vulf Sans'
 }

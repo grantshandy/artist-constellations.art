@@ -1,19 +1,17 @@
+import * as artists from "./artists.js";
+
 // Some settings for getting into spotify...
 const client_id = "2ed0e6e8b06842fb854cb15e1690a7b5";
 const redirect_uri = window.location.href;
 const scopes = "user-follow-read";
 
 (async () => {
-  const token = window.location.hash.substr(1).split('&')[0].split("=")[1]
+  var token = window.location.hash.substr(1).split('&')[0].split("=")[1]
 
   // Check if our page was passed a token...
   if (token) {
-    // Take our artists and print them.
-    var artists = await getFollowingArtists(token);
-    artists.forEach(function(artist) {
-      document.getElementById("content").innerHTML += `<p><a href='${artist.external_urls.spotify}'>${artist.name}</a> id=${artist.id}</p>`;
-    })
-
+    localStorage.setItem("spotToken", token);
+    await appLogic();
   } else {
     // If not then add an authenticate button.
     var authenticateButton = document.createElement("input");
@@ -26,33 +24,28 @@ const scopes = "user-follow-read";
   }
 })();
 
-async function getFollowingArtists(token) {
-  var total;
-  var artists;
+// Here is the "real" entry point for our program. We should have our token at this point and can interact with the spotify api and write to the HTML DOM.
+async function appLogic() {
+  var followingArtists = await artists.getFollowingArtists();
 
-  // Get number of artists so we know how much to download.
-  // This is redundant but spotify's api is kinda dumb here.
-  await fetch('https://api.spotify.com/v1/me/following?type=artist', {
-    headers: {
-      'Authorization': `Bearer ${token}`,
-    }
-  }).then(response => {
-    return response.json();
-  }).then(data => {
-    total = data.artists.total;
-  })
+  var content = document.getElementById("content");
 
-  // Get our artists and print each of them.
-  await fetch(`https://api.spotify.com/v1/me/following?type=artist&limit=${total}`, {
-    headers: {
-      'Authorization': `Bearer ${token}`,
-    }
-  }).then(response => {
-    return response.json();
-  }).then(data => {
-    console.log(data);
-    artists = data.artists.items
+  var ul = document.createElement('ul');
+  content.appendChild(ul);
+
+  followingArtists.forEach(async function(artist) {
+    var li = document.createElement('li');
+    li.appendChild(document.createTextNode(artist.name));
+    var relatedArtistList = document.createElement('ul')
+
+    var relatedArtists = await artists.getRelatedArtists(artist);
+    relatedArtists.forEach(function(relatedArtist) {
+      var relatedArtistItem = document.createElement('li');
+      relatedArtistItem.appendChild(document.createTextNode(relatedArtist.name));
+      relatedArtistList.appendChild(relatedArtistItem);
+    });
+    
+    li.appendChild(relatedArtistList);
+    ul.appendChild(li);
   });
-
-  return artists;
 }
