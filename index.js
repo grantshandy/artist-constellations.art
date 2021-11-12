@@ -47,6 +47,9 @@ async function appLogic() {
   var links = [];
 
   var nodes = await artists.getFollowingArtists();
+  nodes.forEach(function(artist) {
+    console.log(artist.name);
+  });
 
   drawGraph(links, nodes);
 }
