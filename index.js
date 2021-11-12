@@ -38,9 +38,6 @@ const scopes = "user-follow-read";
 // Here is the "real" entry point for our program. We should have our token at this point and can interact with the spotify api and write to the HTML DOM.
 async function appLogic() {
 
-  var width = window.innerWidth / 2;
-  var height = window.innerHeight / 2
-
   // var links = [
   //   { target: 'them', source: 'me' },
   //   { target: 'you', source: 'me' },
@@ -51,14 +48,21 @@ async function appLogic() {
 
   var nodes = await artists.getFollowingArtists();
 
+  drawGraph(links, nodes);
+}
+
+function drawGraph(links, nodes) {
+  var width = window.innerWidth / 2;
+  var height = window.innerHeight / 2;
+
   const svg = d3.select('svg')
-    .attr('width', width)
-    .attr('height', height)
-  
+  .attr('width', width)
+  .attr('height', height)
+
   const simulation = d3.forceSimulation()
-    .force('charge', d3.forceManyBody().strength(-30)) 
+    .force('charge', d3.forceManyBody().strength(-15)) 
     .force('center', d3.forceCenter(width / 2, height / 2))
-  
+
   const nodeElements = svg.append('g')
     .selectAll('circle')
     .data(nodes)
