@@ -1,7 +1,7 @@
-export async function getRelatedArtists(artist) {
+export function getRelatedArtists(id) {
     var artists = new Array();
 
-    await fetch(`https://api.spotify.com/v1/artists/${artist.id}/related-artists`, {
+    fetch(`https://api.spotify.com/v1/artists/${id}/related-artists`, {
         headers: {
         'Authorization': `Bearer ${localStorage.getItem("spotToken")}`,
         }
@@ -10,42 +10,18 @@ export async function getRelatedArtists(artist) {
 
         return response.json();
     }).then(data => {
-        artists = data.artists;
+        data.artists.forEach(function(artist) {
+            artists.push({ name: artist.name, id: artist.id });
+        });
     })
 
     return artists;
 }
-  
-export async function getFollowingArtists() {
-    var total;
-    var artists = new Array ();
 
-    // Get number of artists so we know how much to download.
-    // This is redundant but spotify's api is kinda dumb here.
-    await fetch('https://api.spotify.com/v1/me/following?type=artist', {
-        headers: {
-        'Authorization': `Bearer ${localStorage.getItem("spotToken")}`,
-        }
-    }).then(response => {
-        checkResponse(response);
-
-        return response.json();
-    }).then(data => {
-        total = data.artists.total;
-    })
-
-    // Get our artists and print each of them.
-    await fetch(`https://api.spotify.com/v1/me/following?type=artist&limit=${total}`, {
-        headers: {
-        'Authorization': `Bearer ${localStorage.getItem("spotToken")}`,
-        }
-    }).then(response => {
-        return response.json();
-    }).then(data => {
-        artists = data.artists.items
-    });
-
-    return artists;
+export function logout() {
+    localStorage.removeItem("spotToken");
+    window.location.href = window.location.href.split('/')[0];
+    console.log("logging out!");
 }
 
 // If there's a problem with getting to spotify that probably means that our auth_key is expired (usually around 60 minutes as I hear)

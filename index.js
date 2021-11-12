@@ -5,6 +5,9 @@ const client_id = "2ed0e6e8b06842fb854cb15e1690a7b5";
 const redirect_uri = window.location.href;
 const scopes = "user-follow-read";
 
+const width = 1280;
+const height = 720;
+
 (async () => {
   // Get our token from the page URL
   var token = window.location.hash.substr(1).split('&')[0].split("=")[1]
@@ -37,96 +40,65 @@ const scopes = "user-follow-read";
 
 // Here is the "real" entry point for our program. We should have our token at this point and can interact with the spotify api and write to the HTML DOM.
 async function appLogic() {
+  var links = new Array ();
+  var nodes = new Array ();
+  var ids = new Array ();
 
-  // var links = [
-  //   { target: 'them', source: 'me' },
-  //   { target: 'you', source: 'me' },
-  //   { target: 'them', source: 'you' },
-  // ];
+  var nodes = getFollowingArtists();
+  nodes.forEach(logArtist);
+  // nodes.forEach(function(artist) {
+  //   console.log(artist);
+  //   // var relatedArtists = await artists.getRelatedArtists(artist.id);
+  //   // relatedArtists.forEach(function(related) {
+  //   //   if (!ids.includes(related.id)) {
+  //   //     links.push({ source: artist, target: related })
+  //   //     console.log("!");
+  //   //   }
+  //   // });
+  // });
 
-  var links = [];
+  // drawGraph(links, nodes);
+}
 
-  var nodes = await artists.getFollowingArtists();
-  nodes.forEach(function(artist) {
-    console.log(artist.name);
-  });
-
-  drawGraph(links, nodes);
+function logArtist(value) {
+  console.log(value);
 }
 
 function drawGraph(links, nodes) {
-  var width = window.innerWidth / 2;
-  var height = window.innerHeight / 2;
+  var graphDiv = document.createElement("div");
+  graphDiv.id = "3d-graph";
+  document.getElementById("content").appendChild(graphDiv);
 
-  const svg = d3.select('svg')
-  .attr('width', width)
-  .attr('height', height)
+  const Graph = ForceGraph3D()
+  (document.getElementById('3d-graph'))
+    .graphData({ nodes, links })
+    .nodeLabel('name')
+    .width(width)
+    .height(height);
 
-  const simulation = d3.forceSimulation()
-    .force('charge', d3.forceManyBody().strength(-15)) 
-    .force('center', d3.forceCenter(width / 2, height / 2))
+  var logoutButton = document.createElement("input");
+  logoutButton.type = "button";
+  logoutButton.value = "Logout"
+  logoutButton.onclick = function() {
+    artists.logout();
+  }
+  document.body.appendChild(logoutButton);
+}
 
-  const nodeElements = svg.append('g')
-    .selectAll('circle')
-    .data(nodes)
-    .enter().append('circle')
-    .attr('r', 10)
-    .attr('fill', '#323232')
+async function getFollowingArtists() {
+  var artists = new Array ();
 
-  const textElements = svg.append('g')
-    .selectAll('text')
-    .data(nodes)
-    .enter().append('text')
-    .text(node => node.name)
-    .attr('font-size', 15)
-    .attr('color', '#323232')
-    .attr('dx', 15)
-    .attr('dy', 4)
-
-  const linkElements = svg.append('g')
-    .selectAll('line')
-    .data(links)
-    .enter().append('line')
-    .attr('stroke-width', 2)
-    .attr('stroke', '#323232')
-
-  simulation.nodes(nodes).on('tick', () => {
-    nodeElements
-      .attr('cx', node => node.x)
-      .attr('cy', node => node.y)
-    textElements
-      .attr('x', node => node.x)
-      .attr('y', node => node.y)
-    linkElements
-      .attr('x1', link => link.source.x)
-      .attr('y1', link => link.source.y)
-      .attr('x2', link => link.target.x)
-      .attr('y2', link => link.target.y)
-  })
-
-  simulation.force('link', d3.forceLink()
-    .id(link => link.id)
-    .strength(link => 0.02))
-
-  simulation.force('link').links(links)
-
-  var dragDrop = d3.drag()
-  .on('start', node => {
-    node.fx = node.x
-    node.fy = node.y
-  })
-  .on('drag', node => {
-    simulation.alphaTarget(0.7).restart()
-    node.fx = d3.event.x
-    node.fy = d3.event.y
-  })
-  .on('end', node => {
-    if (!d3.event.active) {
-      simulation.alphaTarget(0)
-    }
-    node.fx = null
-    node.fy = null
+  // Get our artists and print each of them.
+  await fetch(`https://api.spotify.com/v1/me/following?type=artist&limit=50`, {
+      headers: {
+      'Authorization': `Bearer ${localStorage.getItem("spotToken")}`,
+      }
+  }).then(response => response.json())
+  }).then(data => {
+      data.artists.items.forEach(function(artist) {
+          artists.push({ name: artist.name, id: artist.id });
+      });
   });
 
-  nodeElements.call(dragDrop)
+  return artists;
 }
