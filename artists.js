@@ -48,7 +48,7 @@ export async function getFollowingArtists() {
     return artists;
 }
 
-// If there's a problem with getting to spotify that probably means that our auth_key expires.
+// If there's a problem with getting to spotify that probably means that our auth_key is expired (usually around 60 minutes as I hear)
 // This function checks to see if it didn't go through, and unsets spotToken from localStorage then reloads the page.
 // This forces the user to re-login and generate a new auth_key.
 function checkResponse(response) {

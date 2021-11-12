@@ -8,5 +8,14 @@
 }
 
 body {
-    font-family: 'Vulf Sans'
+    font-family: 'Vulf Sans';
+    text-align: center;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+svg {
+    border: 3px solid #323232;
+    border-radius: 15px;
+    color: white;
 }
