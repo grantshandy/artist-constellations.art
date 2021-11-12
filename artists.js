@@ -55,6 +55,6 @@ function checkResponse(response) {
     if (response.status != 200) {
         localStorage.removeItem("spotToken");
         console.log("error getting to spotify API! reloading...");
-        window.location.reload();
+        window.location.href = window.location.href.split('/')[0];
     }
 }
