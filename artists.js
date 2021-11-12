@@ -6,6 +6,8 @@ export async function getRelatedArtists(artist) {
         'Authorization': `Bearer ${localStorage.getItem("spotToken")}`,
         }
     }).then(response => {
+        checkResponse(response);
+
         return response.json();
     }).then(data => {
         artists = data.artists;
@@ -25,6 +27,8 @@ export async function getFollowingArtists() {
         'Authorization': `Bearer ${localStorage.getItem("spotToken")}`,
         }
     }).then(response => {
+        checkResponse(response);
+
         return response.json();
     }).then(data => {
         total = data.artists.total;
@@ -42,4 +46,15 @@ export async function getFollowingArtists() {
     });
 
     return artists;
+}
+
+// If there's a problem with getting to spotify that probably means that our auth_key expires.
+// This function checks to see if it didn't go through, and unsets spotToken from localStorage then reloads the page.
+// This forces the user to re-login and generate a new auth_key.
+function checkResponse(response) {
+    if (response.status != 200) {
+        localStorage.removeItem("spotToken");
+        console.log("error getting to spotify API! reloading...");
+        window.location.reload();
+    }
 }
