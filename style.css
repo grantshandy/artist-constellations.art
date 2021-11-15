@@ -10,11 +10,14 @@
 body {
     font-family: 'Vulf Sans';
     text-align: center;
+    margin-left: auto;
+    margin-right: auto;
 }
 
-#content {
-    text-align: center;
-    display: flex;
-    justify-content: center;
-    border-radius: 10%;
+.graph {
+    border: 3px solid #323232;
+    border-radius: 15px;
+    color: white;
+    width: 70%;
+    height: 50%;
 }
