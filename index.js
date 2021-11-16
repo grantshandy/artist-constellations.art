@@ -24,15 +24,26 @@ if (!token) {
   var graphElement = document.getElementById("graph");
   var contentElement = document.getElementById("content");
 
-  var myGraph = ForceGraph3D();
-  myGraph(graphElement)
+  var Graph = ForceGraph3D();
+  Graph(graphElement)
       .graphData({ nodes, links })
       .enableNodeDrag(false)
       .showNavInfo(false)
       .nodeColor(node => window.getComputedStyle( document.body ,null).getPropertyValue('color'))
+      .nodeThreeObject(node => {
+        const sprite = new SpriteText(node.name);
+        sprite.material.depthWrite = false; // make sprite background transparent
+        sprite.color = window.getComputedStyle( document.body ,null).getPropertyValue('color');
+        sprite.textHeight = 9;
+        return sprite;
+      })
       .width(contentElement.clientWidth)
       .height(contentElement.clientHeight)
       .backgroundColor(window.getComputedStyle( document.body ,null).getPropertyValue('background-color'));
+
+
+  Graph.d3Force('charge').strength(-120);
+
 } 
 
 async function getRelationships(nodes) {
