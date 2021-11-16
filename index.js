@@ -127,7 +127,7 @@ function graph(nodes, links) {
       .backgroundColor("#0F0A0A");
 
 
-  Graph.d3Force('charge').strength(-150);
+  Graph.d3Force('charge').strength(-100);
 }
 
 async function getRelationships(nodes) {
