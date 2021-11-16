@@ -18,23 +18,77 @@ if (!token) {
   // Set our token in localstorage and start the app.
   localStorage.setItem('spotToken', token);
   
+  await following();
+
+  $('#following').on("click", async function() {
+    await following();
+  });
+
+  $('#search').on("click", async function() {
+    await search();
+  });
+
+  $('#connect').on("click", async function() {
+    await connect();
+  });
+}
+
+
+async function search() {
+  $('#content').children().remove();
+  $('#select').children().remove();
+
+  document.getElementById("select").innerHTML = "<input type='text' id='query' placeholder='Enter artist name'><button id='submit'>Draw Graph</button>";
+
+  $('#submit').on("click", async function() {
+    var query = document.getElementById("query").value;  
+    var nodes = await searchForArtist(query);
+    var related = await getRelated(nodes[0]);
+    related.forEach(function(artist) {
+      nodes.push(artist);
+    });
+
+    var links = await getRelationships(nodes);
+
+    graph(nodes, links);
+  });
+}
+
+async function connect() {
+
+}
+
+async function following() {
+  $('#content').children().remove();
+  $('#select').children().remove();
+
+  // Get our following
   var nodes = await getFollowing();
   var links = await getRelationships(nodes);
 
-  var graphElement = document.getElementById("graph");
+  graph(nodes, links);
+}
+
+function graph(nodes, links) {
+  $('#content').children().remove();
+
   var contentElement = document.getElementById("content");
+  var graphElement = document.createElement("div");
+  graphElement.id = "graph";
+  contentElement.appendChild(graphElement);
 
   var Graph = ForceGraph3D();
   Graph(graphElement)
       .graphData({ nodes, links })
       .enableNodeDrag(false)
       .showNavInfo(false)
+      .enablePointerInteraction(false)
       .nodeColor(node => window.getComputedStyle( document.body ,null).getPropertyValue('color'))
       .nodeThreeObject(node => {
         const sprite = new SpriteText(node.name);
         sprite.material.depthWrite = false; // make sprite background transparent
         sprite.color = window.getComputedStyle( document.body ,null).getPropertyValue('color');
-        sprite.textHeight = 9;
+        sprite.textHeight = 8;
         return sprite;
       })
       .width(contentElement.clientWidth)
@@ -42,9 +96,8 @@ if (!token) {
       .backgroundColor(window.getComputedStyle( document.body ,null).getPropertyValue('background-color'));
 
 
-  Graph.d3Force('charge').strength(-120);
-
-} 
+  Graph.d3Force('charge').strength(-150);
+}
 
 async function getRelationships(nodes) {
   var links = new Array();
@@ -71,6 +124,25 @@ async function getRelationships(nodes) {
   return links;
 }
 
+async function searchForArtist(search) {
+  return new Promise((resolve, reject) => {
+    $.ajax({
+      url: `https://api.spotify.com/v1/search?q=artist%3A${search}&type=artist&limit=1`,
+      type: 'GET',
+      dataType: 'json',
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('spotToken')}`,
+      },
+      success: (response) => {
+        resolve([{ name: response.artists.items[0].name, id: response.artists.items[0].id}]);
+      },
+      error: function(error){
+        resetToken(error);
+      },
+    })
+  })
+}
+
 async function getRelated(artist) {
   return new Promise((resolve, reject) => {
     $.ajax({
@@ -89,8 +161,8 @@ async function getRelated(artist) {
 
         resolve(relatedArtists);
       },
-      error: function(){
-        resetToken();
+      error: function(error){
+        resetToken(error);
       },
     })
   })
@@ -115,8 +187,8 @@ async function getFollowing() {
 
         resolve(artists);
       },
-      error: function(){
-        resetToken();
+      error: function(error){
+        resetToken(error);
       },
     })
   })
@@ -125,7 +197,8 @@ async function getFollowing() {
 
 // If there's any problem getting data from spotify it probably means our token expired.
 // Here we reset the token by removing it from localStorage and reloading the page without the params.
-function resetToken() {
+function resetToken(error) {
+  alert(error);
   localStorage.removeItem('spotToken');
   window.location.href = window.location.href.split('#')[0];
 }
