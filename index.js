@@ -58,14 +58,16 @@ async function searchArtist() {
     addLoadingText();
 
     var query = document.getElementById("query").value; 
+    $('#loadingText').text("Getting Artists...");
     var nodes = await searchForArtist(query);
     var related = await getRelated(nodes[0]);
     related.forEach(async function(artist) {
       nodes.push(artist);
     });
   
+    $('#loadingText').text("Building Relationships...");
     var links = await getRelationships(nodes);
-
+    $('#loadingText').text("Building Graph...");
     graph(nodes, links);
   }
 }
@@ -88,11 +90,12 @@ async function following() {
   userInfo.appendChild(userText);
   userInfo.appendChild(logoutButton);
 
-
   // Get our following
+  $('#loadingText').text("Getting Following...");
   var nodes = await getFollowing();
+  $('#loadingText').text("Building Relationships...");
   var links = await getRelationships(nodes);
-
+  $('#loadingText').text("Building Graph...");
   graph(nodes, links);
 }
 
@@ -197,56 +200,52 @@ async function getRelated(artist) {
 }
 
 async function getFollowing() {
-  var totalFollowing = await getFollowingBackend();
-  // if (cursor != null) {
-  //   console.log(`going back for more on id ${cursor}`);
-  
-  //   var moreFollowing = await getFollowingBackend(cursor);
-  //   moreFollowing.forEach(function(x) {
-  //     totalFollowing.push(x);
-  //   })
-
-  //   cursor = null; 
-  // }
-
-  // console.log(`total followers: ${totalFollowing.length}`);
-  // console.log(totalFollowing);
-
-  return totalFollowing;
-}
-
-// Get who we follow
-async function getFollowingBackend(last) {
-  if (last == null) {
-    var url = 'https://api.spotify.com/v1/me/following?type=artist&limit=50';
-  } else {
-    var url = 'https://api.spotify.com/v1/me/following?type=artist&limit=50';
+  var totalFollowing = await get();
+  while (cursor != null) {  
+    var moreFollowing = await get(cursor);
+    moreFollowing.forEach(function(x) {
+      totalFollowing.push(x);
+    })
   }
 
-  return new Promise((resolve, reject) => {
-    $.ajax({
-      url: 'https://api.spotify.com/v1/me/following?type=artist&limit=50',
-      type: 'GET',
-      dataType: 'json',
-      headers: {
-        'Authorization': `Bearer ${localStorage.getItem('spotToken')}`,
-      },
-      success: (response) => {
-        var artists = new Array ();
+  async function get(last) {
+    var url;
 
-        response.artists.items.forEach(function(artist) {
-          artists.push({ name: artist.name, id: artist.id });
-        });
-
-        cursor =  response.artists.cursors.after;
-
-        resolve(artists);
-      },
-      error: function(error){
-        resetToken(error);
-      },
+    if (last == null) {
+      url = 'https://api.spotify.com/v1/me/following?type=artist&limit=50';
+    } else {
+      url = `https://api.spotify.com/v1/me/following?type=artist&after=${last}&limit=50`;
+    }
+  
+    return new Promise((resolve, reject) => {
+      $.ajax({
+        url: url,
+        type: 'GET',
+        dataType: 'json',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('spotToken')}`,
+        },
+        success: (response) => {
+          var artists = new Array ();
+  
+          response.artists.items.forEach(function(artist) {
+            artists.push({ name: artist.name, id: artist.id });
+          });
+  
+          cursor = response.artists.cursors.after;
+  
+          resolve(artists);
+        },
+        error: function(error){
+          resetToken(error);
+        },
+      })
     })
-  })
+  }
+
+  console.log(`You follow ${totalFollowing.length} people!`);
+
+  return totalFollowing;
 }
 
 async function getMe() {
@@ -281,7 +280,6 @@ function addLoadingText() {
   $('#content').children().remove();
 
   var loadingText = document.createElement("p");
-  loadingText.innerHTML = "Hang on a sec..";
   loadingText.id = "loadingText";
   document.getElementById("content").appendChild(loadingText);
 }
