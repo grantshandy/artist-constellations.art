@@ -18,58 +18,73 @@ if (!token) {
   // Set our token in localstorage and start the app.
   localStorage.setItem('spotToken', token);
   
+  addLoadingText();
   await following();
 
   $('#following').on("click", async function() {
+    addLoadingText();
     await following();
   });
 
   $('#search').on("click", async function() {
+    removeBorder();
     await search();
   });
 
-  $('#connect').on("click", async function() {
-    await connect();
-  });
+  // $('#connect').on("click", async function() {
+  //   await connect();
+  // });
 }
 
 
 async function search() {
-  $('#content').children().remove();
   $('#select').children().remove();
+  $('#content').children().remove();
 
   document.getElementById("select").innerHTML = "<input type='text' id='query' placeholder='Enter artist name'><button id='submit'>Draw Graph</button>";
 
   $('#submit').on("click", async function() {
-    var query = document.getElementById("query").value;  
+    await run();
+  });
+
+  $('#query').on("keydown", async function(event) {
+    console.log(event);
+    if (event.keyCode == 13){
+      await run();
+    }
+  });
+
+  async function run() {
+    $('#graph').remove();
+
+    addLoadingText();
+
+    var query = document.getElementById("query").value; 
     var nodes = await searchForArtist(query);
     var related = await getRelated(nodes[0]);
-    related.forEach(function(artist) {
+    related.forEach(async function(artist) {
       nodes.push(artist);
     });
-
+  
     var links = await getRelationships(nodes);
 
     graph(nodes, links);
-  });
-}
-
-async function connect() {
-
+  }
 }
 
 async function following() {
-  $('#content').children().remove();
   $('#select').children().remove();
 
   // Get our following
   var nodes = await getFollowing();
   var links = await getRelationships(nodes);
 
+  // removeLoadingText();
   graph(nodes, links);
 }
 
 function graph(nodes, links) {
+  addBorder();
   $('#content').children().remove();
 
   var contentElement = document.getElementById("content");
@@ -87,13 +102,13 @@ function graph(nodes, links) {
       .nodeThreeObject(node => {
         const sprite = new SpriteText(node.name);
         sprite.material.depthWrite = false; // make sprite background transparent
-        sprite.color = window.getComputedStyle( document.body ,null).getPropertyValue('color');
+        sprite.color = "#F5EFED";
         sprite.textHeight = 8;
         return sprite;
       })
       .width(contentElement.clientWidth)
       .height(contentElement.clientHeight)
-      .backgroundColor(window.getComputedStyle( document.body ,null).getPropertyValue('background-color'));
+      .backgroundColor("#0F0A0A");
 
 
   Graph.d3Force('charge').strength(-150);
@@ -198,7 +213,27 @@ async function getFollowing() {
 // If there's any problem getting data from spotify it probably means our token expired.
 // Here we reset the token by removing it from localStorage and reloading the page without the params.
 function resetToken(error) {
-  alert(error);
+  alert(error.message);
   localStorage.removeItem('spotToken');
   window.location.href = window.location.href.split('#')[0];
+}
+
+function addLoadingText() {
+  removeBorder();
+  $('#content').children().remove();
+
+  var loadingText = document.createElement("p");
+  loadingText.innerHTML = "Hang on a sec..";
+  loadingText.id = "loadingText";
+  document.getElementById("content").appendChild(loadingText);
+}
+
+function removeBorder() {
+  document.getElementById("content").style.borderColor = "transparent";
+  document.getElementById("content").style.backgroundColor = "transparent";
+}
+
+function addBorder() {
+  document.getElementById("content").style.borderColor = "#0F0A0A";
+  document.getElementById("content").style.backgroundColor = "#0F0A0A";
 }
