@@ -3,8 +3,10 @@ const client_id = '2ed0e6e8b06842fb854cb15e1690a7b5';
 const redirect_uri = window.location.href;
 const scopes = 'user-follow-read';
 
+var cursor = null;
+
 // Get our token from the page URL
-var token = window.location.hash.substr(1).split('&')[0].split("=")[1]
+var token = window.location.hash.substr(1).split('&')[0].split("=")[1];
 
 // If the token isn't in the URL then try to get it from localStorage.
 if (token == null) {
@@ -26,20 +28,17 @@ if (!token) {
     await following();
   });
 
-  $('#search').on("click", async function() {
+  $('#search-artist').on("click", async function() {
     removeBorder();
-    await search();
+    await searchArtist();
   });
-
-  // $('#connect').on("click", async function() {
-  //   await connect();
-  // });
 }
 
 
-async function search() {
+async function searchArtist() {
   $('#select').children().remove();
   $('#content').children().remove();
+  $('#userInfo').children().remove();
 
   document.getElementById("select").innerHTML = "<input type='text' id='query' placeholder='Enter artist name'><button id='submit'>Draw Graph</button>";
 
@@ -48,7 +47,6 @@ async function search() {
   });
 
   $('#query').on("keydown", async function(event) {
-    console.log(event);
     if (event.keyCode == 13){
       await run();
     }
@@ -75,11 +73,26 @@ async function search() {
 async function following() {
   $('#select').children().remove();
 
+  var myself = await getMe();
+  var userText = document.createElement('em');
+  userText.innerHTML = `User: ${myself.display_name}`;
+
+  var logoutButton = document.createElement('button');
+  logoutButton.innerHTML = "Log Out";
+  logoutButton.onclick = function() {
+    localStorage.removeItem('spotToken');
+    window.location.href = window.location.href.split('#')[0];
+  }
+
+  var userInfo = document.getElementById('userInfo');
+  userInfo.appendChild(userText);
+  userInfo.appendChild(logoutButton);
+
+
   // Get our following
   var nodes = await getFollowing();
   var links = await getRelationships(nodes);
 
-  // removeLoadingText();
   graph(nodes, links);
 }
 
@@ -183,8 +196,33 @@ async function getRelated(artist) {
   })
 }
 
-// Get who we follow
 async function getFollowing() {
+  var totalFollowing = await getFollowingBackend();
+  // if (cursor != null) {
+  //   console.log(`going back for more on id ${cursor}`);
+  
+  //   var moreFollowing = await getFollowingBackend(cursor);
+  //   moreFollowing.forEach(function(x) {
+  //     totalFollowing.push(x);
+  //   })
+
+  //   cursor = null; 
+  // }
+
+  // console.log(`total followers: ${totalFollowing.length}`);
+  // console.log(totalFollowing);
+
+  return totalFollowing;
+}
+
+// Get who we follow
+async function getFollowingBackend(last) {
+  if (last == null) {
+    var url = 'https://api.spotify.com/v1/me/following?type=artist&limit=50';
+  } else {
+    var url = 'https://api.spotify.com/v1/me/following?type=artist&limit=50';
+  }
+
   return new Promise((resolve, reject) => {
     $.ajax({
       url: 'https://api.spotify.com/v1/me/following?type=artist&limit=50',
@@ -200,6 +238,8 @@ async function getFollowing() {
           artists.push({ name: artist.name, id: artist.id });
         });
 
+        cursor =  response.artists.cursors.after;
+
         resolve(artists);
       },
       error: function(error){
@@ -209,6 +249,24 @@ async function getFollowing() {
   })
 }
 
+async function getMe() {
+  return new Promise((resolve, reject) => {
+    $.ajax({
+      url: 'https://api.spotify.com/v1/me',
+      type: 'GET',
+      dataType: 'json',
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('spotToken')}`,
+      },
+      success: (response) => {
+        resolve(response);
+      },
+      error: function(error){
+        resetToken(error);
+      },
+    })
+  })
+}
 
 // If there's any problem getting data from spotify it probably means our token expired.
 // Here we reset the token by removing it from localStorage and reloading the page without the params.

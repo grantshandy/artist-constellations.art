@@ -37,6 +37,20 @@ body {
     border-radius: 1.5%;
 }
 
+#userInfo {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    column-gap: 20px;
+}
+
+#niceFooter {
+    position:fixed;
+    bottom:0;
+    width:100%;
+}
+
 a:link {
     color: var(--dark);
 }
