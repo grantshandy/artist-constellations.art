@@ -1,8 +1,3 @@
-:root {
-    --light: "#F5EFED";
-    --dark: "#0F0A0A";
-}
-
 @font-face {
     font-family: 'Vulf Sans';
     src: url('https://grantshandy.github.io/textrip/vulf-sans/VulfSans-Regular.woff2') format('woff2'),
@@ -12,57 +7,60 @@
     font-display: swap;
 }
 
-h1 {
-    margin-top: 0px;
-    margin-bottom: 0px;
-}
-
 body {
     font-family: 'Vulf Sans';
-    color: var(--dark);
-    background-color: var(--light);
+    background-color: var(--background);
+    color: var(--text);
+    margin: 0;
     text-align: center;
 }
 
-#content {
-    width: 75vw;
-    height: 75vh;
-    margin-left: auto;
-    margin-right: auto;
-    display: inline-block;
-    margin-top: 15px;
-    margin-bottom: 0px;
-    border: 5px solid;
-    border-color: var(--dark);
-    border-radius: 1.5%;
-}
-
-#userInfo {
+.workspace {
     display: flex;
     flex-direction: row;
-    justify-content: center;
-    align-items: center;
-    column-gap: 20px;
+    flex-wrap: nowrap;
+    width:100vw;
 }
 
-#niceFooter {
-    position:fixed;
-    bottom:0;
-    width:100%;
+.graph {
+    float: left;
+
+    background-color: var(--background);
+    color: var(--light);
+    width: 75vw;
+    height: 100vh;
 }
 
-a:link {
-    color: var(--dark);
+.separator {
+    width: 0.35vw;
+    height: 100vh;
+    background-color: var(--text)
 }
 
-a:visited {
-    color: var(--dark);
+.settings {
+    float: right;
+    /* text-align: center; */
+    position: relative;
+
+    background-color: var(--background);
+    color: var(--light);
+
+    width: 24.65vw;
+}   
+
+.logout {
+    position: absolute;
+    bottom: 1%;
+    left: 50%;
+    -webkit-transform: translateX(-50%);
+    transform: translateX(-50%)
 }
 
-a:hover {
-    color: var(--dark);
-}
-
-a:active {
-    color: var(--dark);
+.settingsType {
+    margin-top: 1vw;
+    margin-left: auto;
+    margin-right: auto;
+    width: 75%;
+    border: 4px solid white;
+    border-radius: 5%;
 }

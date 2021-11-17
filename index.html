@@ -4,27 +4,61 @@
     <meta charset="utf-8">
     <title>Artist Constellations</title>
     <link rel="stylesheet" href="style.css">
-    <script src="//code.jquery.com/jquery-3.1.1.min.js" ></script>
-    <script src="//unpkg.com/3d-force-graph"></script>
-    <script src="//unpkg.com/three"></script>
-    <script src="//unpkg.com/three-spritetext"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
+    <!-- <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script> -->
+    <script src="https://unpkg.com/3d-force-graph"></script>
+    <script src="https://unpkg.com/three"></script>
+    <script src="https://unpkg.com/three-spritetext"></script>
+    <script src="index.js" type="module"></script>
   </head>
   <body>
-    <h1>Spotify Artist Constellations</h1>
-    <div id="graph-type">
-      <label>
-        <input checked="true" type="radio" name="type" id="following">
-        Your Artists
-      </label>
-      <label>
-        <input type="radio" name="type" id="search-artist">
-        Search Artists
-      </label>
+    <div id="app">
+      <!-- Content for when we have authentication -->
+      <div class="workspace" v-if="auth_key">
+        <div id="graph" class="graph" ref="graph"></div>
+        <div class="separator"></div>
+        <div class="settings" ref="settings">
+          <h1>Artist Constellations</h1>
+          <p><em>View your Spotify artists in 3D constellations</em></p>
+
+          <!-- <input type="radio" id="yourArtists" value="following" v-model="graphType">
+          <label for="yourArtists">Your Artists</label> -->
+          <!-- <input type="radio" id="searchArtist" value="search" v-model="graphType">
+          <label for="searchArtist">Search Artist</label> -->
+
+          <div class="settingsType" v-show="graphType === 'following' && graph">
+
+            <p><b>Node Settings</b></p>
+            <input type="radio" id="nodesAsDots" name="nodeSetting" v-on:click="setGraphAsDot" checked="true">
+            <label for="nodesAsDots">View nodes as dots</label>
+            <br>
+            <input type="radio" id="nodesAsText" name="nodeSetting" v-on:click="setGraphAsText">
+            <label for="nodesAsText">View nodes as text</label>
+            <br>
+            <input type="radio" id="nodesAsImages" name="nodeSetting" v-on:click="setGraphAsImage">
+            <label for="nodesAsImages">View nodes as images</label>
+            
+            <p><b>Info</b></p>
+            <ul>
+              <li>You follow {{ nodes.length }} people.</li>
+              <li>You listen to {{ genres.length }} different genres.</li>
+            </ul>
+          </div>
+          <!-- <div class="settingsType" v-show="graphType === 'search' && graph">
+            fd
+          </div> -->
+          
+          <div class="logout">
+            <p ref="username"></p>
+            <button type="button" v-on:click="logout">Log Out</button>
+          </div>
+        </div>
+      </div>
+      <!-- Content for when we don't have authentication -->
+      <div class="login" v-else>
+        <h1>Spotify Artist Constellations</h1>
+        <button class="button" v-on:click="authenticate">Link to Spotify</button>
+      </div>
     </div>
-    <div id="select"></div>
-    <div id="content"></div>
-    <div id="userInfo"></div>
-    <footer id="niceFooter"><p><a href="https://github.com/grantshandy/spotify-artist-relationships">Source</a> · Copyright 2021 <a href=https://github.com/grantshandy>Grant Handy</a></p></footer>
-    <script src="index.js" type="module"></script>
   </body>
 </html>
