@@ -4,27 +4,24 @@
     <meta charset="utf-8">
     <title>Artist Constellations</title>
     <link rel="stylesheet" href="style.css">
-    <script src="//code.jquery.com/jquery-3.1.1.min.js" ></script>
-    <script src="//unpkg.com/3d-force-graph"></script>
-    <script src="//unpkg.com/three"></script>
-    <script src="//unpkg.com/three-spritetext"></script>
+    <script src="https://unpkg.com/3d-force-graph@1.70.5/dist/3d-force-graph.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+    <!-- <script src="https://cdn.jsdelivr.net/npm/vue@2"></script> -->
+    <script src="index.js" type="module"></script>
   </head>
   <body>
-    <h1>Spotify Artist Constellations</h1>
-    <div id="graph-type">
-      <label>
-        <input checked="true" type="radio" name="type" id="following">
-        Your Artists
-      </label>
-      <label>
-        <input type="radio" name="type" id="search-artist">
-        Search Artists
-      </label>
+    <div id="app">
+      <!-- Content for when we have authentication -->
+      <div v-if="auth_key">
+        <div class="graphContainer" ref="graphContainer"></div>
+        <button v-on:click="logout">Log out</button>
+      </div>
+      <!-- Content for when we don't have authentication -->
+      <div class="login" v-else>
+        <h1>Spotify Artist Constellations</h1>
+        <button class="button" v-on:click="authenticate">Link to Spotify</button>
+        <p><em>Artist Constellations needs Spotify authentication to get the artists you follow.</em></p>
+      </div>
     </div>
-    <div id="select"></div>
-    <div id="content"></div>
-    <div id="userInfo"></div>
-    <footer id="niceFooter"><p><a href="https://github.com/grantshandy/spotify-artist-relationships">Source</a> · Made With ♥ by <a href=https://github.com/grantshandy>Grant Handy</a></p></footer>
-    <script src="index.js" type="module"></script>
   </body>
 </html>
