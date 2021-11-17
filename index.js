@@ -1,6 +1,9 @@
 const client_id = '2ed0e6e8b06842fb854cb15e1690a7b5';
-const redirect_uri = window.location.href;
+const redirect_uri = window.location.href.split('?')[0].split('#')[0];
 const scopes = 'user-follow-read';
+
+const darkColor = '#04080F';
+const lightColor = '#EEF0F2';
 
 var cursor = '';
 
@@ -14,7 +17,7 @@ var app = new Vue({
     },
     async created() {
         // Get our authentication key from the URL
-        this.auth_key = window.location.hash.substr(1).split('&')[0].split("=")[1];
+        this.auth_key = window.location.hash.substr(1).split('&')[0].split('=')[1];
 
         // If there was no authentication key in the URL
         if (!this.auth_key) {
@@ -45,25 +48,38 @@ var app = new Vue({
 
         // Run a graph that shows your artists
         showFollowing: async function() {
-            console.log('getting nodes');
+            this.setLoadingText('getting nodes');
             this.nodes = await this.getFollowing();
-            console.log('building relationships');
+            this.setLoadingText('building relationships');
             this.links = await this.buildRelationships(this.nodes);
-            console.log('building graph');
+
             this.buildGraph();
+        },
+
+        // Set the loading text and print it to the console
+        setLoadingText: function(text) {
+            this.$refs['graph'].innerHTML = '<p class="loadingText">'+text+'</p>';
         },
 
         // Create a graph from nodes and links
         buildGraph: function() {
-            var graphElement = document.createElement('div');
-            graphElement.id = 'graph';
-            this.$refs["graphContainer"].appendChild(graphElement);
-
             var Graph = ForceGraph3D();
-            Graph(graphElement)
+            Graph(this.$refs['graph'])
                 .graphData({ nodes: this.nodes, links: this.links })
-                .width(this.$refs["graphContainer"].clientWidth)
-                .height(this.$refs["graphContainer"].clientHeight);
+                .enableNodeDrag(false)
+                .showNavInfo(false)
+                .enablePointerInteraction(false)
+                .nodeColor(node => lightColor)
+                .nodeThreeObject(node => {
+                  const sprite = new SpriteText(node.name);
+                  sprite.material.depthWrite = false; // make sprite background transparent
+                  sprite.color = lightColor;
+                  sprite.textHeight = 8;
+                  return sprite;
+                })
+                .width(this.$refs['graphContainer'].clientWidth)
+                .height(this.$refs['graphContainer'].clientHeight)
+                .backgroundColor(darkColor);
         },
 
         // Build the relationships between nodes
