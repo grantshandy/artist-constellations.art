@@ -4,11 +4,11 @@
     <meta charset="utf-8">
     <title>Artist Constellations</title>
     <link rel="stylesheet" href="style.css">
-    <!-- <script src="https://cdn.jsdelivr.net/npm/vue@2"></script> -->
-    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
-    <script src="//unpkg.com/3d-force-graph"></script>
-    <script src="//unpkg.com/three"></script>
-    <script src="//unpkg.com/three-spritetext"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
+    <!-- <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script> -->
+    <script src="https://unpkg.com/3d-force-graph"></script>
+    <script src="https://unpkg.com/three"></script>
+    <script src="https://unpkg.com/three-spritetext"></script>
     <script src="index.js" type="module"></script>
   </head>
   <body>
@@ -21,26 +21,35 @@
           <h1>Artist Constellations</h1>
           <p><em>View your Spotify artists in 3D constellations</em></p>
 
-          <input type="radio" id="yourArtists" value="following" v-model="graphType">
-          <label for="yourArtists">Your Artists</label>
+          <!-- <input type="radio" id="yourArtists" value="following" v-model="graphType">
+          <label for="yourArtists">Your Artists</label> -->
+          <!-- <input type="radio" id="searchArtist" value="search" v-model="graphType">
+          <label for="searchArtist">Search Artist</label> -->
 
-          <input type="radio" id="searchArtist" value="search" v-model="graphType">
-          <label for="searchArtist">Search Artist</label>
+          <div class="settingsType" v-show="graphType === 'following' && graph">
 
-          <div class="settingsType" v-show="graphType === 'following'">
-            <button v-on:click="toggleView">Nodes as {{ nodeType }}</button>
-            <div style="text-align: left">
-              <ul>
-                <li>You follow {{ followingTotal }} people.</li>
-                <li>You listen to {{ genres.length }} different genres.</li>
-              </ul>
-            </div>
+            <p><b>Node Settings</b></p>
+            <input type="radio" id="nodesAsDots" name="nodeSetting" v-on:click="setGraphAsDot" checked="true">
+            <label for="nodesAsDots">View nodes as dots</label>
+            <br>
+            <input type="radio" id="nodesAsText" name="nodeSetting" v-on:click="setGraphAsText">
+            <label for="nodesAsText">View nodes as text</label>
+            <br>
+            <input type="radio" id="nodesAsImages" name="nodeSetting" v-on:click="setGraphAsImage">
+            <label for="nodesAsImages">View nodes as images</label>
+            
+            <p><b>Info</b></p>
+            <ul>
+              <li>You follow {{ nodes.length }} people.</li>
+              <li>You listen to {{ genres.length }} different genres.</li>
+            </ul>
           </div>
-          <div class="settingsType" v-show="graphType === 'search'">
+          <!-- <div class="settingsType" v-show="graphType === 'search' && graph">
             fd
-          </div>
+          </div> -->
           
           <div class="logout">
+            <p ref="username"></p>
             <button type="button" v-on:click="logout">Log Out</button>
           </div>
         </div>

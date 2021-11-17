@@ -14,17 +14,18 @@ var cursor = '';
 
 var app = new Vue({
     el: '#app',
+
     data: {
         graphType: 'following',
-        followingTotal: null,
         auth_key: null,
         me: null,
         nodes: [],
         links: [],
         genres: [],
-        nodeType: 'image',
+        nodeType: 'dots',
         graph: null,
     },
+
     async created() {
         // Get our authentication key from the URL
         this.auth_key = window.location.hash.substr(1).split('&')[0].split('=')[1];
@@ -36,14 +37,21 @@ var app = new Vue({
         } else {
             // If we have it then set it in localStorage
             localStorage.setItem('spotToken', this.auth_key);
-            this.me = await this.getMe();
         }
     },
+
     async mounted() {
         if (this.auth_key) {
             await this.showFollowing();
+            this.me = await this.getMe();
+            this.$refs['username'].innerHTML = `<em>User: ${this.me.display_name}</em>`;
         }
     },
+
+    destroyed() {
+        window.removeEventListener("resize", this.resizeGraph);
+    },
+
     methods: {
         // Go to the authentication page to generate a new token
         authenticate: function() {
@@ -66,11 +74,6 @@ var app = new Vue({
             this.buildGraph();
         },
 
-        // Set the loading text and print it to the console
-        setLoadingText: function(text) {
-            document.getElementById('graph').innerHTML = `<p class="loadingText">${text}</p>`;
-        },
-
         // Create a graph from nodes and links
         buildGraph: function() {
             this.$refs['graph'].innerHTML = '';
@@ -85,6 +88,7 @@ var app = new Vue({
                 .enableNodeDrag(false)
                 .showNavInfo(false)
                 .enablePointerInteraction(false)
+                .linkWidth(2)
                 .nodeColor(node => textColor)
                 .width(this.$refs['graph'].clientWidth)
                 .height(this.$refs['graph'].clientHeight)
@@ -92,21 +96,32 @@ var app = new Vue({
 
             if (this.nodeType == 'text') {
                 this.setGraphAsText();
-            } else if (this.nodeType == 'image') {
+            } else if (this.nodeType == 'images') {
                 this.setGraphAsImage();
+            } else if (this.nodeType == 'dots') {
+                this.setGraphAsDot();
             }
 
-            Graph.d3Force('charge').strength(-100);
+            this.graph.d3Force('charge').strength(-100);
+
+            window.addEventListener("resize", this.resizeGraph);
         },
 
-        toggleView: function() {
-            if (this.nodeType == 'text') {
-                this.setGraphAsImage();
-            } else if (this.nodeType == 'image') {
-                this.setGraphAsText();
-            }
+        // Resize the graph when the window is resized
+        resizeGraph: function() {
+            this.graph.width(this.$refs['graph'].clientWidth);
+            this.graph.height(this.$refs['graph'].clientHeight)
         },
 
+        // Set nodes on the graph as dots.
+        setGraphAsDot: function() {
+            this.nodeType = 'dots';
+
+            this.graph.nodeThreeObject(node => {});
+            this.graph.enablePointerInteraction(true);
+        },
+
+        // Set nodes on the graph as the name of the artist.
         setGraphAsText: function() {
             this.nodeType = 'text';
 
@@ -117,18 +132,28 @@ var app = new Vue({
                 sprite.textHeight = 8;
                 return sprite;
             });
+
+            this.graph.enablePointerInteraction(false);
         },
 
+        // Set nodes on the graph as an image of the artist.
         setGraphAsImage: function() {
-            this.nodeType = 'image';
+            this.nodeType = 'images';
 
             this.graph.nodeThreeObject(node => {
                 const imgTexture = new THREE.TextureLoader().load(node.img);
                 const material = new THREE.SpriteMaterial({ map: imgTexture });
                 const sprite = new THREE.Sprite(material);
-                sprite.scale.set(12, 12);
+                sprite.scale.set(25, 25);
                 return sprite;
             });
+
+            this.graph.enablePointerInteraction(true);
+        },
+
+        // Set the loading text and print it to the console
+        setLoadingText: function(text) {
+            this.$refs['graph'].innerHTML = `<p class="loadingText">${text}</p>`;
         },
 
         // Build the relationships between nodes
@@ -222,10 +247,6 @@ var app = new Vue({
                     totalFollowing.push(x);
                 });
             }
-
-            this.followingTotal = totalFollowing.length;
-
-            console.log(totalFollowing);
 
             return totalFollowing;
 
