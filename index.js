@@ -2,18 +2,28 @@ const client_id = '2ed0e6e8b06842fb854cb15e1690a7b5';
 const redirect_uri = window.location.href.split('?')[0].split('#')[0];
 const scopes = 'user-follow-read';
 
-const darkColor = '#04080F';
-const lightColor = '#EEF0F2';
+var r = document.querySelector(':root');
+
+var backgroundColor = '#363636';
+var textColor = '#EEF0F2';
+
+r.style.setProperty('--background', backgroundColor);
+r.style.setProperty('--text', textColor);
 
 var cursor = '';
 
 var app = new Vue({
     el: '#app',
     data: {
+        graphType: 'following',
+        followingTotal: null,
         auth_key: null,
         me: null,
         nodes: [],
         links: [],
+        genres: [],
+        nodeType: 'image',
+        graph: null,
     },
     async created() {
         // Get our authentication key from the URL
@@ -48,38 +58,77 @@ var app = new Vue({
 
         // Run a graph that shows your artists
         showFollowing: async function() {
-            this.setLoadingText('getting nodes');
+            this.setLoadingText('getting nodes...');
             this.nodes = await this.getFollowing();
-            this.setLoadingText('building relationships');
+            this.setLoadingText('building relationships...');
             this.links = await this.buildRelationships(this.nodes);
-
+            this.setLoadingText('building graph...');
             this.buildGraph();
         },
 
         // Set the loading text and print it to the console
         setLoadingText: function(text) {
-            this.$refs['graph'].innerHTML = '<p class="loadingText">'+text+'</p>';
+            document.getElementById('graph').innerHTML = `<p class="loadingText">${text}</p>`;
         },
 
         // Create a graph from nodes and links
         buildGraph: function() {
-            var Graph = ForceGraph3D();
-            Graph(this.$refs['graph'])
+            this.$refs['graph'].innerHTML = '';
+
+            var innerGraph = document.createElement('div');
+            this.$refs['graph'].appendChild(innerGraph);
+
+            this.graph = ForceGraph3D();
+
+            this.graph(innerGraph)
                 .graphData({ nodes: this.nodes, links: this.links })
                 .enableNodeDrag(false)
                 .showNavInfo(false)
                 .enablePointerInteraction(false)
-                .nodeColor(node => lightColor)
-                .nodeThreeObject(node => {
-                  const sprite = new SpriteText(node.name);
-                  sprite.material.depthWrite = false; // make sprite background transparent
-                  sprite.color = lightColor;
-                  sprite.textHeight = 8;
-                  return sprite;
-                })
-                .width(this.$refs['graphContainer'].clientWidth)
-                .height(this.$refs['graphContainer'].clientHeight)
-                .backgroundColor(darkColor);
+                .nodeColor(node => textColor)
+                .width(this.$refs['graph'].clientWidth)
+                .height(this.$refs['graph'].clientHeight)
+                .backgroundColor(backgroundColor);
+
+            if (this.nodeType == 'text') {
+                this.setGraphAsText();
+            } else if (this.nodeType == 'image') {
+                this.setGraphAsImage();
+            }
+
+            Graph.d3Force('charge').strength(-100);
+        },
+
+        toggleView: function() {
+            if (this.nodeType == 'text') {
+                this.setGraphAsImage();
+            } else if (this.nodeType == 'image') {
+                this.setGraphAsText();
+            }
+        },
+
+        setGraphAsText: function() {
+            this.nodeType = 'text';
+
+            this.graph.nodeThreeObject(node => {
+                const sprite = new SpriteText(node.name);
+                sprite.material.depthWrite = false; // make sprite background transparent
+                sprite.color = textColor;
+                sprite.textHeight = 8;
+                return sprite;
+            });
+        },
+
+        setGraphAsImage: function() {
+            this.nodeType = 'image';
+
+            this.graph.nodeThreeObject(node => {
+                const imgTexture = new THREE.TextureLoader().load(node.img);
+                const material = new THREE.SpriteMaterial({ map: imgTexture });
+                const sprite = new THREE.Sprite(material);
+                sprite.scale.set(12, 12);
+                return sprite;
+            });
         },
 
         // Build the relationships between nodes
@@ -119,6 +168,11 @@ var app = new Vue({
                 .then(response => response.json())
                 .then(response => {
                     if (response.error) {
+                        if (response.error.status = 401) {
+                            this.logout();
+                        }
+
+                        console.error(response.error);
                         reject(response.error);
                     }
         
@@ -139,6 +193,11 @@ var app = new Vue({
                 .then(response => response.json())
                 .then(response => {
                     if (response.error) {
+                        if (response.error.status = 401) {
+                            this.logout();
+                        }
+
+                        console.error(response.error);
                         reject(response.error);
                     }
         
@@ -164,6 +223,10 @@ var app = new Vue({
                 });
             }
 
+            this.followingTotal = totalFollowing.length;
+
+            console.log(totalFollowing);
+
             return totalFollowing;
 
             async function get(last) {
@@ -184,15 +247,26 @@ var app = new Vue({
                     .then(response => response.json())
                     .then(response => {
                         if (response.error) {
+                            if (response.error.status = 401) {
+                                this.logout();
+                            }
+
+                            console.error(response.error);
                             reject(response.error);
                         }
 
                         var artists = new Array ();
 
                         response.artists.items.forEach(function(artist) {
-                            artists.push({ name: artist.name, id: artist.id });
+                            artist.genres.forEach(function(genre) {
+                                if (!app.genres.includes(genre)) {
+                                    app.genres.push(genre);
+                                }
+                            });
+
+                            artists.push({ name: artist.name, id: artist.id, img: artist.images[Math.floor(artist.images.length / 2)].url });
                         });
-        
+                                
                         cursor = response.artists.cursors.after;
             
                         resolve(artists)

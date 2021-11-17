@@ -14,12 +14,35 @@
   <body>
     <div id="app">
       <!-- Content for when we have authentication -->
-      <div class="container" v-if="auth_key">
-        <div class="graph" ref="graph">
-          <p>alksdjf;alkdsfj</p>
-        </div>
+      <div class="workspace" v-if="auth_key">
+        <div id="graph" class="graph" ref="graph"></div>
+        <div class="separator"></div>
         <div class="settings" ref="settings">
-          <p>alksdjf;alkdsfj</p>
+          <h1>Artist Constellations</h1>
+          <p><em>View your Spotify artists in 3D constellations</em></p>
+
+          <input type="radio" id="yourArtists" value="following" v-model="graphType">
+          <label for="yourArtists">Your Artists</label>
+
+          <input type="radio" id="searchArtist" value="search" v-model="graphType">
+          <label for="searchArtist">Search Artist</label>
+
+          <div class="settingsType" v-show="graphType === 'following'">
+            <button v-on:click="toggleView">Nodes as {{ nodeType }}</button>
+            <div style="text-align: left">
+              <ul>
+                <li>You follow {{ followingTotal }} people.</li>
+                <li>You listen to {{ genres.length }} different genres.</li>
+              </ul>
+            </div>
+          </div>
+          <div class="settingsType" v-show="graphType === 'search'">
+            fd
+          </div>
+          
+          <div class="logout">
+            <button type="button" v-on:click="logout">Log Out</button>
+          </div>
         </div>
       </div>
       <!-- Content for when we don't have authentication -->

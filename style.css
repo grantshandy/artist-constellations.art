@@ -1,52 +1,69 @@
-/* @font-face {
+@font-face {
     font-family: 'Vulf Sans';
     src: url('https://grantshandy.github.io/textrip/vulf-sans/VulfSans-Regular.woff2') format('woff2'),
     url('https://grantshandy.github.io/textrip/vulf-sans/VulfSans-Regular.woff') format('woff');
     font-weight: normal;
     font-style: normal;
     font-display: swap;
-} */
-
-:root {
-    --light: #EEF0F2;
-    --dark: #04080F;
-    --intense: #ED6A5E;
-    --compliment: #FF8E72;
 }
 
 body {
-    background-color: var(--dark);
-    color: var(--light);
+    font-family: 'Vulf Sans';
+    background-color: var(--background);
+    color: var(--text);
     margin: 0;
     text-align: center;
 }
 
-.container {
+.workspace {
     display: flex;
-    height: 100%;
-    width: 100%;
-}
-
-.graph, .settings {
-    display: inline-block;
-    flex-flow: column;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    width:100vw;
 }
 
 .graph {
-    width: 75%;
-    border-right: 5px solid var(--light);
-    background-color: darkblue;
+    float: left;
+
+    background-color: var(--background);
+    color: var(--light);
+    width: 75vw;
+    height: 100vh;
+}
+
+.separator {
+    width: 0.35vw;
+    height: 100vh;
+    background-color: var(--text)
 }
 
 .settings {
-    width: 25%;
-}
-
-.loadingText {
+    float: right;
     text-align: center;
+    position: relative;
+
+    background-color: var(--background);
+    color: var(--light);
+
+    width: 24.65vw;
+}   
+
+.logout {
+    position: absolute;
+    bottom: 1%;
+    left: 50%;
+    -webkit-transform: translateX(-50%);
+    transform: translateX(-50%)
 }
 
-.app {
-    height: 100%;
-    width: 100%;
+.settingsType {
+    margin-top: 1vw;
+    margin-left: auto;
+    margin-right: auto;
+
+    width: 75%;
+    height: 50%;
+
+    border: 4px solid white;
+    border-radius: 5%;
 }
