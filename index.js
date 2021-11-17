@@ -88,6 +88,9 @@ var app = new Vue({
                 .enableNodeDrag(false)
                 .showNavInfo(false)
                 .enablePointerInteraction(false)
+                .onNodeRightClick(node => {
+                    window.open(`https://open.spotify.com/artist/${node.id}`, '_blank');
+                })
                 .linkWidth(2)
                 .nodeColor(node => textColor)
                 .width(this.$refs['graph'].clientWidth)
