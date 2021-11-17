@@ -42,14 +42,18 @@ var app = new Vue({
 
     async mounted() {
         if (this.auth_key) {
-            await this.showFollowing();
+            if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) {
+                window.location.href = window.location.href+'mobile.html';
+            }
+
             this.me = await this.getMe();
-            this.$refs['username'].innerHTML = `<em>User: ${this.me.display_name}</em>`;
+            this.$refs['username'].innerHTML = this.me.display_name;
+            await this.showFollowing();
         }
     },
 
     destroyed() {
-        window.removeEventListener("resize", this.resizeGraph);
+        window.removeEventListener('resize', this.resizeGraph);
     },
 
     methods: {
@@ -107,7 +111,7 @@ var app = new Vue({
 
             this.graph.d3Force('charge').strength(-100);
 
-            window.addEventListener("resize", this.resizeGraph);
+            window.addEventListener('resize', this.resizeGraph);
         },
 
         // Resize the graph when the window is resized
@@ -196,8 +200,8 @@ var app = new Vue({
                 .then(response => response.json())
                 .then(response => {
                     if (response.error) {
-                        if (response.error.status = 401) {
-                            this.logout();
+                        if (response.error.status == 401) {
+                            app.logout();
                         }
 
                         console.error(response.error);
@@ -222,7 +226,7 @@ var app = new Vue({
                 .then(response => {
                     if (response.error) {
                         if (response.error.status = 401) {
-                            this.logout();
+                            app.logout();
                         }
 
                         console.error(response.error);
@@ -272,7 +276,7 @@ var app = new Vue({
                     .then(response => {
                         if (response.error) {
                             if (response.error.status = 401) {
-                                this.logout();
+                                app.logout();
                             }
 
                             console.error(response.error);

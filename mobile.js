@@ -1,0 +1,11 @@
+const Graph = ForceGraphAR({ markerAttrs: { type:'pattern', url:'artist-constellations.patt' }})
+(document.getElementById('3d-graph'))
+  .jsonUrl('https://raw.githubusercontent.com/vasturiano/3d-force-graph-ar/master/example/datasets/miserables.json')
+  .glScale(160)
+  .yOffset(1.8)
+  .nodeAutoColorBy('group')
+  .nodeRelSize(5)
+  .linkWidth(1.5)   
+  .nodeOpacity(0.9)
+  .linkOpacity(0.3)
+  .linkColor(() => 'darkgrey');
