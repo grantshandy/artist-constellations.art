@@ -4,7 +4,7 @@ const scopes = 'user-follow-read';
 
 var r = document.querySelector(':root');
 
-var backgroundColor = '#363636';
+var backgroundColor = '#393939';
 var textColor = '#EEF0F2';
 
 r.style.setProperty('--background', backgroundColor);
