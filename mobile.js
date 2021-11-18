@@ -1,9 +1,12 @@
 var cursor = '';
 
+document.getElementById('log').innerHTML += "following";
 var nodes = await getFollowing();
+document.getElementById('log').innerHTML += "relationships";
 var links = await buildRelationships(nodes);
 console.log(links, nodes);
 
+document.getElementById('log').innerHTML += "graph";
 const Graph = ForceGraphAR({ markerAttrs: { type:'pattern', url:'screenshots/artist-constellations.patt' }})
 (document.getElementById('3d-graph'))
   .graphData({ nodes: nodes, links: links })
