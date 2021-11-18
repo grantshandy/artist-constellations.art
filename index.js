@@ -18,7 +18,8 @@ var app = new Vue({
     data: {
         graphType: 'following',
         auth_key: null,
-        me: null,
+        me: null,        
+        following: [],
         nodes: [],
         links: [],
         genres: [],
@@ -42,10 +43,6 @@ var app = new Vue({
 
     async mounted() {
         if (this.auth_key) {
-            if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) {
-                window.location.href = window.location.href+'mobile.html';
-            }
-
             this.me = await this.getMe();
             this.$refs['username'].innerHTML = this.me.display_name;
             await this.showFollowing();
@@ -78,8 +75,60 @@ var app = new Vue({
             this.buildGraph();
         },
 
+        // Show the data for our top artists of the past four weeks
+        showPastFourWeeks: async function() {
+            this.setLoadingText('getting nodes...');
+            this.nodes = await this.getPastRange('short_term');
+            this.setLoadingText('building relationships...');
+            this.links = await this.buildRelationships(this.nodes);
+            this.setLoadingText('building graph...');
+            this.buildGraph();
+        },
+
+        // Show the data for our top artists of the past six months
+        showPastSixMonths: async function() {
+            this.setLoadingText('getting nodes...');
+            this.nodes = await this.getPastRange('medium_term');
+            this.setLoadingText('building relationships...');
+            this.links = await this.buildRelationships(this.nodes);
+            this.setLoadingText('building graph...');
+            this.buildGraph();
+        },
+
+        // Show the data for our top artists of all time
+        showAllTime: async function() {
+            this.setLoadingText('getting nodes...');
+            this.nodes = await this.getPastRange('long_term');
+            this.setLoadingText('building relationships...');
+            this.links = await this.buildRelationships(this.nodes);
+            this.setLoadingText('building graph...');
+            this.buildGraph();
+        },
+
+        // Show the results for our search
+        showSearch: async function(event) {
+            // clever :) we check to see if the event is a keypress so we can call this from the text box and submit button.
+            if (event.key) {
+                if(event.key === "Enter"){
+                    await run();
+                }
+            } else {
+                await run();
+            }
+
+            async function run() {
+                app.setLoadingText('getting nodes...');
+                app.nodes = await app.searchArtist(app.$refs['searchText'].innerHTML);
+                app.setLoadingText('building relationships...');
+                app.links = await app.buildRelationships(app.nodes);
+                app.setLoadingText('building graph...');
+                app.buildGraph();
+            }
+        },
+
         // Create a graph from nodes and links
         buildGraph: function() {
+            this.$refs['loading'].innerHTML = '';
             this.$refs['graph'].innerHTML = '';
 
             var innerGraph = document.createElement('div');
@@ -160,7 +209,7 @@ var app = new Vue({
 
         // Set the loading text and print it to the console
         setLoadingText: function(text) {
-            this.$refs['graph'].innerHTML = `<p class="loadingText">${text}</p>`;
+            this.$refs['loading'].innerHTML = `<p class="loadingText">${text}</p>`;
         },
 
         // Build the relationships between nodes
@@ -245,8 +294,73 @@ var app = new Vue({
             })
         },
 
+        // Get our top 50 artists within a certain range
+        getPastRange: async function(range) {
+            var artists = await get(range);
+
+            return artists;
+
+            async function get(range) {
+                return new Promise((resolve, reject) => {
+                    fetch(`https://api.spotify.com/v1/me/top/artists?time_range=${range}&limit=50&offset=0`, {
+                        headers: {
+                            'Authorization': `Bearer ${localStorage.getItem('spotToken')}`,
+                        },
+                    })
+                    .then(response => response.json())
+                    .then(response => {
+                        if (response.error) {
+                            if (response.error.status = 401) {
+                                app.logout();
+                            }
+
+                            console.error(response.error);
+                            reject(response.error);
+                        }
+
+                        var artists = new Array ();
+
+                        response.items.forEach(function(artist) {
+                            artists.push({ name: artist.name, id: artist.id, img: artist.images[Math.floor(artist.images.length / 2)].url });
+                        });
+
+                        resolve(artists)
+                    })
+                    .catch(error => reject(error));
+                })
+            }
+        },
+
+        searchArtist: async function(search) {
+            return new Promise((resolve, reject) => {
+                fetch(`https://api.spotify.com/v1/search?q=artist%3A${search}&type=artist&limit=1`, {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('spotToken')}`,
+                    },
+                })
+                .then(response => response.json())
+                .then(response => {
+                    if (response.error) {
+                        if (response.error.status = 401) {
+                            app.logout();
+                        }
+
+                        console.error(response.error);
+                        reject(response.error);
+                    }
+
+                    console.log(response);
+
+                    resolve([{ name: response.artists.items[0].name, id: response.artists.items[0].id, img: response.artists.items[0].images[Math.floor(artist.images.length / 2)].url}])
+                })
+                .catch(error => reject(error));
+            })
+        },
+
         // Get who we follow
         getFollowing: async function() {
+            this.genres = [];
+
             var totalFollowing = await get();
             while (cursor != null) {  
                 var moreFollowing = await get(cursor);
@@ -254,6 +368,8 @@ var app = new Vue({
                     totalFollowing.push(x);
                 });
             }
+
+            this.following = totalFollowing;
 
             return totalFollowing;
 
@@ -301,7 +417,7 @@ var app = new Vue({
                     })
                     .catch(error => reject(error));
                 })
-            }      
+            }
         }
     }
 })
