@@ -1,0 +1,70 @@
+@font-face {
+    font-family: 'Vulf Sans';
+    src: url('https://grantshandy.github.io/textrip/vulf-sans/VulfSans-Regular.woff2') format('woff2'),
+    url('https://grantshandy.github.io/textrip/vulf-sans/VulfSans-Regular.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+body {
+    font-family: 'Vulf Sans';
+    background-color: var(--background);
+    color: var(--text);
+    margin: 0;
+    text-align: center;
+}
+
+.workspace {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    width:100vw;
+}
+
+.graph {
+    float: left;
+
+    background-color: var(--background);
+    color: var(--light);
+    width: 75vw;
+    height: 100vh;
+}
+
+.separator {
+    width: 0.35vw;
+    height: 100vh;
+    background-color: var(--text)
+}
+
+.settings {
+    float: right;
+    text-align: left;
+    position: relative;
+
+    margin-left: 3%;
+    margin-right: 1%;
+
+    background-color: var(--background);
+    color: var(--light);
+
+    width: 24.65vw;
+}
+
+.logout {
+    position: absolute;
+    bottom: 1%;
+    left: 50%;
+    -webkit-transform: translateX(-50%);
+    transform: translateX(-50%)
+}
+
+.settingsType {
+    margin-top: 1vw;
+    /* margin-left: auto;
+    margin-right: auto; */
+    padding-left: 5%;
+    width: 75%;
+    border: 4px solid white;
+    border-radius: 5%;
+}

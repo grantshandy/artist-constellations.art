@@ -1,46 +1,75 @@
-<!doctype HTML>
-<html>
+<!doctype html>
+<html lang="en">
   <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="shortcut icon" type="image/png" href="icon/icon.png"/>
     <title>Artist Constellations</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font@5.8.55/css/materialdesignicons.min.css">
-    <link rel="stylesheet" href="https://unpkg.com/buefy/dist/buefy.min.css">
-    <link rel="stylesheet" href="index.css">
+    <link rel="stylesheet" href="style.css">
+    <!-- <script src="https://cdn.jsdelivr.net/npm/vue@2"></script> -->
+    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+    <script src="https://unpkg.com/3d-force-graph"></script>
+    <script src="https://unpkg.com/three"></script>
+    <script src="https://unpkg.com/three-spritetext"></script>
+    <script src="index.js" type="module"></script>
   </head>
   <body>
     <div id="app">
-      <div v-if="auth_key" id="workspace" class="columns section has-background-grey">
-        <!-- code for site is here -->
-        <div class="column is-four-fifths">
-          <div class="graph box content">
-            Graph goes here
+      <!-- Content for when we have authentication -->
+      <div class="workspace" v-if="auth_key">
+        <div id="graph" class="graph" ref="graph"></div>
+        <div class="separator"></div>
+        <div class="settings" ref="settings">
+          <h1>Artist Constellations</h1>
+          <p><em>View your Spotify artists in 3D constellations</em></p>
+
+          <input type="radio" id="yourArtists" value="following" v-model="graphType" v-on:click="showFollowing">
+          <label for="yourArtists">Artists you follow</label>
+          <br>
+          <input type="radio" id="pastFourWeeks" value="fourWeeks" v-model="graphType" v-on:click="showPastFourWeeks">
+          <label for="pastFourWeeks">Top artists of the past 4 weeks</label>
+          <br>
+          <input type="radio" id="pastSixMonths" value="sixMonths" v-model="graphType" v-on:click="showPastSixMonths">
+          <label for="pastSixMonths">Top artists of the past 6 months</label>
+          <br>
+          <input type="radio" id="AllTime" value="allTime" v-model="graphType" v-on:click="showAllTime">
+          <label for="AllTime">Top artists of all time</label>
+          <br>
+          <input type="radio" id="search" value="search" v-model="graphType">
+          <label for="search">Search for an artist</label>
+
+          <div class="settingsType" v-show="graph">
+            <p><b>Node Settings</b></p>
+            <input type="radio" id="nodesAsDots" name="nodeSetting" v-on:click="setGraphAsDot" checked="true">
+            <label for="nodesAsDots">View nodes as dots</label>
+            <br>
+            <input type="radio" id="nodesAsText" name="nodeSetting" v-on:click="setGraphAsText">
+            <label for="nodesAsText">View nodes as text</label>
+            <br>
+            <input type="radio" id="nodesAsImages" name="nodeSetting" v-on:click="setGraphAsImage">
+            <label for="nodesAsImages">View nodes as images</label>
+            <hr>
+            <p><b>Info</b></p>
+              <ul>
+                <li>You follow {{ following.length }} artists.</li>
+                <li>You listen to {{ genres.length }} different genres.</li>
+              </ul>
           </div>
-        </div>
-        <div class="column">
-          <div class="info box content">
-            <p>User: {{ me.display_name }}</p>
-            <b-button v-on:click="logout" type="is-primary" class="is-vcentered">Log Out</b-button>
+          <div class="settingsType" v-show="graphType === 'search' && graph">
+            <p><b>Search</b></p>
+            <p><input type='text' ref='searchText' placeholder="Artist name" v-on:keypress="showSearch"/><input ref="searchSubmit" type='submit' value='Search' v-on:click="showSearch"/></p>
+          </div>
+
+          <div ref="loading"></div>
+          
+          <div class="logout">
+            <p>User: <em ref="username"></em>         <button type="button" v-on:click="logout">Log Out</button></p>
           </div>
         </div>
       </div>
-      <div v-else id="login" class="block has-text-centered">
-        <section class="hero is-medium is-primary">
-          <div class="hero-body">
-            <p class="title">Artist Constellations</p>
-            <p class="subtitle"><em>View your Spotify artists in 3D constellations</em></p>
-          </div>
-        </section>
-        <section class="content section">
-          <b-button v-on:click="login" type="is-primary">Log in to Spotify</b-button>
-        </section>
+      <!-- Content for when we don't have authentication -->
+      <div class="login" v-else>
+        <h1>Spotify Artist Constellations</h1>
+        <button class="button" v-on:click="authenticate">Link to Spotify</button>
       </div>
     </div>
-    <!-- <script src="https://cdn.jsdelivr.net/npm/vue@2"></script> -->
-    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
-    <script src="https://unpkg.com/buefy/dist/buefy.min.js"></script>
-    <script src="index.js"></script>
   </body>
 </html>
-<!-- Love, Grant -->
