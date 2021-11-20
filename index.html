@@ -1,4 +1,4 @@
-<!doctype html>
+<!doctype HTML>
 <html>
   <head>
     <meta charset="utf-8">
@@ -11,19 +11,17 @@
   </head>
   <body>
     <div id="app">
-      <div v-if="auth_key" id="workspace">
+      <div v-if="auth_key" id="workspace" class="columns section has-background-grey">
         <!-- code for site is here -->
-        <div class="columns section has-background-grey">
-          <div class="column is-four-fifths">
-            <div class="box content">
-              Code goes here
-            </div>
+        <div class="column is-four-fifths">
+          <div class="graph box content">
+            Graph goes here
           </div>
-          <div class="column">
-            <div class="box content">
-              <p>User: {{ me.display_name }}</p>
-              <b-button v-on:click="logout" type="is-primary" class="is-vcentered">Log Out</b-button>
-            </div>
+        </div>
+        <div class="column">
+          <div class="info box content">
+            <p>User: {{ me.display_name }}</p>
+            <b-button v-on:click="logout" type="is-primary" class="is-vcentered">Log Out</b-button>
           </div>
         </div>
       </div>
