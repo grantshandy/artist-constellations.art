@@ -24,7 +24,7 @@ jobs:
         key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
 
     - name: Move files around
-      run: mkdir -p public/icon && cp CNAME index.html index.css index.js public/ && cp icon/icon.png public/icon/icon.png
+      run: mkdir -p public && cp CNAME index.html style.css index.js public/
  
     - name: Deploy to gh-pages
       uses: peaceiris/actions-gh-pages@v3
