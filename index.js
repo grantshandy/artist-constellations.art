@@ -12,7 +12,10 @@ var app = new Vue({
     el: '#app',
 
     data: {
-        auth_key: null
+        auth_key: null,
+        me: {
+            display_name: 'Loading User Information...'
+        }
     },
 
     created() {
@@ -24,8 +27,14 @@ var app = new Vue({
             // Try to set it from localStorage
             this.auth_key = localStorage.getItem('spotToken');
         } else {
-            // If we have it then set it in localStorage
+            // If we have it then set it in localStorage and get user info
             localStorage.setItem('spotToken', this.auth_key);
+        }
+    },
+
+    async mounted() {
+        if (this.auth_key) {
+            this.me = await this.getMe();
         }
     },
 
@@ -35,10 +44,36 @@ var app = new Vue({
             window.location.href = `https://accounts.spotify.com/authorize?client_id=${client_id}&response_type=token&redirect_uri=${redirect_uri}&scope=${scopes}&show_dialog=true`;
         },
 
-        // Logout by clearing the token from storage and redirecting to the page without any arguments in the URL
+        // Logout by clearing the token from storage and setting it as null. This will make the login div the only thing visible.
         logout: function() {
             localStorage.removeItem('spotToken');
             window.location.href = window.location.href.split('?')[0].split('#')[0];
+        },
+
+        // Get information about the user.
+        getMe: async function() {
+            return new Promise((resolve, reject) => {
+                fetch('https://api.spotify.com/v1/me', {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('spotToken')}`,
+                    },
+                })
+                .then(response => response.json())
+                .then(response => {
+                    if (response.error) {
+                        console.error(response.error);
+
+                        if (response.error.status == 401) {
+                            app.logout();
+                        }
+
+                        reject(response.error);
+                    }
+        
+                    resolve(response)
+                })
+                .catch(error => reject(error));
+            });
         }
     }
 })
