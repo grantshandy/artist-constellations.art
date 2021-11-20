@@ -11,11 +11,23 @@
   </head>
   <body>
     <div id="app">
-      <div v-if="auth_key" id="workspace" class="has-background-dark has-text-light">
+      <div v-if="auth_key" id="workspace">
         <!-- code for site is here -->
-        you're in!
+        <div class="columns section has-background-grey">
+          <div class="column is-four-fifths">
+            <div class="box content">
+              Code goes here
+            </div>
+          </div>
+          <div class="column">
+            <div class="box content">
+              <p>User: {{ me.display_name }}</p>
+              <b-button v-on:click="logout" type="is-primary" class="is-vcentered">Log Out</b-button>
+            </div>
+          </div>
+        </div>
       </div>
-      <div v-else id="login" class="has-text-centered">
+      <div v-else id="login" class="block has-text-centered">
         <section class="hero is-medium is-primary">
           <div class="hero-body">
             <p class="title">Artist Constellations</p>
@@ -23,13 +35,8 @@
           </div>
         </section>
         <section class="content section">
-          <b-button v-on:click="login" type="is-primary">Login to Spotify</b-button>
+          <b-button v-on:click="login" type="is-primary">Log in to Spotify</b-button>
         </section>
-        <footer class="footer">
-          <div class="content has-text-centered">
-            <p>Copyright 2021 Grant Handy</p>
-          </div>
-        </footer>
       </div>
     </div>
     <!-- <script src="https://cdn.jsdelivr.net/npm/vue@2"></script> -->
