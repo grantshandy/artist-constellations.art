@@ -3,11 +3,39 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="shortcut icon" type="image/png" href="icon/icon.png"/>
     <title>Artist Constellations</title>
-    <link href="index.css" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font@5.8.55/css/materialdesignicons.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/buefy/dist/buefy.min.css">
+    <link rel="stylesheet" href="index.css">
   </head>
   <body>
-
+    <div id="app">
+      <div v-if="auth_key" id="workspace" class="has-background-dark has-text-light">
+        <!-- code for site is here -->
+        you're in!
+      </div>
+      <div v-else id="login" class="has-text-centered">
+        <section class="hero">
+          <div class="hero-body">
+            <p class="title">Artist Constellations</p>
+            <p class="subtitle"><em>View your Spotify artists in 3D constellations</em></p>
+          </div>
+        </section>
+        <section class="content section">
+          <b-button v-on:click="login" type="is-primary">Login to Spotify</b-button>
+        </section>
+        <footer class="footer">
+          <div class="content has-text-centered">
+            <p>Copyright 2021 Grant Handy</p>
+          </div>
+        </footer>
+      </div>
+    </div>
+    <!-- <script src="https://cdn.jsdelivr.net/npm/vue@2"></script> -->
+    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+    <script src="https://unpkg.com/buefy/dist/buefy.min.js"></script>
+    <script src="index.js"></script>
   </body>
 </html>
 <!-- Love, Grant -->
