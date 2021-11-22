@@ -1,19 +1,41 @@
-html {
-    overflow-y: hidden;
-}
-
-.info {
-    height: 100%;
-}
-
-.graph {
-    height: 100%;
-}
-
 #workspace {
-    height: 100%;
+    width: 100vw;
+    height: 100vh;
 }
 
-#app {
+.workspaceGrid {
+    height: 100vh;
+}
+
+#login {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.loggingin {
+    width: 35%;
+    padding: 50px;
+    text-align: center;
+}
+
+@media(max-width: 692px){
+    .loggingin {
+        width: 70%;
+    }
+}
+
+@media(max-width: 450px){
+    .loggingin {
+        width: 80%;
+    }
+}
+
+body {
+    height: 100vh;
+}
+
+html {
     height: 100vh;
 }

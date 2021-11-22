@@ -2,19 +2,13 @@ const client_id = '2ed0e6e8b06842fb854cb15e1690a7b5';
 const redirect_uri = window.location.href.split('?')[0].split('#')[0];
 const scopes = 'user-follow-read';
 
-Vue.use(Buefy, {
-    defaultIconPack: 'fas',
-    defaultContainerElement: '#content',
-    // ...
-})
-
 var app = new Vue({
     el: '#app',
 
     data: {
         auth_key: null,
         me: {
-            display_name: 'Loading User Information...'
+            display_name: "loading user information..."
         }
     },
 
