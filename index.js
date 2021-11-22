@@ -1,6 +1,6 @@
 const client_id = '2ed0e6e8b06842fb854cb15e1690a7b5';
 const redirect_uri = window.location.href.split('?')[0].split('#')[0];
-const scopes = 'user-follow-read';
+const scopes = 'user-follow-read user-top-read';
 
 var r = document.querySelector(':root');
 
