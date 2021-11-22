@@ -6,17 +6,21 @@
     <title>Artist Constellations</title>
     <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css">
     <link rel="stylesheet" type="text/css" href="index.css">
+    <script src="https://unpkg.com/3d-force-graph"></script>
+    <script src="https://unpkg.com/three"></script>
+    <script src="https://unpkg.com/three-spritetext"></script>
   </head>
   <body>
     <div id="app">
       <div v-if="auth_key" id="workspace">
         <div class="ui two column divided stackable grid workspaceGrid">
           <div class="thirteen wide column">
-            graph here
+            <div ref="graph"></div>
           </div>
           <div class="three wide column">
             <p>User: {{ me.display_name }}</p>
             <button class="ui primary button" v-on:click="logout">Log out</button>
+            <div ref="loading"></div>
           </div>
         </div>
       </div>
