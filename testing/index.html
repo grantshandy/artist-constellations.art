@@ -1,41 +1,26 @@
-<!doctype HTML>
-<html>
+<!DOCTYPE html>
+<html lang="en">
   <head>
     <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="style.css">
     <title>Artist Constellations</title>
-    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css">
-    <link rel="stylesheet" type="text/css" href="index.css">
-    <script src="https://unpkg.com/3d-force-graph"></script>
-    <script src="https://unpkg.com/three"></script>
-    <script src="https://unpkg.com/three-spritetext"></script>
   </head>
   <body>
     <div id="app">
       <div v-if="auth_key" id="workspace">
-        <div class="ui two column divided stackable grid workspaceGrid">
-          <div class="thirteen wide column">
-            <div ref="graph"></div>
-          </div>
-          <div class="three wide column">
-            <p>User: {{ me.display_name }}</p>
-            <button class="ui primary button" v-on:click="logout">Log out</button>
-            <div ref="loading"></div>
-          </div>
-        </div>
+        <p>logged into {{ me.display_name }}</p>
+        <p><img v-bind:src="this.me.images[0].url"></p>
+        <p><button v-on:click="logout">Log Out</button></p>
       </div>
       <div v-else id="login">
-          <div class="ui loggingin form message">
-            <h1 class="ui header">Spotify Artist Constellations</h1>
-            <p><em>View your Spotify artists in 3D constellations.</em></p>
-            <button class="ui primary button" v-on:click="login">Log in to Spotify</button>
-          </div>
+        <h1>Artist Constellations</h1>
+        <button v-on:click="login">Log In</button>
       </div>
     </div>
     <!-- <script src="https://cdn.jsdelivr.net/npm/vue@2"></script> -->
     <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.js" integrity="sha512-dqw6X88iGgZlTsONxZK9ePmJEFrmHwpuMrsUChjAw1mRUhUITE5QU9pkcSox+ynfLhL15Sv2al5A0LVyDCmtUw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="index.js"></script>
   </body>
 </html>
