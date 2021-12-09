@@ -1,75 +1,36 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>Artist Constellations</title>
-    <link rel="stylesheet" href="style.css">
-    <!-- <script src="https://cdn.jsdelivr.net/npm/vue@2"></script> -->
-    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css" rel="stylesheet">
     <script src="https://unpkg.com/3d-force-graph"></script>
-    <script src="https://unpkg.com/three"></script>
-    <script src="https://unpkg.com/three-spritetext"></script>
-    <script src="index.js" type="module"></script>
+    <title>Artist Constellations</title>
   </head>
   <body>
-    <div id="app">
-      <!-- Content for when we have authentication -->
-      <div class="workspace" v-if="auth_key">
-        <div id="graph" class="graph" ref="graph"></div>
-        <div class="separator"></div>
-        <div class="settings" ref="settings">
-          <h1>Artist Constellations</h1>
-          <p><em>View your Spotify artists in 3D constellations</em></p>
-
-          <input type="radio" id="yourArtists" value="following" v-model="graphType" v-on:click="showFollowing">
-          <label for="yourArtists">Artists you follow</label>
-          <br>
-          <input type="radio" id="pastFourWeeks" value="fourWeeks" v-model="graphType" v-on:click="showPastFourWeeks">
-          <label for="pastFourWeeks">Top artists of the past 4 weeks</label>
-          <br>
-          <input type="radio" id="pastSixMonths" value="sixMonths" v-model="graphType" v-on:click="showPastSixMonths">
-          <label for="pastSixMonths">Top artists of the past 6 months</label>
-          <br>
-          <input type="radio" id="AllTime" value="allTime" v-model="graphType" v-on:click="showAllTime">
-          <label for="AllTime">Top artists of all time</label>
-          <br>
-          <input type="radio" id="search" value="search" v-model="graphType">
-          <label for="search">Search for an artist</label>
-
-          <div class="settingsType" v-show="graph">
-            <p><b>Node Settings</b></p>
-            <input type="radio" id="nodesAsDots" name="nodeSetting" v-on:click="setGraphAsDot" checked="true">
-            <label for="nodesAsDots">View nodes as dots</label>
-            <br>
-            <input type="radio" id="nodesAsText" name="nodeSetting" v-on:click="setGraphAsText">
-            <label for="nodesAsText">View nodes as text</label>
-            <br>
-            <input type="radio" id="nodesAsImages" name="nodeSetting" v-on:click="setGraphAsImage">
-            <label for="nodesAsImages">View nodes as images</label>
-            <hr>
-            <p><b>Info</b></p>
-              <ul>
-                <li>You follow {{ following.length }} artists.</li>
-                <li>You listen to {{ genres.length }} different genres.</li>
-              </ul>
+    <div id="app" class="flex h-screen">
+      <div v-if="!auth_key" id="login" class="flex-auto bg-gray-600 p-2 text-white">
+        <div class="rounded-lg shadow-lg bg-gray-800 p-4 text-center">
+          <h1 class="font-bold text-4xl">Spotify Artist Constellations</h1>
+          <button class="bg-green-500 hover:bg-green-700 py-2 px-4 my-5 font-semibold rounded-lg shadow-md" v-on:click="login">Link To Spotify</button>
+          <p>View and share your spotify artists in a 3D graph.</p>
+        </div>
+      </div>
+      <div v-else id="workspace" class="flex flex-1 bg-gray-600">
+        <div class="flex-1 flex-col flex p-2 md:p-5 space-y-2 md:space-y-5 text-white">
+          <div class="flex h-4/5 rounded-lg shadow-lg bg-gray-800 text-center" ref="content">
+            <div class="flex-1" id="graph" ref="graph"></div>
           </div>
-          <div class="settingsType" v-show="graphType === 'search' && graph">
-            <p><b>Search</b></p>
-            <p><input type='text' ref='searchText' placeholder="Artist name" v-on:keypress="showSearch"/><input ref="searchSubmit" type='submit' value='Search' v-on:click="showSearch"/></p>
-          </div>
-
-          <div ref="loading"></div>
-          
-          <div class="logout">
-            <p>User: <em ref="username"></em>         <button type="button" v-on:click="logout">Log Out</button></p>
+          <div class="flex-auto rounded-lg shadow-lg p-4 space-y-5 bg-gray-800">
+            <p>User: {{ me.display_name }}</p>
+            <button v-on:click="logout" ref="logoutButton" class="bg-green-500 hover:bg-green-700 py-2 px-4 font-semibold rounded-lg shadow-md">Log Out</button>  
           </div>
         </div>
       </div>
-      <!-- Content for when we don't have authentication -->
-      <div class="login" v-else>
-        <h1>Spotify Artist Constellations</h1>
-        <button class="button" v-on:click="authenticate">Link to Spotify</button>
-      </div>
     </div>
+    <!-- <script src="https://cdn.jsdelivr.net/npm/vue@2"></script> -->
+    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+    <script src="index.js"></script>
   </body>
 </html>
