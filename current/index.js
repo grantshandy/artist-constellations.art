@@ -13,6 +13,8 @@ var app = new Vue({
         nodes: [],
         links: [],
         graph: null,
+        graphType: 'following',
+        nodeType: 'dots',
     },
 
     created() {
@@ -84,6 +86,7 @@ var app = new Vue({
                 .height(height)
                 .backgroundColor(backgroundColor)
                 .nodeColor(node => nodeColor)
+                .linkWidth(2)
                 .onNodeRightClick(node => {
                     window.open(`https://open.spotify.com/artist/${node.id}`, '_blank');
                 });
@@ -97,6 +100,35 @@ var app = new Vue({
     
             this.graph.width(width);
             this.graph.height(height);
+        },
+
+        updateNodeType: function() {
+            if (this.nodeType == 'pictures') {
+                this.graph.nodeThreeObject(node => {
+                    const imgTexture = new THREE.TextureLoader().load(node.img);
+                    const material = new THREE.SpriteMaterial({ map: imgTexture });
+                    const sprite = new THREE.Sprite(material);
+                    sprite.scale.set(25, 25);
+                    return sprite;
+                });
+    
+                this.graph.enablePointerInteraction(true);
+
+            } else if (this.nodeType == 'text') {
+                this.graph.nodeThreeObject(node => {
+                    const sprite = new SpriteText(node.name);
+                    sprite.material.depthWrite = false; // make sprite background transparent
+                    sprite.color = window.getComputedStyle(this.$refs['graph']).color;
+                    sprite.textHeight = 8;
+                    return sprite;
+                });
+
+                this.graph.enablePointerInteraction(false);
+            } else if (this.nodeType == 'dots') {
+                this.graph.nodeThreeObject(node => {});
+
+                this.graph.enablePointerInteraction(true);
+            }
         },
 
         // Build the relationships between nodes
