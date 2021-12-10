@@ -74,7 +74,7 @@ var app = new Vue({
             var width = this.$refs['graph'].clientWidth;
             var height = this.$refs['graph'].clientHeight;
             var backgroundColor = window.getComputedStyle(this.$refs['graph']).backgroundColor;
-            var nodeColor = window.getComputedStyle(this.$refs['logoutButton']).color;
+            var nodeColor = window.getComputedStyle(this.$refs['graph']).color;
 
             this.graph(this.$refs['graph'])
                 .graphData(this)
@@ -87,8 +87,6 @@ var app = new Vue({
                 .onNodeRightClick(node => {
                     window.open(`https://open.spotify.com/artist/${node.id}`, '_blank');
                 });
-
-            this.graph.d3Force('charge').strength(-100);
 
             window.addEventListener('resize', this.resizeGraph);
         },
@@ -239,7 +237,7 @@ var app = new Vue({
                     resolve(response)
                 })
                 .catch(error => reject(error));
-            })
+            });
         },
     }
 })
