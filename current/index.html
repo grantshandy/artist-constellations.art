@@ -10,8 +10,8 @@
   </head>
   <body>
     <div id="app" class="flex h-screen">
-      <div v-if="!auth_key" id="login" class="flex-auto bg-gray-600 p-2 text-white">
-        <div class="md:w-2/3 rounded-lg shadow-lg bg-gray-800 p-4 text-center">
+      <div v-if="!auth_key" id="login" class="w-screen h-screen flex justify-center items-center bg-gray-600 text-white">
+        <div class="text-center rounded-lg shadow-lg bg-gray-800 p-7">
           <h1 class="font-bold text-4xl">Spotify Artist Constellations</h1>
           <button class="bg-green-500 hover:bg-green-700 py-2 px-4 my-5 font-semibold rounded-lg shadow-md" v-on:click="login">Link To Spotify</button>
           <p>View and share your spotify artists in a 3D graph.</p>
@@ -23,7 +23,7 @@
             <div class="flex-1" id="graph" ref="graph"></div>
           </div>
           <div class="flex-auto rounded-lg shadow-lg p-4 space-y-5 bg-gray-800">
-            <p>User: {{ me.display_name }}. This graph shows who you follow on spotify and their relationships with other artists.</p>
+            <p>User: {{ me.display_name }}</p>
             <button v-on:click="logout" ref="logoutButton" class="bg-green-500 hover:bg-green-700 py-2 px-4 font-semibold rounded-lg shadow-md">Log Out</button>
             <p>Copyright 2021 Grant Handy</p>
           </div>
