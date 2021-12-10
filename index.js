@@ -74,7 +74,7 @@ var app = new Vue({
             var width = this.$refs['graph'].clientWidth;
             var height = this.$refs['graph'].clientHeight;
             var backgroundColor = window.getComputedStyle(this.$refs['graph']).backgroundColor;
-            var nodeColor = window.getComputedStyle(this.$refs['logoutButton']).backgroundColor;
+            var nodeColor = window.getComputedStyle(this.$refs['logoutButton']).color;
 
             this.graph(this.$refs['graph'])
                 .graphData(this)
