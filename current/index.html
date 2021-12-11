@@ -16,8 +16,9 @@
         <div class="text-center rounded-lg shadow-lg bg-gray-800 p-7">
           <h1 class="font-bold text-4xl">Spotify Artist Constellations</h1>
           <button class="bg-green-500 hover:bg-green-700 py-2 px-4 my-5 font-semibold rounded-lg shadow-md" v-on:click="login">Link To Spotify</button>
-          <p>View your Spotify artists in a 3D graph.</p>
-          <img class="hidden" src="https://gpvc.arturio.dev/artistconstellations">
+          <p>View your Spotify artists in constellations!</p>
+          <p><i>© 2021 Grant Handy</i></p>
+          <!-- <img class="hidden" src="https://gpvc.arturio.dev/artistconstellations"> -->
         </div>
       </div>
       <div v-else id="workspace" class="flex flex-1 bg-gray-600">
@@ -26,7 +27,7 @@
             <div class="flex-1" id="graph" ref="graph"></div>
           </div>
           <div class="flex-auto rounded-lg shadow-lg p-4 space-y-2 bg-gray-800 content-center">
-            <p class="font-bold">User: {{ me.display_name }}</p>
+            <p><b>User: {{ me.display_name }}.</b> Drag and zoom to look around the graph.</p>
             <div class="md:flex md:flex-col md:space-y-3">
               <button v-on:click="logout" ref="logoutButton" class="bg-green-500 hover:bg-green-700 py-1 px-1 md:py-3 md:px-3 text-left font-semibold rounded-lg shadow-md">Log Out</button>
               <select v-if="graph" v-model="nodeType" @change="updateNodeType" class="bg-green-500 hover:bg-green-700 py-1 px-1 md:py-3 md:px-2 font-semibold rounded-lg shadow-md" ref="view">
@@ -41,7 +42,6 @@
                 <option value="alltime">Top (all time)</option>
               </select>
             </div>
-            <p>Copyright 2021 Grant Handy</p>
           </div>
         </div>
       </div>
