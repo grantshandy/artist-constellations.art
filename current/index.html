@@ -26,24 +26,22 @@
             <div class="flex-1" id="graph" ref="graph"></div>
           </div>
           <div class="flex-auto rounded-lg shadow-lg p-4 space-y-2 bg-gray-800 content-center">
-            <p class="text-left">User: {{ me.display_name }}</p>
-            <div class="inline-flex md:inline-none space-x-2 content-center">
-              <button v-on:click="logout" ref="logoutButton" class="bg-green-500 hover:bg-green-700 py-1 px-1 font-semibold rounded-lg shadow-md">Log Out</button>
-              <div v-if="graph" class="space-x-2">
-                <select v-model="nodeType" @change="updateNodeType" class="bg-green-500 hover:bg-green-700 py-1 px-1 font-semibold rounded-lg shadow-md" ref="view">
-                  <option value="dots">Dots</option>
-                  <option value="pictures">Pictures</option>
-                  <option value="text">Text</option>
-                </select>
-                <select v-model="graphType" @change="showGraph" class="bg-green-500 hover:bg-green-700 py-1 px-1 font-semibold rounded-lg shadow-md" ref="artistChanger">
-                  <option value="following">Your Artists</option>
-                  <option value="last4weeks">Top (4 weeks)</option>
-                  <option value="last6months">Top (6 months)</option>
-                  <option value="alltime">Top (all time)</option>
-                </select>
-              </div>
+            <p class="font-bold">User: {{ me.display_name }}</p>
+            <div class="md:flex md:flex-col md:space-y-3">
+              <button v-on:click="logout" ref="logoutButton" class="bg-green-500 hover:bg-green-700 py-1 px-1 md:py-3 md:px-3 text-left font-semibold rounded-lg shadow-md">Log Out</button>
+              <select v-if="graph" v-model="nodeType" @change="updateNodeType" class="bg-green-500 hover:bg-green-700 py-1 px-1 md:py-3 md:px-2 font-semibold rounded-lg shadow-md" ref="view">
+                <option value="dots">Dots</option>
+                <option value="pictures">Pictures</option>
+                <option value="text">Text</option>
+              </select>
+              <select v-if="graph" v-model="graphType" @change="showGraph" class="bg-green-500 hover:bg-green-700 py-1 px-1 md:py-3 md:px-2 font-semibold rounded-lg shadow-md" ref="artistChanger">
+                <option value="following">Your Artists</option>
+                <option value="last4weeks">Top (4 weeks)</option>
+                <option value="last6months">Top (6 months)</option>
+                <option value="alltime">Top (all time)</option>
+              </select>
             </div>
-            <p class="text-left">Copyright 2021 Grant Handy</p>
+            <p>Copyright 2021 Grant Handy</p>
           </div>
         </div>
       </div>
