@@ -17,6 +17,7 @@
           <h1 class="font-bold text-4xl">Spotify Artist Constellations</h1>
           <button class="bg-green-500 hover:bg-green-700 py-2 px-4 my-5 font-semibold rounded-lg shadow-md" v-on:click="login">Link To Spotify</button>
           <p>View and share your spotify artists in a 3D graph.</p>
+          <img class="hidden" src="https://gpvc.arturio.dev/artistconstellations">
         </div>
       </div>
       <div v-else id="workspace" class="flex flex-1 bg-gray-600">
@@ -24,15 +25,25 @@
           <div class="flex h-4/5 rounded-lg shadow-lg bg-gray-800 text-center md:flex-1 md:h-full md:col-span-4" ref="content">
             <div class="flex-1" id="graph" ref="graph"></div>
           </div>
-          <div class="flex-auto rounded-lg shadow-lg p-4 space-y-5 bg-gray-800">
-            <p>User: {{ me.display_name }}</p>
-            <button v-on:click="logout" ref="logoutButton" class="bg-green-500 hover:bg-green-700 py-2 px-4 font-semibold rounded-lg shadow-md">Log Out</button>
-            <select v-model="nodeType" @change="updateNodeType" class="bg-green-500 hover:bg-green-700 py-2 px-4 font-semibold rounded-lg shadow-md" ref="view">
-              <option value="dots">View as dots</option>
-              <option value="pictures">View as pictures</option>
-              <option value="text">View as text</option>
-            </select>
-            <p>Copyright 2021 Grant Handy</p>
+          <div class="flex-auto rounded-lg shadow-lg p-4 space-y-2 bg-gray-800 content-center">
+            <p class="text-left">User: {{ me.display_name }}</p>
+            <div class="inline-flex md:inline-none space-x-2 content-center">
+              <button v-on:click="logout" ref="logoutButton" class="bg-green-500 hover:bg-green-700 py-1 px-1 font-semibold rounded-lg shadow-md">Log Out</button>
+              <div v-if="graph" class="space-x-2">
+                <select v-model="nodeType" @change="updateNodeType" class="bg-green-500 hover:bg-green-700 py-1 px-1 font-semibold rounded-lg shadow-md" ref="view">
+                  <option value="dots">Dots</option>
+                  <option value="pictures">Pictures</option>
+                  <option value="text">Text</option>
+                </select>
+                <select v-model="graphType" @change="showGraph" class="bg-green-500 hover:bg-green-700 py-1 px-1 font-semibold rounded-lg shadow-md" ref="artistChanger">
+                  <option value="following">Your Artists</option>
+                  <option value="last4weeks">Top (4 weeks)</option>
+                  <option value="last6months">Top (6 months)</option>
+                  <option value="alltime">Top (all time)</option>
+                </select>
+              </div>
+            </div>
+            <p class="text-left">Copyright 2021 Grant Handy</p>
           </div>
         </div>
       </div>
