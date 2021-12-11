@@ -127,8 +127,6 @@ var app = new Vue({
                     return sprite;
                 });
     
-                this.graph.enablePointerInteraction(true);
-
             } else if (this.nodeType == 'text') {
                 this.graph.nodeThreeObject(node => {
                     const sprite = new SpriteText(node.name);
@@ -141,11 +139,8 @@ var app = new Vue({
                     return sprite;
                 });
 
-                this.graph.enablePointerInteraction(false);
             } else if (this.nodeType == 'dots') {
                 this.graph.nodeThreeObject(node => {});
-
-                this.graph.enablePointerInteraction(true);
             }
         },
 
