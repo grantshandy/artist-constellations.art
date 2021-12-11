@@ -67,6 +67,11 @@ var app = new Vue({
                 this.nodes = await this.getTimeRange('long_term');
             }
 
+            if (this.nodes.length == 0 || this.nodes.length == 1) {
+                this.setLoadingText('You aren\'t following enough artists! Go follow some more people or switch to another mode.');
+                return;
+            }
+
             this.setLoadingText('Getting Relationships...');
             this.links = await this.buildRelationships(this.nodes);
 
