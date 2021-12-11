@@ -75,6 +75,7 @@ var app = new Vue({
 
             if (this.nodes.length == 0 || this.nodes.length == 1) {
                 this.setLoadingText('You aren\'t following enough artists! Go follow some more people or switch to another mode.');
+                this.graph = ' ';
                 return;
             }
 
@@ -180,7 +181,7 @@ var app = new Vue({
                 }
 
                 currentArtist += 1;
-                this.setLoadingText(`Building Relationships... (${currentArtist}/${idArray.length})`);
+                this.setLoadingText(`Building Relationship (${currentArtist}/${idArray.length})`);
             }
 
             return links;
