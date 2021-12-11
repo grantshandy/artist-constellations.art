@@ -53,7 +53,7 @@ var app = new Vue({
             window.location.href = window.location.href.split('?')[0].split('#')[0];
         },
 
-        // Show who we follow
+        // Rebuild the graph with all of our settings
         showGraph: async function() {
             this.setLoadingText('Getting Artists...');
 
@@ -102,6 +102,7 @@ var app = new Vue({
             this.$refs.graph.innerHTML = `<p class="m-4">${text}</p>`;
         },
 
+        // Resize the graph to the size of it's parent div
         resizeGraph: function() {
             var width = this.$refs['graph'].clientWidth;
             var height = this.$refs['graph'].clientHeight;
@@ -110,6 +111,7 @@ var app = new Vue({
             this.graph.height(height);
         },
 
+        // Set the graph's node type from the nodeType variable
         updateNodeType: function() {
             if (this.nodeType == 'pictures') {
                 this.graph.nodeThreeObject(node => {
@@ -163,7 +165,7 @@ var app = new Vue({
                 }
 
                 currentArtist += 1;
-                this.setLoadingText(`Getting Relationships... (${currentArtist}/${idArray.length})`);
+                this.setLoadingText(`Building Relationships... (${currentArtist}/${idArray.length})`);
             }
 
             return links;
@@ -200,6 +202,7 @@ var app = new Vue({
             })
         },
 
+        // Get our top artists of the past either short_term, medium_term, or long_term
         getTimeRange: async function(range) {
             return new Promise((resolve, reject) => {
                 fetch(`https://api.spotify.com/v1/me/top/artists?time_range=${range}&limit=50`, {
