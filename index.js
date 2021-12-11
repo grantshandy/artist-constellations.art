@@ -1,6 +1,6 @@
 const client_id = '2ed0e6e8b06842fb854cb15e1690a7b5';
 const redirect_uri = window.location.href.split('?')[0].split('#')[0];
-const scopes = 'user-follow-read';
+const scopes = 'user-follow-read user-top-read';
 
 var app = new Vue({
     el: '#app',
@@ -33,7 +33,7 @@ var app = new Vue({
     async mounted() {
         if (this.auth_key) {
             this.me = await this.getMe();
-            await this.showFollowing();
+            await this.showGraph();
         }
     },
 
@@ -54,21 +54,22 @@ var app = new Vue({
         },
 
         // Show who we follow
-        showFollowing: async function() {
-            this.setLoadingText('Getting Following...');
-            this.nodes = await this.getFollowing();
+        showGraph: async function() {
+            this.setLoadingText('Getting Artists...');
+
+            if (this.graphType == 'following') {
+                this.nodes = await this.getFollowing();
+            } else if (this.graphType == 'last4weeks') {
+                this.nodes = await this.getTimeRange('short_term');
+            } else if (this.graphType == 'last6months') {
+                this.nodes = await this.getTimeRange('medium_term');
+            } else if (this.graphType == 'alltime') {
+                this.nodes = await this.getTimeRange('long_term');
+            }
+
             this.setLoadingText('Getting Relationships...');
             this.links = await this.buildRelationships(this.nodes);
-            this.buildGraph();
-        },
 
-        // Set loading text
-        setLoadingText: function(text) {
-            this.$refs.graph.innerHTML = `<p class="m-4">${text}</p>`;
-        },
-
-        // Build graph
-        buildGraph: function() {
             this.$refs['graph'].innerHTML = '';
 
             this.graph = ForceGraph3D();
@@ -91,7 +92,14 @@ var app = new Vue({
                     window.open(`https://open.spotify.com/artist/${node.id}`, '_blank');
                 });
 
+            this.updateNodeType();
+
             window.addEventListener('resize', this.resizeGraph);
+        },
+
+        // Set loading text
+        setLoadingText: function(text) {
+            this.$refs.graph.innerHTML = `<p class="m-4">${text}</p>`;
         },
 
         resizeGraph: function() {
@@ -176,7 +184,7 @@ var app = new Vue({
                             app.logout();
                         }
 
-                        console.error(response.error);
+                        this.setLoadingText('Couldn\'t connect to spotify, try checking your network connection');
                         reject(response.error);
                     }
         
@@ -190,6 +198,36 @@ var app = new Vue({
                 })
                 .catch(error => reject(error));
             })
+        },
+
+        getTimeRange: async function(range) {
+            return new Promise((resolve, reject) => {
+                fetch(`https://api.spotify.com/v1/me/top/artists?time_range=${range}&limit=50`, {
+                    headers: {
+                        'Authorization': `Bearer ${this.auth_key}`,
+                    },
+                })
+                .then(response => response.json())
+                .then(response => {
+                    if (response.error) {
+                        if (response.error.status == 401) {
+                            app.logout();
+                        }
+
+                        this.setLoadingText('Couldn\'t connect to spotify, try checking your network connection');
+                        reject(response.error);
+                    }
+
+                    var artists = new Array ();
+
+                    response.items.forEach(function(artist) {
+                        artists.push({ name: artist.name, id: artist.id, img: artist.images[Math.floor(artist.images.length / 2)].url });
+                    });
+        
+                    resolve(artists)
+                })
+                .catch(error => reject(error));
+            });
         },
 
         // Get who we follow
@@ -228,7 +266,7 @@ var app = new Vue({
                                 app.logout();
                             }
 
-                            console.error(response.error);
+                            this.setLoadingText('Couldn\'t connect to spotify, try checking your network connection');
                             reject(response.error);
                         }
 
@@ -262,7 +300,7 @@ var app = new Vue({
                             app.logout();
                         }
 
-                        console.error(response.error);
+                        this.setLoadingText('Couldn\'t connect to spotify, try checking your network connection');
                         reject(response.error);
                     }
         
