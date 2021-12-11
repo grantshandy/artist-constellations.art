@@ -32,6 +32,7 @@ var app = new Vue({
 
     async mounted() {
         if (this.auth_key) {
+            this.setLoadingText('Getting User Information...');
             this.me = await this.getMe();
             await this.showGraph();
         }
@@ -56,7 +57,6 @@ var app = new Vue({
         // Rebuild the graph with all of our settings
         showGraph: async function() {
             this.setLoadingText('Getting Artists...');
-
             if (this.graphType == 'following') {
                 this.nodes = await this.getFollowing();
             } else if (this.graphType == 'last4weeks') {
@@ -132,8 +132,11 @@ var app = new Vue({
             } else if (this.nodeType == 'text') {
                 this.graph.nodeThreeObject(node => {
                     const sprite = new SpriteText(node.name);
-                    sprite.material.depthWrite = false; // make sprite background transparent
+                    sprite.backgroundColor = window.getComputedStyle(this.$refs['workspace']).backgroundColor;
                     sprite.color = window.getComputedStyle(this.$refs['graph']).color;
+                    sprite.borderWidth = 4;
+                    sprite.borderRadius = 4;
+                    sprite.borderColor = window.getComputedStyle(this.$refs['workspace']).backgroundColor;
                     sprite.textHeight = 8;
                     return sprite;
                 });
