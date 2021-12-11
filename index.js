@@ -15,6 +15,8 @@ var app = new Vue({
         graph: null,
         graphType: 'following',
         nodeType: 'dots',
+        currentArtist: null,
+        isMobile: false,
     },
 
     created() {
@@ -28,6 +30,8 @@ var app = new Vue({
         } else {
             this.auth_key = localStorage.getItem('spotToken');
         }
+
+        this.isMobile = ('ontouchstart' in document.documentElement && navigator.userAgent.match(/Mobi/));
     },
 
     async mounted() {
@@ -56,6 +60,8 @@ var app = new Vue({
 
         // Rebuild the graph with all of our settings
         showGraph: async function() {
+            this.currentArtist = null;
+
             this.setLoadingText('Getting Artists...');
             if (this.graphType == 'following') {
                 this.nodes = await this.getFollowing();
@@ -98,6 +104,12 @@ var app = new Vue({
                 });
 
             this.updateNodeType();
+
+            this.graph.onNodeHover(node => {
+                if (node) {
+                    this.currentArtist = node;
+                }
+            });
 
             window.addEventListener('resize', this.resizeGraph);
         },
@@ -227,7 +239,7 @@ var app = new Vue({
                     var artists = new Array ();
 
                     response.items.forEach(function(artist) {
-                        artists.push({ name: artist.name, id: artist.id, img: artist.images[Math.floor(artist.images.length / 2)].url });
+                        artists.push({ name: artist.name, id: artist.id, genres: artist.genres, img: artist.images[Math.floor(artist.images.length / 2)].url });
                     });
         
                     resolve(artists)
@@ -277,9 +289,10 @@ var app = new Vue({
                         }
 
                         var artists = new Array ();
+                        
 
                         response.artists.items.forEach(function(artist) {
-                            artists.push({ name: artist.name, id: artist.id, img: artist.images[Math.floor(artist.images.length / 2)].url });
+                            artists.push({ name: artist.name, genres: artist.genres, id: artist.id, img: artist.images[Math.floor(artist.images.length / 2)].url });
                         });
                                 
                         cursor = response.artists.cursors.after;
