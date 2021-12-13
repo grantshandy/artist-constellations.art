@@ -181,7 +181,7 @@ var app = new Vue({
                 }
 
                 currentArtist += 1;
-                this.setLoadingText(`Building Relationship (${currentArtist}/${idArray.length})`);
+                this.setLoadingText(`Building Relationships... (${currentArtist}/${idArray.length})`);
             }
 
             return links;
@@ -295,9 +295,9 @@ var app = new Vue({
                         response.artists.items.forEach(function(artist) {
                             artists.push({ name: artist.name, genres: artist.genres, id: artist.id, img: artist.images[Math.floor(artist.images.length / 2)].url });
                         });
-                                
+
                         cursor = response.artists.cursors.after;
-            
+
                         resolve(artists)
                     })
                     .catch(error => reject(error));
