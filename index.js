@@ -17,6 +17,8 @@ var app = new Vue({
         nodeType: 'dots',
         currentArtist: null,
         isMobile: false,
+        numArtists: null,
+        numFollowing: null,
     },
 
     created() {
@@ -181,7 +183,7 @@ var app = new Vue({
                 }
 
                 currentArtist += 1;
-                this.setLoadingText(`Building Relationships... (${currentArtist}/${idArray.length})`);
+                this.setLoadingText(`Building Relationship (${currentArtist}/${idArray.length})`);
             }
 
             return links;
@@ -261,6 +263,16 @@ var app = new Vue({
                 });
             }
 
+            var genres = new Array ();
+            totalFollowing.forEach(function(artist) {
+                artist.genres.forEach(function(genre) {
+                    genres.push(genre);
+                });
+            });
+
+            this.numGenres = genres.length;
+            this.numFollowing = totalFollowing.length;
+
             return totalFollowing;
 
             async function get(last) {
@@ -290,14 +302,13 @@ var app = new Vue({
                         }
 
                         var artists = new Array ();
-                        
 
                         response.artists.items.forEach(function(artist) {
                             artists.push({ name: artist.name, genres: artist.genres, id: artist.id, img: artist.images[Math.floor(artist.images.length / 2)].url });
                         });
-
+                                
                         cursor = response.artists.cursors.after;
-
+            
                         resolve(artists)
                     })
                     .catch(error => reject(error));
