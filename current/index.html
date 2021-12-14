@@ -37,8 +37,8 @@
           </div>
           <div class="flex-auto rounded-lg shadow-lg p-4 space-y-3 bg-gray-800 content-center">
             <p><b>User: {{ me.display_name }}.</b> Drag and zoom to look around the graph.</p>
+            <p v-if="!isMobile && graph">You listen to <b>{{ numGenres }} genres</b> and follow <b>{{ numFollowing }} artists</b>.</p>
             <div class="md:flex md:flex-col md:space-y-3">
-              <button v-on:click="logout" ref="logoutButton" class="bg-green-500 hover:bg-green-700 py-1 px-1 md:py-3 md:px-3 text-left font-semibold rounded-lg shadow-md">Log Out</button>
               <select v-if="graph" v-model="nodeType" @change="updateNodeType" class="bg-green-500 hover:bg-green-700 py-1 px-1 md:py-3 md:px-2 font-semibold rounded-lg shadow-md" ref="view">
                 <option value="dots">Dots</option>
                 <option value="pictures">Pictures</option>
@@ -50,16 +50,15 @@
                 <option value="last6months">Top (6 months)</option>
                 <option value="alltime">Top (all time)</option>
               </select>
+              <button v-on:click="logout" ref="logoutButton" class="bg-green-500 hover:bg-green-700 py-1 px-1 md:py-3 md:px-3 text-left font-semibold rounded-lg shadow-md">Log Out</button>
             </div>
             <div v-if="currentArtist && !isMobile">
               <div class="rounded-lg shadow-md bg-green-500 px-2 py-2">
-                <img class="w-40 h-40 mx-auto rounded-full" v-bind:src="currentArtist.img">
-                <p class="font-lg"><a v-bind:href="'https://open.spotify.com/artist/' + currentArtist.id">{{ currentArtist.name }}</a><p>
+                <img class="w-30 h-30 mx-auto rounded-full" v-bind:src="currentArtist.img">
+                <p class="text-xl"><a v-bind:href="'https://open.spotify.com/artist/' + currentArtist.id"><b>{{ currentArtist.name }}</b></a><p>
                 <div v-if="currentArtist.genres.length != 0">
-                  <ul class="list-disk">
-                    <li v-for="genre in currentArtist.genres">
-                      ●  {{ genre }}
-                    </li>
+                  <ul style="list-style-type: disc;" class="pl-5">
+                    <li v-for="genre in currentArtist.genres">{{ genre }}</li>
                   </ul>
                 </div>
               </div>
