@@ -19,6 +19,9 @@ var app = new Vue({
         isMobile: false,
         numArtists: null,
         numFollowing: null,
+        colorByPopularity: false,
+        averagePopularity: null,
+        testing: false,
     },
 
     created() {
@@ -64,26 +67,32 @@ var app = new Vue({
         showGraph: async function() {
             this.currentArtist = null;
 
+            // Get our artists based on our current settings.
             this.setLoadingText('Getting Artists...');
             if (this.graphType == 'following') {
                 this.nodes = await this.getFollowing();
-            } else if (this.graphType == 'last4weeks') {
-                this.nodes = await this.getTimeRange('short_term');
-            } else if (this.graphType == 'last6months') {
-                this.nodes = await this.getTimeRange('medium_term');
-            } else if (this.graphType == 'alltime') {
-                this.nodes = await this.getTimeRange('long_term');
+            } else if (this.graphType == 'search') {
+                this.nodes = await this.searchArtist('The Beatles');
+            } else {
+                this.nodes = await this.getTimeRange(this.graphType);
             }
 
+            // If we don't have any artists or only one we need to tell them to go get more users.
             if (this.nodes.length == 0 || this.nodes.length == 1) {
                 this.setLoadingText('You aren\'t following enough artists! Go follow some more people or switch to another mode.');
+                // We set the graph to an empty string so they can still change to another setting.
                 this.graph = ' ';
                 return;
             }
 
+            // Set our average popularity
+            this.averagePopularity = this.getAveragePopularity();
+
+            // Build our links for the nodes
             this.setLoadingText('Getting Relationships...');
             this.links = await this.buildRelationships(this.nodes);
 
+            // Clear the graph div.
             this.$refs['graph'].innerHTML = '';
 
             this.graph = ForceGraph3D();
@@ -91,7 +100,6 @@ var app = new Vue({
             var width = this.$refs['graph'].clientWidth;
             var height = this.$refs['graph'].clientHeight;
             var backgroundColor = window.getComputedStyle(this.$refs['graph']).backgroundColor;
-            var nodeColor = window.getComputedStyle(this.$refs['graph']).color;
 
             this.graph(this.$refs['graph'])
                 .graphData(this)
@@ -100,19 +108,24 @@ var app = new Vue({
                 .width(width)
                 .height(height)
                 .backgroundColor(backgroundColor)
-                .nodeColor(node => nodeColor)
                 .linkWidth(2)
+                .nodeRelSize(7)
                 .onNodeRightClick(node => {
                     window.open(`https://open.spotify.com/artist/${node.id}`, '_blank');
                 });
 
             this.updateNodeType();
+            this.updateNodeColor();
 
             this.graph.onNodeHover(node => {
                 if (node) {
                     this.currentArtist = node;
                 }
             });
+
+            if (this.graphType == 'search') {
+                this.graph.d3Force('charge').strength(-300);
+            }
 
             window.addEventListener('resize', this.resizeGraph);
         },
@@ -129,6 +142,21 @@ var app = new Vue({
     
             this.graph.width(width);
             this.graph.height(height);
+        },
+
+        // Get average popularity
+        getAveragePopularity: function() {
+            var total = 0;
+            var count = 0;
+
+            this.nodes.forEach(function(artist) {
+                total += artist.popularity;
+                count++;
+            });
+
+            var average = total / count;
+
+            return Math.round(average);
         },
 
         // Set the graph's node type from the nodeType variable
@@ -159,11 +187,29 @@ var app = new Vue({
             }
         },
 
+        // Switch between the colors for the nodes.
+        updateNodeColor: function() {
+            var nodeColor = window.getComputedStyle(this.$refs['graph']).color;
+
+            this.graph.nodeColor(node => {
+                if (this.colorByPopularity) {
+                    var hue = node.popularity;
+                    var saturation = node.popularity;
+
+                    hue = (saturation / 100) * 360;
+
+                    return `hsl(${hue},${saturation}%,50%)`;
+                } else {
+                    return nodeColor;
+                }
+            });
+        },
+
         // Build the relationships between nodes
         buildRelationships: async function(nodes) {
             var links = new Array();
-            var idArray = new Array();
             var currentArtist = 0;
+            var idArray = new Array();
 
             nodes.forEach(function(artist) {
                 idArray.push(artist.id);
@@ -172,6 +218,7 @@ var app = new Vue({
             for await (const artist of nodes) {
                 var relatedArtists = await this.getRelated(artist);
                 for (const relatedArtist of relatedArtists) {
+
                     if (idArray.includes(relatedArtist.id)) {
                         var potentialConnection = { source: artist.id, target: relatedArtist.id };
                         var reversedPotentialConnection = { source: relatedArtist.id, target: artist.id };
@@ -183,7 +230,7 @@ var app = new Vue({
                 }
 
                 currentArtist += 1;
-                this.setLoadingText(`Building Relationship (${currentArtist}/${idArray.length})`);
+                this.setLoadingText(`Building Relationships... (${currentArtist}/${idArray.length})`);
             }
 
             return links;
@@ -242,10 +289,86 @@ var app = new Vue({
                     var artists = new Array ();
 
                     response.items.forEach(function(artist) {
-                        artists.push({ name: artist.name, id: artist.id, genres: artist.genres, img: artist.images[Math.floor(artist.images.length / 2)].url });
+                        artists.push({ name: artist.name, id: artist.id, genres: artist.genres, img: artist.images[Math.floor(artist.images.length / 2)].url, popularity: artist.popularity });
                     });
         
                     resolve(artists)
+                })
+                .catch(error => reject(error));
+            });
+        },
+
+        // Search for an artist and return their related artists to the second degree.
+        searchArtist: async function(query) {
+            var artists = new Array ();
+
+            this.setLoadingText('Searching...');
+
+            var centralArtist = await search(query);
+            artists.push(centralArtist);
+
+            var centralRelatedArtists = await this.getRelated(centralArtist);
+            var currentNum = 0;
+
+            for await (const artist of centralRelatedArtists) {
+                currentNum += 1;
+                this.setLoadingText(`Getting related artists... (${currentNum}/${centralRelatedArtists.length})`);
+
+                var currentFirstDegreeArtist = await this.getArtist(artist.id);
+                artists.push(currentFirstDegreeArtist);
+            }
+
+            return artists;
+
+            async function search(query) {
+                return new Promise((resolve, reject) => {
+                    fetch(`https://api.spotify.com/v1/search?q=${query}&type=artist`, {
+                        headers: {
+                            'Authorization': `Bearer ${app.auth_key}`,
+                        },
+                    })
+                    .then(response => response.json())
+                    .then(response => {
+                        if (response.error) {
+                            if (response.error.status == 401) {
+                                app.logout();
+                            }
+    
+                            app.setLoadingText('Couldn\'t connect to spotify, try checking your network connection');
+                            reject(response.error);
+                        }
+        
+                        var artist = response.artists.items[0];
+            
+                        resolve({ name: artist.name, id: artist.id, genres: artist.genres, img: artist.images[Math.floor(artist.images.length / 2)].url, popularity: artist.popularity });
+                    })
+                    .catch(error => reject(error));
+                });
+            }
+        },
+
+        // Get info about an artist, namely their genres and pictures, things that getRelated can't do.
+        getArtist: async function(id) {
+            return new Promise((resolve, reject) => {
+                fetch(`https://api.spotify.com/v1/artists/${id}`, {
+                    headers: {
+                        'Authorization': `Bearer ${this.auth_key}`,
+                    },
+                })
+                .then(response => response.json())
+                .then(response => {
+                    if (response.error) {
+                        if (response.error.status == 401) {
+                            app.logout();
+                        }
+
+                        app.setLoadingText('Couldn\'t connect to spotify, try checking your network connection');
+                        reject(response.error);
+                    }
+    
+                    var artist = response;
+        
+                    resolve({ name: artist.name, id: artist.id, genres: artist.genres, img: artist.images[Math.floor(artist.images.length / 2)].url, popularity: artist.popularity });
                 })
                 .catch(error => reject(error));
             });
@@ -304,7 +427,7 @@ var app = new Vue({
                         var artists = new Array ();
 
                         response.artists.items.forEach(function(artist) {
-                            artists.push({ name: artist.name, genres: artist.genres, id: artist.id, img: artist.images[Math.floor(artist.images.length / 2)].url });
+                            artists.push({ name: artist.name, genres: artist.genres, id: artist.id, img: artist.images[Math.floor(artist.images.length / 2)].url, popularity: artist.popularity });
                         });
                                 
                         cursor = response.artists.cursors.after;
