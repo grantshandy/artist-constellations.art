@@ -13,11 +13,37 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" type="image/svg" href="/icon.svg">
     <link href="//unpkg.com/tailwindcss@^2/dist/tailwind.min.css" rel="stylesheet">
     <script src="//unpkg.com/3d-force-graph"></script>
     <script src="//unpkg.com/three"></script>
     <script src="//unpkg.com/three-spritetext"></script>
     <title>Artist Constellations</title>
+    <style type="text/css" media="screen">
+      /* For Firefox Browser */
+      .scrollbar {
+        scrollbar-width: thin;
+        scrollbar-color: #fafafa #1f2937;
+      }
+
+      /* For Chrome, EDGE, Opera, Others */
+      .scrollbar::-webkit-scrollbar {
+        width: 5px;
+      }
+
+      .scrollbar::-webkit-scrollbar-track { 
+        background: #1f2937;
+      }
+
+      .scrollbar::-webkit-scrollbar-thumb { 
+        background: #fafafa;
+      }
+
+      input:checked ~ .dot {
+        transform: translateX(100%);
+        background-color: #10b981;
+      }
+    </style>
   </head>
   <body>
     <div id="app" class="flex h-screen">
@@ -32,12 +58,12 @@
       </div>
       <div v-else id="workspace" ref="workspace" class="flex flex-1 bg-gray-600">
         <div class="flex-1 flex-col flex p-2 space-y-2 text-white md:grid md:grid-cols-5 md:space-x-5 md:space-y-0 md:p-5">
-          <div class="flex h-4/5 rounded-lg shadow-lg bg-gray-800 text-center md:flex-1 md:h-full md:col-span-4" ref="content">
+          <div class="flex h-4/5 rounded-lg shadow-lg bg-gray-800 text-center md:flex-1 md:h-full md:col-span-3 lg:col-span-4" ref="content">
             <div class="flex-1" id="graph" ref="graph"></div>
           </div>
-          <div class="flex-auto rounded-lg shadow-lg p-4 space-y-3 bg-gray-800 content-center">
+          <div class="flex-auto rounded-lg shadow-lg p-4 space-y-3 bg-gray-800 content-center overflow-y-auto scrollbar md:col-span-2 lg:col-span-1">
             <p><b>User: {{ me.display_name }}.</b> Drag and zoom to look around the graph.</p>
-            <p v-if="!isMobile && graph">You listen to <b>{{ numGenres }} genres</b> and follow <b>{{ numFollowing }} artists</b>.</p>
+            <p v-if="!isMobile && graph">You listen to <b>{{ numGenres }} genres</b> and follow <b>{{ numFollowing }} artists</b>. This graph is <b>{{ averagePopularity }}%</b> popular.</p>
             <div class="md:flex md:flex-col md:space-y-3">
               <select v-if="graph" v-model="nodeType" @change="updateNodeType" class="bg-green-500 hover:bg-green-700 py-1 px-1 md:py-3 md:px-2 font-semibold rounded-lg shadow-md" ref="view">
                 <option value="dots">Dots</option>
@@ -46,22 +72,37 @@
               </select>
               <select v-if="graph" v-model="graphType" @change="showGraph" class="bg-green-500 hover:bg-green-700 py-1 px-1 md:py-3 md:px-2 font-semibold rounded-lg shadow-md" ref="artistChanger">
                 <option value="following">Your Artists</option>
-                <option value="last4weeks">Top (4 weeks)</option>
-                <option value="last6months">Top (6 months)</option>
-                <option value="alltime">Top (all time)</option>
+                <option value="short_term">Top (4 weeks)</option>
+                <option value="medium_term">Top (6 months)</option>
+                <option value="long_term">Top (all time)</option>
+                <option v-if="!isMobile && testing" value="search">Search</option>
               </select>
-              <button v-on:click="logout" ref="logoutButton" class="bg-green-500 hover:bg-green-700 py-1 px-1 md:py-3 md:px-3 text-left font-semibold rounded-lg shadow-md">Log Out</button>
-            </div>
-            <div v-if="currentArtist && !isMobile">
-              <div class="rounded-lg shadow-md bg-green-500 px-2 py-2">
-                <img class="w-30 h-30 mx-auto rounded-full" v-bind:src="currentArtist.img">
-                <p class="text-xl"><a v-bind:href="'https://open.spotify.com/artist/' + currentArtist.id"><b>{{ currentArtist.name }}</b></a><p>
-                <div v-if="currentArtist.genres.length != 0">
-                  <ul style="list-style-type: disc;" class="pl-5">
-                    <li v-for="genre in currentArtist.genres">{{ genre }}</li>
-                  </ul>
+              <label v-if="!isMobile && graph && nodeType == 'dots'" for="toggleB" class="flex items-center cursor-pointer bg-green-500 hover:bg-green-700 py-1 px-1 md:py-3 md:px-2 font-semibold rounded-lg shadow-md">
+                <!-- toggle -->
+                <div class="relative">
+                  <!-- input -->
+                  <input type="checkbox" id="toggleB" v-model="colorByPopularity" @change="updateNodeColor" class="sr-only">
+                  <!-- line -->
+                  <div class="block bg-gray-800 w-10 h-6 rounded-full"></div>
+                  <!-- dot -->
+                  <div class="dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition"></div>
+                </div>
+                <!-- label -->
+                <div class="ml-3 font-semibold select-none">Color by Popularity</div>
+              </label>
+              <div v-if="currentArtist && !isMobile">
+                <div class="rounded-lg shadow-md bg-green-500 px-4 py-4">
+                  <img class="w-2/3 mx-auto rounded-full" v-bind:src="currentArtist.img">
+                  <p class="text-xl text-center"><a v-bind:href="'https://open.spotify.com/artist/' + currentArtist.id"><b>{{ currentArtist.name }}</b></a><p>
+                  <p class="text-center">Popularity: {{ currentArtist.popularity }}%</p>
+                  <div v-if="currentArtist.genres.length != 0">
+                    <ul style="list-style-type: disc;" class="pl-5">
+                      <li v-for="genre in currentArtist.genres">{{ genre }}</li>
+                    </ul>
+                  </div>
                 </div>
               </div>
+              <button v-on:click="logout" ref="logoutButton" class="bg-green-500 hover:bg-green-700 py-1 px-1 md:py-3 md:px-3 text-left font-semibold rounded-lg shadow-md">Log Out</button>
             </div>
           </div>
         </div>
