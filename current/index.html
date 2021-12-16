@@ -53,7 +53,7 @@
           <button class="bg-green-500 hover:bg-green-700 py-2 px-4 my-5 font-semibold rounded-lg shadow-md" v-on:click="login">Link To Spotify</button>
           <p>View your Spotify artists in constellations!</p>
           <p><i>© 2021 <a class="text-green-500" href="mailto:grantshandy@gmail.com">Grant Handy</a></i>  ●  <a class="text-green-500" href="https://github.com/grantshandy/artist-constellations.art">Source</a>  ●  <a class="text-green-500" href="https://github.com/grantshandy/artist-constellations.art/issues/new">Submit an Issue</a></p>
-          <img class="hidden" src="https://gpvc.arturio.dev/artistconstellations">
+          <!-- <img class="hidden" src="https://gpvc.arturio.dev/artistconstellations"> -->
         </div>
       </div>
       <div v-else id="workspace" ref="workspace" class="flex flex-1 bg-gray-600">
@@ -61,15 +61,10 @@
           <div class="flex h-4/5 rounded-lg shadow-lg bg-gray-800 text-center md:flex-1 md:h-full md:col-span-3 lg:col-span-4" ref="content">
             <div class="flex-1" id="graph" ref="graph"></div>
           </div>
-          <div class="flex-auto rounded-lg shadow-lg p-4 space-y-3 bg-gray-800 content-center overflow-y-auto scrollbar md:col-span-2 lg:col-span-1">
-            <p><b>User: {{ me.display_name }}.</b> Drag and zoom to look around the graph.</p>
-            <p v-if="!isMobile && graph">You listen to <b>{{ numGenres }} genres</b> and follow <b>{{ numFollowing }} artists</b>. This graph is on average <b>{{ averagePopularity }}%</b> popular.</p>
-            <div class="md:flex md:flex-col md:space-y-3">
-              <select v-if="graph" v-model="nodeType" @change="updateNodeType" class="bg-green-500 hover:bg-green-700 py-1 px-1 md:py-3 md:px-2 font-semibold rounded-lg shadow-md" ref="view">
-                <option value="dots">Dots</option>
-                <option value="pictures">Pictures</option>
-                <option value="text">Text</option>
-              </select>
+          <div class="md:flex md:flex-col flex-auto rounded-lg shadow-lg p-4 space-y-3 md:space-y-5 bg-gray-800 content-center overflow-y-auto scrollbar md:col-span-2 lg:col-span-1">
+            <p class="md:flex-none"><b>User: {{ me.display_name }}.</b> Drag and zoom to look around the graph.</p>
+            <p class="md:flex-none" v-if="!isMobile && graph">You listen to <b>{{ numGenres }} genres</b> and follow <b>{{ numFollowing }} artists</b>. The artists on this graph are on average <b>{{ averagePopularity }}%</b> popular.</p>
+            <div class="md:flex-1 md:flex md:flex-col space-y-3 md:space-y-5">
               <select v-if="graph" v-model="graphType" @change="showGraph" class="bg-green-500 hover:bg-green-700 py-1 px-1 md:py-3 md:px-2 font-semibold rounded-lg shadow-md" ref="artistChanger">
                 <option value="following">Your Artists</option>
                 <option value="short_term">Top (4 weeks)</option>
@@ -77,40 +72,54 @@
                 <option value="long_term">Top (all time)</option>
                 <option v-if="!isMobile && testing" value="search">Search</option>
               </select>
-              <label v-if="!isMobile && graph && nodeType == 'dots'" for="toggleB" class="flex items-center cursor-pointer bg-green-500 hover:bg-green-700 py-1 px-1 md:py-3 md:px-2 font-semibold rounded-lg shadow-md">
-                <div class="relative">
-                  <input type="checkbox" id="toggleB" v-model="colorByPopularity" @change="updateNodeColor" class="sr-only">
-                  <div class="block bg-gray-800 w-10 h-6 rounded-full"></div>
-                  <div class="dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition"></div>
-                </div>
-                <div class="ml-3 font-semibold select-none">Color by Popularity</div>
-              </label>
-              <div v-if="colorByPopularity && nodeType == 'dots'" class="inline-grid grid-cols-2 px-2 py-2 rounded-lg shadow-md bg-gradient-to-r from-green-700 via-purple-700 to-pink-700">
-                <p class="text-left">Less Popular</p>
-                <p class="text-right">More Popular</p>
-              </div>
-              <div v-if="currentArtist && !isMobile">
-                <div class="rounded-lg shadow-md bg-green-500 px-4 py-4">
-                  <a v-bind:href="'https://open.spotify.com/artist/' + currentArtist.id" target="_blank" rel="noopener noreferrer">
-                    <img class="w-2/3 mx-auto rounded-full" v-bind:src="currentArtist.img">
-                    <p class="text-xl text-center"><b>{{ currentArtist.name }}</b><p>
-                  </a>
-                  <p class="text-center text-sm">Popularity: {{ currentArtist.popularity }}%</p>
-                  <div v-if="currentArtist.genres.length != 0">
-                    <ul style="list-style-type: disc;" class="pl-5">
-                      <li v-for="genre in currentArtist.genres">{{ genre }}</li>
-                    </ul>
+              <div v-if="!isMobile" class="md:flex md:flex-col bg-gray-600 rounded-lg shadow-md">
+                <select v-if="graph" v-model="nodeType" @change="updateNodeType" class="bg-green-500 hover:bg-green-700 py-1 px-1 md:py-3 md:px-2 font-semibold rounded-lg shadow-md" ref="view">
+                  <option value="dots">Dots</option>
+                  <option value="pictures">Pictures</option>
+                  <option value="text">Text</option>
+                </select>
+                <div v-if="!isMobile && graph && nodeType == 'dots'" class="my-5 space-y-5 flex flex-col mx-5">
+                  <label for="toggleB" class="flex items-center cursor-pointer bg-green-500 hover:bg-green-700 py-1 px-2 rounded-lg shadow-md">
+                    <div class="relative">
+                      <input type="checkbox" id="toggleB" v-model="colorByPopularity" @change="updateNodeColor" class="sr-only">
+                      <div class="block bg-gray-800 w-10 h-6 rounded-full"></div>
+                      <div class="dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition"></div>
+                    </div>
+                    <div class="ml-3 select-none">Color by Popularity</div>
+                  </label>
+                  <div v-if="colorByPopularity" class="inline-grid grid-cols-2 px-3 py-1 rounded-lg shadow-md bg-gradient-to-r from-green-700 via-purple-700 to-pink-700">
+                    <p class="text-left">Less Popular</p>
+                    <p class="text-right">More Popular</p>
                   </div>
                 </div>
               </div>
-              <button v-on:click="logout" ref="logoutButton" class="bg-green-500 hover:bg-green-700 py-1 px-1 md:py-3 md:px-3 text-left font-semibold rounded-lg shadow-md">Log Out</button>
+              <div v-else>
+                <select v-if="graph" v-model="nodeType" @change="updateNodeType" class="bg-green-500 hover:bg-green-700 py-1 px-1 md:py-3 md:px-2 font-semibold rounded-lg shadow-md" ref="view">
+                  <option value="dots">Dots</option>
+                  <option value="pictures">Pictures</option>
+                  <option value="text">Text</option>
+                </select>
+              </div>
             </div>
+            <div v-if="currentArtist && !isMobile" class="rounded-lg shadow-md bg-green-500 px-4 py-4">
+              <a v-bind:href="'https://open.spotify.com/artist/' + currentArtist.id" target="_blank" rel="noopener noreferrer">
+                <img class="w-2/3 mx-auto rounded-full" v-bind:src="currentArtist.img">
+                <p class="text-xl text-center"><b>{{ currentArtist.name }}</b><p>
+              </a>
+              <p class="text-center text-sm">Popularity: {{ currentArtist.popularity }}%</p>
+              <div v-if="currentArtist.genres.length != 0">
+                <ul style="list-style-type: disc;" class="pl-5">
+                  <li v-for="genre in currentArtist.genres">{{ genre }}</li>
+                </ul>
+              </div>
+            </div>
+            <button v-on:click="logout" ref="logoutButton" class="md:flex-none bg-green-500 hover:bg-green-700 py-1 px-1 md:py-3 md:px-3 text-left font-semibold rounded-lg shadow-md">Log Out</button>
           </div>
         </div>
       </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
     <!-- <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script> -->
-    <script src="index.js"></script>
+    <script src="index.js" type="module"></script>
   </body>
 </html>
