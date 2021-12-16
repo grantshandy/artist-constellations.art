@@ -462,6 +462,7 @@ var app = new Vue({
             });
         },
 
+        // Spotify uses a very complex schema for representing artists so we do this for simplicity.
         convertArtist: function(artist) {
             var name = artist.name;
             var genres = artist.genres;
@@ -470,8 +471,8 @@ var app = new Vue({
 
             var img = null;
 
-            if (artist.images) {
-                img = artist.images[Math.floor(artist.images.length / 2)].url
+            if (artist.images[0].url) {
+                img = artist.images[0].url
             } else {
                 img = 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/11/Blue_question_mark_icon.svg/100px-Blue_question_mark_icon.svg.png';
             }
