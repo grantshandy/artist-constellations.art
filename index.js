@@ -208,17 +208,20 @@ var app = new Vue({
         // Build the relationships between nodes
         buildRelationships: async function(nodes) {
             var links = new Array();
-            var currentArtist = 0;
             var idArray = new Array();
 
             nodes.forEach(function(artist) {
                 idArray.push(artist.id);
             });
 
+            var currentArtist = 0;
+
             for await (const artist of nodes) {
+                currentArtist += 1;
+                this.setLoadingText(`Building Relationships... (${currentArtist}/${idArray.length})`);
+
                 var relatedArtists = await this.getRelated(artist);
                 for (const relatedArtist of relatedArtists) {
-
                     if (idArray.includes(relatedArtist.id)) {
                         var potentialConnection = { source: artist.id, target: relatedArtist.id };
                         var reversedPotentialConnection = { source: relatedArtist.id, target: artist.id };
@@ -227,10 +230,7 @@ var app = new Vue({
                             links.push(potentialConnection);
                         }
                     }
-                }
-
-                currentArtist += 1;
-                this.setLoadingText(`Building Relationships... (${currentArtist}/${idArray.length})`);
+                } 
             }
 
             return links;

@@ -63,7 +63,7 @@
           </div>
           <div class="flex-auto rounded-lg shadow-lg p-4 space-y-3 bg-gray-800 content-center overflow-y-auto scrollbar md:col-span-2 lg:col-span-1">
             <p><b>User: {{ me.display_name }}.</b> Drag and zoom to look around the graph.</p>
-            <p v-if="!isMobile && graph">You listen to <b>{{ numGenres }} genres</b> and follow <b>{{ numFollowing }} artists</b>. This graph is <b>{{ averagePopularity }}%</b> popular.</p>
+            <p v-if="!isMobile && graph">You listen to <b>{{ numGenres }} genres</b> and follow <b>{{ numFollowing }} artists</b>. This graph is on average <b>{{ averagePopularity }}%</b> popular.</p>
             <div class="md:flex md:flex-col md:space-y-3">
               <select v-if="graph" v-model="nodeType" @change="updateNodeType" class="bg-green-500 hover:bg-green-700 py-1 px-1 md:py-3 md:px-2 font-semibold rounded-lg shadow-md" ref="view">
                 <option value="dots">Dots</option>
@@ -78,23 +78,24 @@
                 <option v-if="!isMobile && testing" value="search">Search</option>
               </select>
               <label v-if="!isMobile && graph && nodeType == 'dots'" for="toggleB" class="flex items-center cursor-pointer bg-green-500 hover:bg-green-700 py-1 px-1 md:py-3 md:px-2 font-semibold rounded-lg shadow-md">
-                <!-- toggle -->
                 <div class="relative">
-                  <!-- input -->
                   <input type="checkbox" id="toggleB" v-model="colorByPopularity" @change="updateNodeColor" class="sr-only">
-                  <!-- line -->
                   <div class="block bg-gray-800 w-10 h-6 rounded-full"></div>
-                  <!-- dot -->
                   <div class="dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition"></div>
                 </div>
-                <!-- label -->
                 <div class="ml-3 font-semibold select-none">Color by Popularity</div>
               </label>
+              <div v-if="colorByPopularity && nodeType == 'dots'" class="inline-grid grid-cols-2 px-2 py-2 rounded-lg shadow-md bg-gradient-to-r from-green-700 via-purple-700 to-pink-700">
+                <p class="text-left">Less Popular</p>
+                <p class="text-right">More Popular</p>
+              </div>
               <div v-if="currentArtist && !isMobile">
                 <div class="rounded-lg shadow-md bg-green-500 px-4 py-4">
-                  <img class="w-2/3 mx-auto rounded-full" v-bind:src="currentArtist.img">
-                  <p class="text-xl text-center"><a v-bind:href="'https://open.spotify.com/artist/' + currentArtist.id"><b>{{ currentArtist.name }}</b></a><p>
-                  <p class="text-center">Popularity: {{ currentArtist.popularity }}%</p>
+                  <a v-bind:href="'https://open.spotify.com/artist/' + currentArtist.id" target="_blank" rel="noopener noreferrer">
+                    <img class="w-2/3 mx-auto rounded-full" v-bind:src="currentArtist.img">
+                    <p class="text-xl text-center"><b>{{ currentArtist.name }}</b><p>
+                  </a>
+                  <p class="text-center text-sm">Popularity: {{ currentArtist.popularity }}%</p>
                   <div v-if="currentArtist.genres.length != 0">
                     <ul style="list-style-type: disc;" class="pl-5">
                       <li v-for="genre in currentArtist.genres">{{ genre }}</li>
