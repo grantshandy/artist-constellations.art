@@ -289,7 +289,7 @@ var app = new Vue({
                     var artists = new Array ();
 
                     response.items.forEach(function(artist) {
-                        artists.push({ name: artist.name, id: artist.id, genres: artist.genres, img: artist.images[Math.floor(artist.images.length / 2)].url, popularity: artist.popularity });
+                        artists.push(app.convertArtist(artist));
                     });
         
                     resolve(artists)
@@ -340,7 +340,7 @@ var app = new Vue({
         
                         var artist = response.artists.items[0];
             
-                        resolve({ name: artist.name, id: artist.id, genres: artist.genres, img: artist.images[Math.floor(artist.images.length / 2)].url, popularity: artist.popularity });
+                        resolve(app.convertArtist(artist));
                     })
                     .catch(error => reject(error));
                 });
@@ -365,10 +365,8 @@ var app = new Vue({
                         app.setLoadingText('Couldn\'t connect to spotify, try checking your network connection');
                         reject(response.error);
                     }
-    
-                    var artist = response;
-        
-                    resolve({ name: artist.name, id: artist.id, genres: artist.genres, img: artist.images[Math.floor(artist.images.length / 2)].url, popularity: artist.popularity });
+            
+                    resolve(app.convertArtist(response));
                 })
                 .catch(error => reject(error));
             });
@@ -427,7 +425,7 @@ var app = new Vue({
                         var artists = new Array ();
 
                         response.artists.items.forEach(function(artist) {
-                            artists.push({ name: artist.name, genres: artist.genres, id: artist.id, img: artist.images[Math.floor(artist.images.length / 2)].url, popularity: artist.popularity });
+                            artists.push(app.convertArtist(artist))
                         });
                                 
                         cursor = response.artists.cursors.after;
@@ -463,5 +461,22 @@ var app = new Vue({
                 .catch(error => reject(error));
             });
         },
+
+        convertArtist: function(artist) {
+            var name = artist.name;
+            var genres = artist.genres;
+            var id = artist.id;
+            var popularity = artist.popularity;
+
+            var img = null;
+
+            if (artist.images) {
+                img = artist.images[Math.floor(artist.images.length / 2)].url
+            } else {
+                img = 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/11/Blue_question_mark_icon.svg/100px-Blue_question_mark_icon.svg.png';
+            }
+
+            return { name, genres, id, img, popularity };
+        }
     }
 })
