@@ -72,7 +72,7 @@ var app = new Vue({
             if (this.graphType == 'following') {
                 this.nodes = await this.getFollowing();
             } else if (this.graphType == 'search') {
-                this.nodes = await this.searchArtist('The Beatles');
+                this.nodes = await this.searchArtist('Andy Shauf');
             } else {
                 this.nodes = await this.getTimeRange(this.graphType);
             }
@@ -104,24 +104,24 @@ var app = new Vue({
             this.graph(this.$refs['graph'])
                 .graphData(this)
                 .showNavInfo(false)
-                .enableNodeDrag(false)
                 .width(width)
                 .height(height)
+                .enableNodeDrag(false)
                 .backgroundColor(backgroundColor)
                 .linkWidth(2)
                 .nodeRelSize(7)
                 .onNodeRightClick(node => {
                     window.open(`https://open.spotify.com/artist/${node.id}`, '_blank');
+                })
+                .onNodeHover(node => {
+                    if (node) {
+                        this.currentArtist = node;
+                    }
                 });
+                // .d3Force('charge').strength(-100);
 
             this.updateNodeType();
             this.updateNodeColor();
-
-            this.graph.onNodeHover(node => {
-                if (node) {
-                    this.currentArtist = node;
-                }
-            });
 
             if (this.graphType == 'search') {
                 this.graph.d3Force('charge').strength(-300);
