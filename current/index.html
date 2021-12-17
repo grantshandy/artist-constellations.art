@@ -64,17 +64,30 @@
           </div>
           <div class="md:flex md:flex-col flex-auto rounded-lg shadow-lg p-4 space-y-3 md:space-y-5 bg-gray-800 content-center overflow-y-auto scrollbar md:col-span-2 lg:col-span-1">
             <p class="md:flex-none"><b>User: {{ me.display_name }}.</b> Drag and zoom to look around the graph.</p>
-            <p class="md:flex-none" v-if="!isMobile && graph">You listen to <b>{{ numGenres }} genres</b> and follow <b>{{ numFollowing }} artists</b>. The artists on this graph are on average <b>{{ averagePopularity }}%</b> popular.</p>
-            <p class="md:flex-none" v-if="!isMobile && graph">Your most popular artist in this graph is <b>{{ mostPopularArtist.name }}</b> at <b>{{ mostPopularArtist.popularity }}%</b>, the least popular is <b>{{ leastPopularArtist.name }}</b> at <b>{{ leastPopularArtist.popularity }}%</b>.</p>
-            <!--   -->
-            <div class="md:flex-none md:flex md:flex-col space-y-3 md:space-y-5"> 
-              <select v-if="graph" v-model="graphType" @change="showGraph" class="bg-green-500 hover:bg-green-700 py-1 px-1 md:py-3 md:px-2 font-semibold rounded-lg shadow-md" ref="artistChanger">
-                <option value="following">Your Artists</option>
-                <option value="short_term">Top (4 weeks)</option>
-                <option value="medium_term">Top (6 months)</option>
-                <option value="long_term">Top (all time)</option>
-                <option v-if="!isMobile && testing" value="search">Search</option>
-              </select>
+            <!-- <p class="md:flex-none" v-if="!isMobile && graph">You listen to <b>{{ numGenres }} genres</b> and follow <b>{{ numFollowing }} artists</b>. The artists on this graph are on average <b>{{ averagePopularity }}%</b> popular.</p>
+            <p class="md:flex-none" v-if="!isMobile && graph">Your most popular artist in this graph is <b>{{ mostPopularArtist.name }}</b> at <b>{{ mostPopularArtist.popularity }}%</b>, the least popular is <b>{{ leastPopularArtist.name }}</b> at <b>{{ leastPopularArtist.popularity }}%</b>.</p> -->
+            <div class="md:flex-none md:flex md:flex-col space-y-3 md:space-y-5">
+              <div v-if="!isMobile" class="md:flex md:flex-col bg-gray-600 rounded-lg shadow-md">
+                <select v-if="graph" v-model="graphType" @change="showGraph" class="bg-green-500 hover:bg-green-700 py-1 px-1 md:py-3 md:px-2 font-semibold rounded-lg shadow-md" ref="artistChanger">
+                  <option value="following">Your Artists</option>
+                  <option value="short_term">Top (4 weeks)</option>
+                  <option value="medium_term">Top (6 months)</option>
+                  <option value="long_term">Top (all time)</option>
+                  <option value="search">Search</option>
+                </select>
+                <div v-if="graphType == 'search'" class="my-5 mx-5 space-y-5 flex flex-col">
+                  <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="searchBox" type="text" v-model="searchQuery" placeholder="Artist">
+                  <button v-on:click="showGraph" ref="searchButton" class="bg-green-500 hover:bg-green-700 py-1 px-1 md:py-3 md:px-3 text-left font-semibold rounded-lg shadow-md">Search</button>
+                </div>
+              </div>
+              <div v-else>
+                <select v-if="graph" v-model="graphType" @change="showGraph" class="bg-green-500 hover:bg-green-700 py-1 px-1 md:py-3 md:px-2 font-semibold rounded-lg shadow-md" ref="artistChanger">
+                  <option value="following">Your Artists</option>
+                  <option value="short_term">Top (4 weeks)</option>
+                  <option value="medium_term">Top (6 months)</option>
+                  <option value="long_term">Top (all time)</option>
+                </select>
+              </div>
               <div v-if="!isMobile" class="md:flex md:flex-col bg-gray-600 rounded-lg shadow-md">
                 <select v-if="graph" v-model="nodeType" @change="updateNodeType" class="bg-green-500 hover:bg-green-700 py-1 px-1 md:py-3 md:px-2 font-semibold rounded-lg shadow-md" ref="view">
                   <option value="dots">Dots</option>
