@@ -2,7 +2,7 @@ const client_id = '2ed0e6e8b06842fb854cb15e1690a7b5';
 const redirect_uri = window.location.href.split('?')[0].split('#')[0];
 const scopes = 'user-follow-read user-top-read';
 
-var app = new Vue({
+let app = new Vue({
     el: '#app',
 
     data: {
@@ -97,9 +97,9 @@ var app = new Vue({
 
             this.graph = ForceGraph3D();
 
-            var width = this.$refs['graph'].clientWidth;
-            var height = this.$refs['graph'].clientHeight;
-            var backgroundColor = window.getComputedStyle(this.$refs['graph']).backgroundColor;
+            let width = this.$refs['graph'].clientWidth;
+            let height = this.$refs['graph'].clientHeight;
+            let backgroundColor = window.getComputedStyle(this.$refs['graph']).backgroundColor;
 
             this.graph(this.$refs['graph'])
                 .graphData(this)
@@ -137,8 +137,8 @@ var app = new Vue({
 
         // Resize the graph to the size of it's parent div
         resizeGraph: function() {
-            var width = this.$refs['graph'].clientWidth;
-            var height = this.$refs['graph'].clientHeight;
+            let width = this.$refs['graph'].clientWidth;
+            let height = this.$refs['graph'].clientHeight;
     
             this.graph.width(width);
             this.graph.height(height);
@@ -146,15 +146,15 @@ var app = new Vue({
 
         // Get average popularity
         getAveragePopularity: function() {
-            var total = 0;
-            var count = 0;
+            let total = 0;
+            let count = 0;
 
             this.nodes.forEach(function(artist) {
                 total += artist.popularity;
                 count++;
             });
 
-            var average = total / count;
+            let average = total / count;
 
             return Math.round(average);
         },
@@ -189,12 +189,12 @@ var app = new Vue({
 
         // Switch between the colors for the nodes.
         updateNodeColor: function() {
-            var nodeColor = window.getComputedStyle(this.$refs['graph']).color;
+            let nodeColor = window.getComputedStyle(this.$refs['graph']).color;
 
             this.graph.nodeColor(node => {
                 if (this.colorByPopularity) {
-                    var hue = node.popularity;
-                    var saturation = node.popularity;
+                    let hue = node.popularity;
+                    let saturation = node.popularity;
 
                     hue = (saturation / 100) * 360;
 
@@ -207,24 +207,24 @@ var app = new Vue({
 
         // Build the relationships between nodes
         buildRelationships: async function(nodes) {
-            var links = new Array();
-            var idArray = new Array();
+            let links = new Array();
+            let idArray = new Array();
 
             nodes.forEach(function(artist) {
                 idArray.push(artist.id);
             });
 
-            var currentArtist = 0;
+            let currentArtist = 0;
 
             for await (const artist of nodes) {
                 currentArtist += 1;
                 this.setLoadingText(`Building Relationships... (${currentArtist}/${idArray.length})`);
 
-                var relatedArtists = await this.getRelated(artist);
+                let relatedArtists = await this.getRelated(artist);
                 for (const relatedArtist of relatedArtists) {
                     if (idArray.includes(relatedArtist.id)) {
-                        var potentialConnection = { source: artist.id, target: relatedArtist.id };
-                        var reversedPotentialConnection = { source: relatedArtist.id, target: artist.id };
+                        let potentialConnection = { source: artist.id, target: relatedArtist.id };
+                        let reversedPotentialConnection = { source: relatedArtist.id, target: artist.id };
 
                         if (!links.includes(potentialConnection) && !links.includes(reversedPotentialConnection)) {
                             links.push(potentialConnection);
@@ -255,7 +255,7 @@ var app = new Vue({
                         reject(response.error);
                     }
         
-                    var relatedArtists = new Array ();
+                    let relatedArtists = new Array ();
 
                     response.artists.forEach(function(artist) {
                         relatedArtists.push({ name: artist.name, id: artist.id });
@@ -286,7 +286,7 @@ var app = new Vue({
                         reject(response.error);
                     }
 
-                    var artists = new Array ();
+                    let artists = new Array ();
 
                     response.items.forEach(function(artist) {
                         artists.push(app.convertArtist(artist));
@@ -300,21 +300,21 @@ var app = new Vue({
 
         // Search for an artist and return their related artists to the second degree.
         searchArtist: async function(query) {
-            var artists = new Array ();
+            let artists = new Array ();
 
             this.setLoadingText('Searching...');
 
-            var centralArtist = await search(query);
+            let centralArtist = await search(query);
             artists.push(centralArtist);
 
-            var centralRelatedArtists = await this.getRelated(centralArtist);
-            var currentNum = 0;
+            let centralRelatedArtists = await this.getRelated(centralArtist);
+            let currentNum = 0;
 
             for await (const artist of centralRelatedArtists) {
                 currentNum += 1;
                 this.setLoadingText(`Getting related artists... (${currentNum}/${centralRelatedArtists.length})`);
 
-                var currentFirstDegreeArtist = await this.getArtist(artist.id);
+                let currentFirstDegreeArtist = await this.getArtist(artist.id);
                 artists.push(currentFirstDegreeArtist);
             }
 
@@ -338,7 +338,7 @@ var app = new Vue({
                             reject(response.error);
                         }
         
-                        var artist = response.artists.items[0];
+                        let artist = response.artists.items[0];
             
                         resolve(app.convertArtist(artist));
                     })
@@ -374,17 +374,17 @@ var app = new Vue({
 
         // Get who we follow
         getFollowing: async function() {
-            var cursor = null;
-            var totalFollowing = await get();
+            let cursor = null;
+            let totalFollowing = await get();
 
             while (cursor != null) {  
-                var moreFollowing = await get(cursor);
+                let moreFollowing = await get(cursor);
                 moreFollowing.forEach(function(x) {
                     totalFollowing.push(x);
                 });
             }
 
-            var genres = new Array ();
+            let genres = new Array ();
             totalFollowing.forEach(function(artist) {
                 artist.genres.forEach(function(genre) {
                     genres.push(genre);
@@ -397,7 +397,7 @@ var app = new Vue({
             return totalFollowing;
 
             async function get(last) {
-                var url;
+                let url;
 
                 if (last == null) {
                     url = 'https://api.spotify.com/v1/me/following?type=artist&limit=50';
@@ -422,7 +422,7 @@ var app = new Vue({
                             reject(response.error);
                         }
 
-                        var artists = new Array ();
+                        let artists = new Array ();
 
                         response.artists.items.forEach(function(artist) {
                             artists.push(app.convertArtist(artist))
@@ -464,19 +464,19 @@ var app = new Vue({
 
         // Spotify uses a very complex schema for representing artists so we do this for simplicity.
         convertArtist: function(artist) {
-            var name = artist.name;
-            var genres = artist.genres;
-            var id = artist.id;
-            var popularity = artist.popularity;
-
-            var img = null;
+            let name = artist.name;
+            let genres = artist.genres;
+            let id = artist.id;
+            let popularity = artist.popularity;
 
             console.log(`Artist: ${artist.name}`);
             console.log(artist);
 
-            if (artist.images[0].url) {
-                img = artist.images[0].url
-            } else {
+            let img = null;
+
+            try {
+                img = artist.images[0].url;
+            } catch (error) {
                 img = 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/11/Blue_question_mark_icon.svg/100px-Blue_question_mark_icon.svg.png';
             }
 
