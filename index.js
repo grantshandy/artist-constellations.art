@@ -471,6 +471,9 @@ var app = new Vue({
 
             var img = null;
 
+            console.log(`Artist: ${artist.name}`);
+            console.log(artist);
+
             if (artist.images[0].url) {
                 img = artist.images[0].url
             } else {
