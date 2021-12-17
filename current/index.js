@@ -61,7 +61,7 @@ let app = new Vue({
 
         // Logout by clearing the token from storage and setting it as null. This will make the login div the only thing visible.
         logout: function() {
-            localStorage.removeItem('spotToken');
+            localStorage.clear();
             window.location.href = window.location.href.split('?')[0].split('#')[0];
         },
 
@@ -119,14 +119,13 @@ let app = new Vue({
                 .linkWidth(2)
                 .nodeRelSize(7)
                 .onNodeRightClick(node => {
-                    window.open(`https://open.spotify.com/artist/${node.id}`, '_blank');
+                    this.viewRelated(node);
                 })
                 .onNodeHover(node => {
                     if (node) {
                         this.currentArtist = node;
                     }
                 });
-                // .d3Force('charge').strength(-100);
 
             this.updateNodeType();
             this.updateNodeColor();
@@ -192,12 +191,18 @@ let app = new Vue({
             } else if (this.nodeType == 'text') {
                 this.graph.nodeThreeObject(node => {
                     const sprite = new SpriteText(node.name);
-                    sprite.backgroundColor = window.getComputedStyle(this.$refs['workspace']).backgroundColor;
                     sprite.color = window.getComputedStyle(this.$refs['graph']).color;
+                    sprite.borderColor = window.getComputedStyle(this.$refs['workspace']).backgroundColor;
+                    sprite.backgroundColor = window.getComputedStyle(this.$refs['workspace']).backgroundColor;
                     sprite.borderWidth = 4;
                     sprite.borderRadius = 4;
-                    sprite.borderColor = window.getComputedStyle(this.$refs['workspace']).backgroundColor;
                     sprite.textHeight = 8;
+
+                    if (node.isCenter) {
+                        sprite.borderColor = window.getComputedStyle(this.$refs['logoutButton']).backgroundColor;
+                        sprite.backgroundColor = window.getComputedStyle(this.$refs['logoutButton']).backgroundColor;
+                    }
+
                     return sprite;
                 });
 
@@ -230,6 +235,17 @@ let app = new Vue({
 
         // Build the relationships between nodes
         buildRelationships: async function(nodes) {
+            if (this.graphType != 'search') {
+                let storageRelationships = localStorage.getItem(`${this.me.display_name}-${this.graphType}`);
+                if (storageRelationships) {
+                    storageRelationships = JSON.parse(storageRelationships);
+    
+                    if (storageRelationships.nodes = nodes) {
+                        return storageRelationships.links;
+                    }
+                }
+            }
+
             let links = new Array();
             let idArray = new Array();
 
@@ -255,6 +271,8 @@ let app = new Vue({
                     }
                 } 
             }
+
+            localStorage.setItem(`${this.me.display_name}-${this.graphType}`, JSON.stringify({ name: this.me.display_name, links, nodes: this.nodes }));
 
             return links;
         },
@@ -339,7 +357,7 @@ let app = new Vue({
 
             for await (const artist of centralRelatedArtists) {
                 currentNum += 1;
-                this.setLoadingText(`Getting related artists... (${currentNum}/${centralRelatedArtists.length})`);
+                this.setLoadingText(`Getting Related Artists... (${currentNum}/${centralRelatedArtists.length})`);
 
                 let currentFirstDegreeArtist = await this.getArtist(artist.id);
                 artists.push(currentFirstDegreeArtist);
@@ -502,9 +520,23 @@ let app = new Vue({
             let id = artist.id;
             let popularity = artist.popularity;
 
-            const img = artist?.images[0]?.url ?? 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/11/Blue_question_mark_icon.svg/100px-Blue_question_mark_icon.svg.png';
+            const img = artist?.images[0].url ?? 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/11/Blue_question_mark_icon.svg/100px-Blue_question_mark_icon.svg.png';
 
             return { name, genres, id, img, popularity };
+        },
+
+        // This allows us to search when the enter button is clicked in the search bar.
+        searchCallback: async function(event) {
+            if (event.code == "Enter") {
+                await this.showGraph();
+            }
+        },
+
+        // View the related artists from the sidebar.
+        viewRelated: async function(currentArtist) {
+            this.graphType = 'search';
+            this.searchQuery = currentArtist.name;
+            await this.showGraph();
         }
     }
 })

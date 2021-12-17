@@ -64,8 +64,8 @@
           </div>
           <div class="md:flex md:flex-col flex-auto rounded-lg shadow-lg p-4 space-y-3 md:space-y-5 bg-gray-800 content-center overflow-y-auto scrollbar md:col-span-2 lg:col-span-1">
             <p class="md:flex-none"><b>User: {{ me.display_name }}.</b> Drag and zoom to look around the graph.</p>
-            <!-- <p class="md:flex-none" v-if="!isMobile && graph">You listen to <b>{{ numGenres }} genres</b> and follow <b>{{ numFollowing }} artists</b>. The artists on this graph are on average <b>{{ averagePopularity }}%</b> popular.</p>
-            <p class="md:flex-none" v-if="!isMobile && graph">Your most popular artist in this graph is <b>{{ mostPopularArtist.name }}</b> at <b>{{ mostPopularArtist.popularity }}%</b>, the least popular is <b>{{ leastPopularArtist.name }}</b> at <b>{{ leastPopularArtist.popularity }}%</b>.</p> -->
+            <p class="md:flex-none" v-if="!isMobile && graph">You listen to <b>{{ numGenres }} genres</b> and follow <b>{{ numFollowing }} artists</b>. The artists on this graph are on average <b>{{ averagePopularity }}%</b> popular.</p>
+            <!-- <p class="md:flex-none" v-if="!isMobile && graph">Your most popular artist in this graph is <b>{{ mostPopularArtist.name }}</b> at <b>{{ mostPopularArtist.popularity }}%</b>, the least popular is <b>{{ leastPopularArtist.name }}</b> at <b>{{ leastPopularArtist.popularity }}%</b>.</p> -->
             <div class="md:flex-none md:flex md:flex-col space-y-3 md:space-y-5">
               <div v-if="!isMobile" class="md:flex md:flex-col bg-gray-600 rounded-lg shadow-md">
                 <select v-if="graph" v-model="graphType" @change="showGraph" class="bg-green-500 hover:bg-green-700 py-1 px-1 md:py-3 md:px-2 font-semibold rounded-lg shadow-md" ref="artistChanger">
@@ -76,8 +76,8 @@
                   <option value="search">Search</option>
                 </select>
                 <div v-if="graphType == 'search'" class="my-5 mx-5 space-y-5 flex flex-col">
-                  <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="searchBox" type="text" v-model="searchQuery" placeholder="Artist">
-                  <button v-on:click="showGraph" ref="searchButton" class="bg-green-500 hover:bg-green-700 py-1 px-1 md:py-3 md:px-3 text-left font-semibold rounded-lg shadow-md">Search</button>
+                  <input class="shadow appearance-none border rounded w-full px-3 py-1 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="searchBox" type="text" v-model="searchQuery" v-on:keydown="searchCallback" placeholder="Artist">
+                  <button v-on:click="showGraph" ref="searchButton" class="bg-green-500 hover:bg-green-700 px-3 py-1 text-left font-semibold rounded-lg shadow-md">Search</button>
                 </div>
               </div>
               <div v-else>
@@ -101,7 +101,7 @@
                       <div class="block bg-gray-800 w-10 h-6 rounded-full"></div>
                       <div class="dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition"></div>
                     </div>
-                    <div class="ml-3 select-none">Color by Popularity</div>
+                    <div class="ml-3 select-none font-semibold">Color by Popularity</div>
                   </label>
                   <div v-if="colorByPopularity" class="inline-grid grid-cols-2 px-3 py-1 rounded-lg shadow-md bg-gradient-to-r from-green-700 via-purple-700 to-pink-700">
                     <p class="text-left">Less Popular</p>
@@ -120,9 +120,10 @@
             <div v-if="currentArtist && !isMobile" class="flex-grow rounded-lg shadow-md bg-green-500 px-4 py-4 overflow-y-auto scrollbar">
               <a v-bind:href="'https://open.spotify.com/artist/' + currentArtist.id" target="_blank" rel="noopener noreferrer">
                 <img class="w-2/3 mx-auto rounded-full" v-bind:src="currentArtist.img">
-                <p class="text-xl text-center"><b>{{ currentArtist.name }}</b><p>
+                <p class="text-center text-xl"><b>{{ currentArtist.name }}</b><p>
               </a>
               <p class="text-center text-sm">Popularity: {{ currentArtist.popularity }}%</p>
+              <p class="text-center mx-auto"><button class="text-sm font-semibold" v-on:click="viewRelated(currentArtist)">View Related Artists</button></p>
               <div v-if="currentArtist.genres.length != 0">
                 <ul style="list-style-type: disc;" class="pl-5">
                   <li v-for="genre in currentArtist.genres">{{ genre }}</li>
