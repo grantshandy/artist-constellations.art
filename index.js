@@ -23,7 +23,7 @@ let app = new Vue({
         numFollowing: null,
         colorByPopularity: false,
         averagePopularity: null,
-        testing: false,
+        searchQuery: null,
     },
 
     created() {
@@ -74,7 +74,13 @@ let app = new Vue({
             if (this.graphType == 'following') {
                 this.nodes = await this.getFollowing();
             } else if (this.graphType == 'search') {
-                this.nodes = await this.searchArtist('Andy Shauf');
+                let searchNodes = await this.searchArtist(this.searchQuery);
+                if (!searchNodes) {
+                    this.setLoadingText('Search for an artist!');
+                    return;
+                } else {
+                    this.nodes = searchNodes;
+                }
             } else {
                 this.nodes = await this.getTimeRange(this.graphType);
             }
@@ -161,9 +167,6 @@ let app = new Vue({
             this.mostPopularArtist = { popularity: average };
             this.leastPopularArtist = { popularity: average };
 
-            console.log(typeof(this.mostPopularArtist));
-            console.log(typeof(this.leastPopularArtist));
-
             this.nodes.forEach(function(artist) {
                 if (artist.popularity >= app.mostPopularArtist.popularity) {
                     app.mostPopularArtist = artist;
@@ -171,9 +174,6 @@ let app = new Vue({
                     app.leastPopularArtist = artist;
                 }
             });
-
-            console.log(`your most popular artist is ${this.mostPopularArtist.name} at ${this.mostPopularArtist.popularity}`);
-            console.log(`your least popular artist is ${this.leastPopularArtist.name} at ${this.leastPopularArtist.popularity}`);
 
             return Math.round(average);
         },
@@ -219,6 +219,10 @@ let app = new Vue({
 
                     return `hsl(${hue},${saturation}%,50%)`;
                 } else {
+                    if (node.isCenter) {
+                        return window.getComputedStyle(this.$refs['logoutButton']).backgroundColor;
+                    }
+
                     return nodeColor;
                 }
             });
@@ -319,6 +323,10 @@ let app = new Vue({
 
         // Search for an artist and return their related artists to the second degree.
         searchArtist: async function(query) {
+            if (query == '' || query == ' ' || query == null) {
+                return;
+            }
+
             let artists = new Array ();
 
             this.setLoadingText('Searching...');
@@ -353,13 +361,17 @@ let app = new Vue({
                                 app.logout();
                             }
     
-                            app.setLoadingText('Couldn\'t connect to spotify, try checking your network connection');
+                            console.log(response.error);
+                            app.setLoadingText(`Couldn\'t connect to spotify, try checking your network connection: ${response.error}`);
                             reject(response.error);
                         }
         
                         let artist = response.artists.items[0];
+
+                        artist = app.convertArtist(artist);
+                        artist.isCenter = true;
             
-                        resolve(app.convertArtist(artist));
+                        resolve(artist);
                     })
                     .catch(error => reject(error));
                 });
@@ -380,6 +392,8 @@ let app = new Vue({
                         if (response.error.status == 401) {
                             app.logout();
                         }
+
+                        console.log(response.error);
 
                         app.setLoadingText('Couldn\'t connect to spotify, try checking your network connection');
                         reject(response.error);
@@ -487,9 +501,6 @@ let app = new Vue({
             let genres = artist.genres;
             let id = artist.id;
             let popularity = artist.popularity;
-
-            console.log(`Artist: ${artist.name}`);
-            console.log(artist);
 
             const img = artist?.images[0]?.url ?? 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/11/Blue_question_mark_icon.svg/100px-Blue_question_mark_icon.svg.png';
 
