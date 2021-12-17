@@ -472,13 +472,7 @@ let app = new Vue({
             console.log(`Artist: ${artist.name}`);
             console.log(artist);
 
-            let img = null;
-
-            try {
-                img = artist.images[0].url;
-            } catch (error) {
-                img = 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/11/Blue_question_mark_icon.svg/100px-Blue_question_mark_icon.svg.png';
-            }
+            const img = artist?.images[0]?.url ?? 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/11/Blue_question_mark_icon.svg/100px-Blue_question_mark_icon.svg.png';
 
             return { name, genres, id, img, popularity };
         }
