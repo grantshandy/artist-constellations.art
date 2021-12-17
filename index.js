@@ -16,6 +16,8 @@ let app = new Vue({
         graphType: 'following',
         nodeType: 'dots',
         currentArtist: null,
+        mostPopularArtist: null,
+        leastPopularArtist: null,
         isMobile: false,
         numArtists: null,
         numFollowing: null,
@@ -155,6 +157,23 @@ let app = new Vue({
             });
 
             let average = total / count;
+
+            this.mostPopularArtist = { popularity: average };
+            this.leastPopularArtist = { popularity: average };
+
+            console.log(typeof(this.mostPopularArtist));
+            console.log(typeof(this.leastPopularArtist));
+
+            this.nodes.forEach(function(artist) {
+                if (artist.popularity >= app.mostPopularArtist.popularity) {
+                    app.mostPopularArtist = artist;
+                } else if (artist.popularity <= app.leastPopularArtist.popularity) {
+                    app.leastPopularArtist = artist;
+                }
+            });
+
+            console.log(`your most popular artist is ${this.mostPopularArtist.name} at ${this.mostPopularArtist.popularity}`);
+            console.log(`your least popular artist is ${this.leastPopularArtist.name} at ${this.leastPopularArtist.popularity}`);
 
             return Math.round(average);
         },
