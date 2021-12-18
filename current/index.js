@@ -520,7 +520,7 @@ let app = new Vue({
             let id = artist.id;
             let popularity = artist.popularity;
 
-            const img = artist?.images[0].url ?? 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/11/Blue_question_mark_icon.svg/100px-Blue_question_mark_icon.svg.png';
+            const img = artist?.images[0]?.url ?? 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/11/Blue_question_mark_icon.svg/100px-Blue_question_mark_icon.svg.png';
 
             return { name, genres, id, img, popularity };
         },
