@@ -14,17 +14,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-
-    - uses: actions/cache@v2
-      with:
-        path: |
-          ~/.cargo/registry
-          ~/.cargo/git
-          target
-        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-
-    - name: Move files around
-      run: mkdir -p public && cp CNAME current/index.html current/index.js current/icon.svg public/
  
     - name: Deploy to gh-pages
       uses: peaceiris/actions-gh-pages@v3
