@@ -2,6 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const crypto = require("crypto");
 const MongoClient = require('mongodb').MongoClient;
+const cors = require('cors');
 
 let app = express();
 
