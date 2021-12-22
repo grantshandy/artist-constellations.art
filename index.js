@@ -12,6 +12,7 @@ let app = new Vue({
         },
         nodes: [],
         links: [],
+        genres: [],
         graph: null,
         graphType: 'following',
         nodeType: 'dots',
@@ -24,6 +25,7 @@ let app = new Vue({
         colorByPopularity: false,
         averagePopularity: null,
         searchQuery: null,
+        queryId: null,
     },
 
     created() {
@@ -61,7 +63,7 @@ let app = new Vue({
 
         // Logout by clearing the token from storage and setting it as null. This will make the login div the only thing visible.
         logout: function() {
-            localStorage.clear();
+            localStorage.removeItem('spotToken');
             window.location.href = window.location.href.split('?')[0].split('#')[0];
         },
 
@@ -118,6 +120,7 @@ let app = new Vue({
                 .backgroundColor(backgroundColor)
                 .linkWidth(2)
                 .nodeRelSize(7)
+                .nodeLabel('name')
                 .onNodeRightClick(node => {
                     this.viewRelated(node);
                 })
@@ -240,7 +243,7 @@ let app = new Vue({
                 if (storageRelationships) {
                     storageRelationships = JSON.parse(storageRelationships);
     
-                    if (storageRelationships.nodes = nodes) {
+                    if (storageRelationships.nodes == this.nodes) {
                         return storageRelationships.links;
                     }
                 }
@@ -272,7 +275,12 @@ let app = new Vue({
                 } 
             }
 
-            localStorage.setItem(`${this.me.display_name}-${this.graphType}`, JSON.stringify({ name: this.me.display_name, links, nodes: this.nodes }));
+            try {
+                localStorage.setItem(`${this.me.display_name}-${this.graphType}`, JSON.stringify({ name: this.me.display_name, links, nodes }));
+            } catch {
+                localStorage.clear();
+                localStorage.setItem('spotToken', this.auth_key);
+            }
 
             return links;
         },
@@ -435,14 +443,15 @@ let app = new Vue({
                 });
             }
 
-            let genres = new Array ();
             totalFollowing.forEach(function(artist) {
                 artist.genres.forEach(function(genre) {
-                    genres.push(genre);
+                    if (!app.genres.includes(genre)) {
+                        app.genres.push(genre);
+                    }
                 });
             });
 
-            this.numGenres = genres.length;
+            this.numGenres = this.genres.length;
             this.numFollowing = totalFollowing.length;
 
             return totalFollowing;
@@ -536,6 +545,7 @@ let app = new Vue({
         viewRelated: async function(currentArtist) {
             this.graphType = 'search';
             this.searchQuery = currentArtist.name;
+            this.queryId = currentArtist.id;
             await this.showGraph();
         }
     }
