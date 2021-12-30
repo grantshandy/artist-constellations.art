@@ -1,8 +1,8 @@
 const client_id = '2ed0e6e8b06842fb854cb15e1690a7b5';
-const redirect_uri = window.location.href.split('?')[0].split('#')[0];
+let redirect_uri = window.location.href.split('?')[0].split('#')[0];
 const scopes = 'user-follow-read user-top-read';
 
-let app = new Vue({
+const app = new Vue({
     el: '#app',
 
     data: {
@@ -15,6 +15,7 @@ let app = new Vue({
         genres: [],
         graph: null,
         graphType: 'following',
+        numGenres: null,
         nodeType: 'dots',
         currentArtist: null,
         mostPopularArtist: null,
@@ -26,9 +27,22 @@ let app = new Vue({
         averagePopularity: null,
         searchQuery: null,
         queryId: null,
+        shareCode: null,
+        shareCodeData: null,
     },
 
     created() {
+        // Check to see if we are getting this from a share URL.
+        if (window.location.search.includes('share')) {
+            this.shareCode = window.location.search.split('=')[1].toUpperCase();
+        } else if (localStorage.getItem('shareCode')) {
+            // Check to see if we have the share code in localStorage because we set it there to keep it during the redirect.
+            this.shareCode = localStorage.getItem('shareCode');
+            localStorage.removeItem('shareCode');
+        }
+
+        console.log('shareCode: '+this.shareCode);
+
         // Get our authentication key from the URL
         this.auth_key = window.location.hash.substr(1).split('&')[0].split('=')[1];
 
@@ -58,6 +72,10 @@ let app = new Vue({
     methods: {
         // Redirect to spotify authentication page
         login: function() {
+            if (this.shareCode) {
+                localStorage.setItem('shareCode', this.shareCode);
+            }
+
             window.location.href = `https://accounts.spotify.com/authorize?client_id=${client_id}&response_type=token&redirect_uri=${redirect_uri}&scope=${scopes}&show_dialog=true`;
         },
 
@@ -71,6 +89,12 @@ let app = new Vue({
         showGraph: async function() {
             this.currentArtist = null;
 
+            if (!this.graphType.includes('term') && this.shareCode) {
+                this.setLoadingText('Getting The Other User\'s Artists');
+                this.shareCodeData = await this.getGraph(this.shareCode);
+                this.graphType = this.shareCodeData.graphType;
+            }
+
             // Get our artists based on our current settings.
             this.setLoadingText('Getting Artists...');
             if (this.graphType == 'following') {
@@ -83,8 +107,14 @@ let app = new Vue({
                 } else {
                     this.nodes = searchNodes;
                 }
-            } else {
+            } else if (this.graphType.includes('term')) {
                 this.nodes = await this.getTimeRange(this.graphType);
+            }
+
+            if (!this.graphType.includes('term') && this.shareCode && this.shareCodeData.user != this.me.display_name) {
+                this.nodes = this.combineNodes(this.nodes, this.shareCodeData.nodes);
+            } else {
+                this.shareCode = null;
             }
 
             // If we don't have any artists or only one we need to tell them to go get more users.
@@ -226,6 +256,18 @@ let app = new Vue({
                     hue = (saturation / 100) * 360;
 
                     return `hsl(${hue},${saturation}%,50%)`;
+                } else if (this.shareCode) {
+                    let yourColor = window.getComputedStyle(this.$refs['logoutButton']).backgroundColor;
+                    let theirColor = window.getComputedStyle(this.$refs['logoutButton']).color;
+                    let sharedColor = 'blue';
+
+                    if (node.foreign) {
+                        return theirColor;
+                    } else if (node.shared) {
+                        return sharedColor;
+                    } else {
+                        return yourColor;
+                    }
                 } else {
                     if (node.isCenter) {
                         return window.getComputedStyle(this.$refs['logoutButton']).backgroundColor;
@@ -547,6 +589,85 @@ let app = new Vue({
             this.searchQuery = currentArtist.name;
             this.queryId = currentArtist.id;
             await this.showGraph();
-        }
+        },
+
+        uploadGraph: async function() {
+            let newNodes = new Array();
+
+            this.nodes.forEach(function(node) {
+                newNodes.push({ name: node.name, genres: node.genres, id: node.id, img: node.img, popularity: node.popularity });
+            });
+
+            let url = `${redirect_uri}upload`;
+            console.log(`uploading to ${url}`);
+
+            let body = JSON.stringify({ user: app.me.display_name, graphType: app.graphType, nodes: newNodes });
+            console.log(body);
+
+            return new Promise((resolve, reject) => {
+                fetch(url, {
+                    method: 'post',
+                    body: body,
+                    headers: {
+                        'Accept': 'application/json, text/plain, */*',
+                        'Content-Type': 'application/json'
+                    },
+                })
+                .then(response => response.json())
+                .then(response => resolve(response.code))
+                .catch(error => reject(error));
+            });
+        },
+
+        getGraph: async function(code) {
+            return new Promise((resolve, reject) => {
+                fetch(`${redirect_uri}data/${code}`, {
+                    method: 'get',
+                })
+                .then(response => response.json())
+                .then(response => resolve(response))
+                .catch(error => reject(error));
+            });
+        },
+
+        combineNodes: function(userNodes, foreignNodes) {
+            // Create and id array for both current and foreign nodes.
+            let userNodeIdArray = new Array ();
+            let foreignNodeIdArray = new Array ();
+            let finalIdArray = new Array ();
+            let finalArray = new Array ();
+
+            userNodes.forEach(function(node) {
+                userNodeIdArray.push(node.id);
+            });
+
+            foreignNodes.forEach(function(node) {
+                foreignNodeIdArray.push(node.id);
+            });
+            
+            // Go through all the nodes and assign them properties for their colors;
+            foreignNodes.forEach(function(node) {
+                if (userNodeIdArray.includes(node.id) && foreignNodeIdArray.includes(node.id)) {
+                    node.shared = true;
+                } else {
+                    node.foreign = true;
+                }
+
+                finalIdArray.push(node.id);
+                finalArray.push(node);
+            });
+
+            userNodes.forEach(function(node) {
+                if (userNodeIdArray.includes(node.id) && foreignNodeIdArray.includes(node.id)) {
+                    node.shared = true;
+                }
+
+                if (!finalIdArray.includes(node.id)) {
+                    finalArray.push(node);
+                }
+            });
+
+            return finalArray;
+        },
     }
 })
