@@ -402,16 +402,25 @@ const app = new Vue({
             let centralArtist = await search(query);
             artists.push(centralArtist);
 
+            this.setLoadingText('Getting Related Artists');
             let centralRelatedArtists = await this.getRelated(centralArtist);
-            let currentNum = 0;
+            this.setLoadingText('Updating Artist Information');
+            let related = await this.getArtists(centralRelatedArtists);
 
-            for await (const artist of centralRelatedArtists) {
-                currentNum += 1;
-                this.setLoadingText(`Getting Related Artists... (${currentNum}/${centralRelatedArtists.length})`);
+            // Why do I do this I hate this
+            related.forEach(function(artist) {
+                artists.push(artist);
+            });
 
-                let currentFirstDegreeArtist = await this.getArtist(artist.id);
-                artists.push(currentFirstDegreeArtist);
-            }
+            // Atleast it's better than doing this.
+            // let currentNum = 0;
+            // for await (const artist of centralRelatedArtists) {
+            //     currentNum += 1;
+            //     this.setLoadingText(`Getting Related Artists... (${currentNum}/${centralRelatedArtists.length})`);
+
+            //     let currentFirstDegreeArtist = await this.getArtist(artist.id);
+            //     artists.push(currentFirstDegreeArtist);
+            // }
 
             return artists;
 
@@ -562,6 +571,45 @@ const app = new Vue({
                 })
                 .catch(error => reject(error));
             });
+        },
+
+        // Get multiple artists from an array of artists that atleast have ids.
+        getArtists: async function(artists) {
+            let idString = '';
+
+            artists.forEach(function(artist) {
+                idString += artist.id + ',';
+            });
+
+            idString = idString.slice(0, -1);
+
+            return new Promise((resolve, reject) => {
+                fetch(`https://api.spotify.com/v1/artists?ids=${idString}`, {
+                    headers: {
+                        'Authorization': `Bearer ${this.auth_key}`,
+                    },
+                })
+                .then(response => response.json())
+                .then(response => {
+                    if (response.error) {
+                        if (response.error.status == 401) {
+                            app.logout();
+                        }
+
+                        this.setLoadingText('Couldn\'t connect to spotify, try checking your network connection');
+                        reject(response.error);
+                    }
+
+                    let artists = new Array ();
+
+                    response.artists.forEach(function(artist) {
+                        artists.push(app.convertArtist(artist));
+                    })
+        
+                    resolve(artists);
+                })
+                .catch(error => reject(error));
+            }); 
         },
 
         // Spotify uses a very complex schema for representing artists so we do this for simplicity.
