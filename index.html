@@ -134,11 +134,11 @@
                 </ul>
               </div>
             </div>
-            <div v-if="!shareCode" class="md:grid md:grid-cols-2 md:space-x-2">
+            <!-- <div v-if="!shareCode" class="md:grid md:grid-cols-2 md:space-x-2">
               <button v-on:click="uploadGraph" ref="shareButton" class="bg-green-500 hover:bg-green-700 py-1 px-1 md:py-3 md:px-3 text-left font-semibold rounded-lg shadow-md text-center">Share</button>
               <button v-on:click="logout" ref="logoutButton" class="bg-green-500 hover:bg-green-700 py-1 px-1 md:py-3 md:px-3 text-left font-semibold rounded-lg shadow-md text-center">Log Out</button>
-            </div>
-            <button v-else v-on:click="logout" ref="logoutButton" class="bg-green-500 hover:bg-green-700 py-1 px-1 md:py-3 md:px-3 text-left font-semibold rounded-lg shadow-md">Log Out</button>
+            </div> -->
+            <button v-else v-on:click="logout" ref="logoutButton" class="md:flex-none bg-green-500 hover:bg-green-700 py-1 px-1 md:py-3 md:px-3 text-left font-semibold rounded-lg shadow-md">Log Out</button>
           </div>
         </div>
       </div>
