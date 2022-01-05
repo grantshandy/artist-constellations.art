@@ -64,7 +64,7 @@
             <div class="flex-1" id="graph" ref="graph"></div>
           </div>
           <div class="md:flex md:flex-col flex-auto rounded-lg shadow-lg p-4 space-y-3 md:space-y-5 bg-gray-800 content-center overflow-y-auto scrollbar md:col-span-2 lg:col-span-1">
-            <p class="md:flex-none" v-if="!isMobile"><b>User: {{ me.display_name }}.</b> Drag and zoom to look around the graph. Right click on an artist to see their related artists.</p>
+            <p class="md:flex-none" v-if="!isMobile"><b>User: {{ me.display_name }}.</b><span v-if="graph"> Drag and zoom to look around the graph. Right click on an artist to see their related artists.</span></p>
             <p v-else><b>User: {{ me.display_name }}.</b> Drag and zoom to look around the graph.</p>
             <p class="md:flex-none" v-if="!isMobile && graph && !shareCode"><span v-if="numGenres" class="inline">You listen to <b>{{ numGenres }} genres</b> and follow <b>{{ numFollowing }} artists</b>. </span>The artists on this graph are on average <b>{{ averagePopularity }}%</b> popular.</p>
             <!-- <p class="md:flex-none" v-if="!isMobile && graph">Your most popular artist in this graph is <b>{{ mostPopularArtist.name }}</b> at <b>{{ mostPopularArtist.popularity }}%</b>, the least popular is <b>{{ leastPopularArtist.name }}</b> at <b>{{ leastPopularArtist.popularity }}%</b>.</p> -->
@@ -138,7 +138,7 @@
               <button v-on:click="uploadGraph" ref="shareButton" class="bg-green-500 hover:bg-green-700 py-1 px-1 md:py-3 md:px-3 text-left font-semibold rounded-lg shadow-md text-center">Share</button>
               <button v-on:click="logout" ref="logoutButton" class="bg-green-500 hover:bg-green-700 py-1 px-1 md:py-3 md:px-3 text-left font-semibold rounded-lg shadow-md text-center">Log Out</button>
             </div> -->
-            <button v-else v-on:click="logout" ref="logoutButton" class="md:flex-none bg-green-500 hover:bg-green-700 py-1 px-1 md:py-3 md:px-3 text-left font-semibold rounded-lg shadow-md">Log Out</button>
+            <button v-on:click="logout" ref="logoutButton" class="md:flex-none bg-green-500 hover:bg-green-700 py-1 px-1 md:py-3 md:px-3 text-left font-semibold rounded-lg shadow-md">Log Out</button>
           </div>
         </div>
       </div>
