@@ -1,0 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.filter {
+    @apply bg-base02 hover:bg-base02-tint text-base01 hover:text-base01-tint text-xs md:text-base text-left cursor-pointer font-semibold border-none focus:outline-none px-2;
+}
