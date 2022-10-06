@@ -1,5 +1,5 @@
 <template>
-    <div class="w-screen h-screen bg-[url(./screenshot.png)] bg-no-repeat bg-cover bg-center bg-fixed">
+    <div class="w-screen h-screen bg-[url(/screenshot.png)] bg-no-repeat bg-cover bg-center bg-fixed">
         <div class="w-screen h-screen p-5 backdrop-blur-sm md:p-0 md:grid md:place-items-center">
             <div class="w-6/7 md:w-fit space-y-3">
                 <div class="rounded-md shadow-2xl text-center p-4 bg-base03">
