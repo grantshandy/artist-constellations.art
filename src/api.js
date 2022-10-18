@@ -1,199 +1,221 @@
-import pLimit from 'p-limit'
+import pLimit from "p-limit";
 
 export function convertArtist(artist) {
-    let name = artist.name;
-    let genres = artist.genres;
-    let id = artist.id;
-    let popularity = artist.popularity;
-    let img = artist?.images[0]?.url ?? 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/11/Blue_question_mark_icon.svg/100px-Blue_question_mark_icon.svg.png';
+  let name = artist.name;
+  let genres = artist.genres;
+  let id = artist.id;
+  let popularity = artist.popularity;
+  let img =
+    artist?.images[0]?.url ??
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/1/11/Blue_question_mark_icon.svg/100px-Blue_question_mark_icon.svg.png";
 
-    return { name, genres, id, img, popularity };
+  return { name, genres, id, img, popularity };
 }
 
 export async function getFollowing() {
-    // final list of people we follow
-    let firstFragment = await getFollowingFragment();
+  // final list of people we follow
+  let firstFragment = await getFollowingFragment();
 
-    let cursor = firstFragment.cursor;
-    let artists = firstFragment.artists;
+  let cursor = firstFragment.cursor;
+  let artists = firstFragment.artists;
 
-    // add to the final list with subsequent calls
-    while (cursor != null) {  
-        let followingFragment = await getFollowingFragment(cursor);
-        cursor = followingFragment.cursor;
+  // add to the final list with subsequent calls
+  while (cursor != null) {
+    let followingFragment = await getFollowingFragment(cursor);
+    cursor = followingFragment.cursor;
 
-        followingFragment.artists.forEach(function(x) {
-            artists.push(x);
-        });
-    }
+    followingFragment.artists.forEach(function (x) {
+      artists.push(x);
+    });
+  }
 
-    return artists;
+  return artists;
 }
 
 export async function getArtistsTopTracks(artist) {
-    let response = await fetch(`https://api.spotify.com/v1/artists/${artist.id}/top-tracks?market=US`, {
-        headers: {
-            'Authorization': `Bearer ${localStorage.getItem('userToken')}`,
-        },
-    });
+  let response = await fetch(
+    `https://api.spotify.com/v1/artists/${artist.id}/top-tracks?market=US`,
+    {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("userToken")}`,
+      },
+    }
+  );
 
-    let json = await response.json();
+  let json = await response.json();
 
-    if (json.error) {
-        if (json.error.status == 401) {
-            logout();
-        }
-
-        throw json.error;
+  if (json.error) {
+    if (json.error.status == 401) {
+      logout();
     }
 
-    return json.tracks;
+    throw json.error;
+  }
+
+  return json.tracks;
 }
 
 async function getFollowingFragment(last) {
-    let url;
+  let url;
 
-    if (last == null) {
-        url = 'https://api.spotify.com/v1/me/following?type=artist&limit=50';
-    } else {
-        url = `https://api.spotify.com/v1/me/following?type=artist&after=${last}&limit=50`;
+  if (last == null) {
+    url = "https://api.spotify.com/v1/me/following?type=artist&limit=50";
+  } else {
+    url = `https://api.spotify.com/v1/me/following?type=artist&after=${last}&limit=50`;
+  }
+
+  let response = await fetch(url, {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("userToken")}`,
+    },
+  });
+
+  let json = await response.json();
+
+  if (json.error) {
+    if ((json.error.status = 401)) {
+      logout();
     }
 
-    let response = await fetch(url, {
-        headers: {
-            'Authorization': `Bearer ${localStorage.getItem('userToken')}`,
-        },
-    });
+    throw json.error;
+  }
 
-    let json = await response.json();
+  let artists = new Array();
 
-    if (json.error) {
-        if (json.error.status = 401) {
-            logout();
-        }
+  json.artists.items.forEach(function (artist) {
+    artists.push(convertArtist(artist));
+  });
 
-        throw json.error;
-    }
+  let cursor = json.artists.cursors.after;
 
-    let artists = new Array ();
-
-    json.artists.items.forEach(function(artist) {
-        artists.push(convertArtist(artist));
-    });
-
-    let cursor = json.artists.cursors.after;
-
-    return { artists, cursor };
+  return { artists, cursor };
 }
 
 export async function getMe() {
-    let response = await fetch('https://api.spotify.com/v1/me', {
-        headers: {
-            'Authorization': `Bearer ${localStorage.getItem('userToken')}`,
-        },
-    });
+  let response = await fetch("https://api.spotify.com/v1/me", {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("userToken")}`,
+    },
+  });
 
-    let json = await response.json();
+  let json = await response.json();
 
-    if (json.error) {
-        if (json.error.status == 401) {
-            logout();
-        }
-
-        throw json.error;
+  if (json.error) {
+    if (json.error.status == 401) {
+      logout();
     }
 
-    return json;
+    throw json.error;
+  }
+
+  return json;
 }
 
 export async function getLinks(nodes) {
-    let idArray = [];
+  let idArray = [];
 
-    nodes.forEach(function(artist) {
-        idArray.push(artist.id);
-    });
+  nodes.forEach(function (artist) {
+    idArray.push(artist.id);
+  });
 
-    let limit = pLimit(4);
+  let limit = pLimit(4);
 
-    // download all relations concurrently
-    let relatedArtists = await Promise.all(nodes.map(artist => limit(() => getRelated(artist))));
+  // download all relations concurrently
+  let relatedArtists = await Promise.all(
+    nodes.map((artist) => limit(() => getRelated(artist)))
+  );
 
-    let links = [];
+  let links = [];
 
-    for (const artist of relatedArtists) {
-        for (const relatedArtist of artist.relatedArtists) {
-            if (idArray.includes(relatedArtist.id)) {
-                let potentialConnection = { source: artist.id, target: relatedArtist.id };
-                let reversedPotentialConnection = { source: relatedArtist.id, target: artist.id };
-
-                if (!links.includes(potentialConnection) && !links.includes(reversedPotentialConnection)) {
-                    links.push(potentialConnection);
-                }
-            }
+  for (const artist of relatedArtists) {
+    for (const relatedArtist of artist.relatedArtists) {
+      if (idArray.includes(relatedArtist.id)) {
+        let potentialConnection = {
+          source: artist.id,
+          target: relatedArtist.id,
         };
-    };
+        let reversedPotentialConnection = {
+          source: relatedArtist.id,
+          target: artist.id,
+        };
 
-    return links;
+        if (
+          !links.includes(potentialConnection) &&
+          !links.includes(reversedPotentialConnection)
+        ) {
+          links.push(potentialConnection);
+        }
+      }
+    }
+  }
+
+  return links;
 }
 
 export async function getRelated(artist) {
-    let response = await fetch(`https://api.spotify.com/v1/artists/${artist.id}/related-artists`, {
-        headers: {
-            'Authorization': `Bearer ${localStorage.getItem('userToken')}`,
-        },
-    });
+  let response = await fetch(
+    `https://api.spotify.com/v1/artists/${artist.id}/related-artists`,
+    {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("userToken")}`,
+      },
+    }
+  );
 
-    let json = await response.json();
+  let json = await response.json();
 
-    if (json.error) {
-        if (json.error.status == 401) {
-            logout();
-        }
-
-        throw json.error;
+  if (json.error) {
+    if (json.error.status == 401) {
+      logout();
     }
 
-    let relatedArtists = [];
+    throw json.error;
+  }
 
-    json.artists.forEach(function(artist) {
-        relatedArtists.push({ name: artist.name, id: artist.id });
-    });
+  let relatedArtists = [];
 
-    return {
-        name: artist.name,
-        id: artist.id,
-        relatedArtists,
-    };
+  json.artists.forEach(function (artist) {
+    relatedArtists.push({ name: artist.name, id: artist.id });
+  });
+
+  return {
+    name: artist.name,
+    id: artist.id,
+    relatedArtists,
+  };
 }
 
 export async function getTopOf(timeRange) {
-    let response = await fetch(`https://api.spotify.com/v1/me/top/artists?time_range=${timeRange}&limit=50`, {
-        headers: {
-            'Authorization': `Bearer ${localStorage.getItem('userToken')}`,
-        },
-    });
+  let response = await fetch(
+    `https://api.spotify.com/v1/me/top/artists?time_range=${timeRange}&limit=50`,
+    {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("userToken")}`,
+      },
+    }
+  );
 
-    let json = await response.json();
+  let json = await response.json();
 
-    if (json.error) {
-        if (json.error.status == 401) {
-            logout();
-        }
-
-        throw json.error;
+  if (json.error) {
+    if (json.error.status == 401) {
+      logout();
     }
 
-    let artists = [];
+    throw json.error;
+  }
 
-    json.items.forEach(function(artist) {
-        artists.push(convertArtist(artist));
-    });
+  let artists = [];
 
-    return artists;
+  json.items.forEach(function (artist) {
+    artists.push(convertArtist(artist));
+  });
+
+  return artists;
 }
 
 export function logout() {
-    localStorage.removeItem('userToken');
-    localStorage.removeItem('lastLoggedIn');
-    window.location.href = window.location.href.split('?')[0].split('#')[0];
+  localStorage.removeItem("userToken");
+  localStorage.removeItem("lastLoggedIn");
+  window.location.href = window.location.href.split("?")[0].split("#")[0];
 }
