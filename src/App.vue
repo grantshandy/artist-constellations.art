@@ -1,4 +1,8 @@
 <template>
+  <!--
+    Because this is a "web app" sort of thing there's no scrolling.
+    The site always takes up the full size of the screen.
+  -->
   <div class="w-screen h-screen flex">
     <!-- main page -->
     <MainPage v-if="userToken" class="grow" />

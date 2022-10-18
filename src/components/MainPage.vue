@@ -41,6 +41,7 @@
           </option>
         </select>
       </div>
+      <!-- main graph -->
       <div
         id="content"
         class="grow bg-base02 md:rounded-br-md md:rounded-bl-md text-center flex"
@@ -69,6 +70,7 @@
         v-if="graph"
         class="grow gap-2 rounded-md grid grid-cols-2 md:flex md:flex-col overflow-y-auto"
       >
+        <!-- info block -->
         <div
           class="bg-base03 rounded-md p-2 space-y-2 rounded-md shadow-md overflow-y-auto"
         >
