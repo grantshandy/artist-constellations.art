@@ -24,7 +24,6 @@ export default {
       userToken: null,
     };
   },
-
   created() {
     // if lastLogged in is more than an hour in the past then log out (because the token will have expired)
     if (localStorage.getItem("lastLoggedIn") != null) {
@@ -44,8 +43,8 @@ export default {
 
     // if we have a user token from a hash put it in local storage and reload page to clean up URL.
     // a bit hacky but whatever
-    let hash = window.location.hash.split("#")[1];
-    console.log(`url hash: ${hash}`);
+    let hash = window.location.hash.split("&")[0].split("=")[1];
+    console.log(`Url Hash: ${hash}`);
 
     // redirect
     if (hash) {
