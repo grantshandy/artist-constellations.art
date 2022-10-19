@@ -10,7 +10,10 @@
             <p class="text-base0">
               View the artists you listen to on Spotify in a 3D constellations!
             </p>
-            <a href="https://github.com/grantshandy/artist-constellations.art" class="text-base0 underline">
+            <a
+              href="https://github.com/grantshandy/artist-constellations.art"
+              class="text-base0 underline"
+            >
               View Source Code
             </a>
           </main>

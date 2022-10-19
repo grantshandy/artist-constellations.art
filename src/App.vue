@@ -15,7 +15,7 @@
 import LoginPage from "./components/LoginPage.vue";
 import MainPage from "./components/MainPage.vue";
 
-import { logout } from "./api.js";
+import { logout } from "./spotifyApi.js";
 
 export default {
   name: "App",

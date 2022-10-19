@@ -74,10 +74,17 @@
         <div
           class="bg-base03 rounded-md p-2 space-y-2 rounded-md shadow-md overflow-y-auto"
         >
+          <!-- artist popularity text -->
           <p class="text-sm md:text-base text-center font-bold mx-1 mb-2">
             Average Artist Popularity: {{ avgPopularity() }}%
           </p>
+          <!-- just shows the logged in person's name -->
           <UserInfo v-if="me" :me="me" />
+          <!--
+            color by popularity button
+          
+            this one is particularly complicated because of the switch :/
+           -->
           <div
             v-if="graph && nodeType == 'dot'"
             class="space-y-2 select-none flex flex-col"
@@ -113,19 +120,37 @@
           </div>
         </div>
         <!-- artist info -->
-        <ArtistInfo
-          v-if="currentArtist"
-          :artist="currentArtist"
-          class="rounded-md shadow-md"
-        />
+        <ArtistInfo v-if="currentArtist" :artist="currentArtist" />
       </div>
-      <!-- logout button -->
-      <button
-        v-on:click="logout"
-        class="px-2 py-1 rounded-md bg-base01 text-base03 space-x-3 font-bold w-full hover:shadow-lg"
-      >
-        Logout
-      </button>
+      <!-- logout/share button -->
+      <div class="grid grid-cols-2 md:grid-cols-1 gap-2">
+        <button
+          v-on:click="shareGraph"
+          class="px-2 py-1 rounded-md bg-base01 text-base03 font-bold w-full shadow-md hover:shadow-lg"
+        >
+          Share
+        </button>
+        <button
+          v-on:click="logout"
+          class="px-2 py-1 rounded-md bg-base01 text-base03 font-bold w-full shadow-md hover:shadow-lg"
+        >
+          Logout
+        </button>
+      </div>
+    </div>
+    <!-- share modal dialog -->
+    <div v-if="shareModal.view" class="fixed top-0 left-0 w-screen h-screen bg-[rgba(0,0,0,0.5)] opacity-100 grid place-items-center">
+      <div class="rounded-md shadow-lg bg-base03 p-3 text-center text-base1">
+        <h1 class="text-xl font-semibold">Share Your Graph</h1>
+        <div v-if="shareModal.loading">
+          <p>Loading: {{ shareModal.loading }}...</p>
+        </div>
+        <div v-else>
+          <p>Your graph is now available at</p>
+          <a class="select-none underline" :href="shareModal.url">{{ shareModal.url }}</a>
+        </div>
+        <button class="bg-base02 mt-4 px-2 py-1 rounded-md" v-on:click="shareModal.view = false">Close</button>
+      </div>
     </div>
   </div>
 </template>
@@ -134,7 +159,15 @@
 import UserInfo from "./UserInfo.vue";
 import ArtistInfo from "./ArtistInfo.vue";
 
-import { getFollowing, getMe, getLinks, getTopOf, logout } from "../api.js";
+import {
+  getFollowing,
+  getMe,
+  getLinks,
+  getTopOf,
+  logout,
+} from "../spotifyApi.js";
+import { uploadData } from "../dbApi.js";
+
 import ForceGraph3D from "3d-force-graph";
 
 import * as THREE from "three";
@@ -160,6 +193,11 @@ export default {
       nodeType: "dot", // dot | image | text
       colorByPopularity: false,
       currentArtist: null,
+      shareModal: {
+        view: false,
+        url: null,
+        loading: null,
+      },
     };
   },
   async mounted() {
@@ -370,6 +408,18 @@ export default {
 
       return Math.round(average);
     },
+    
+    async shareGraph() {
+      this.shareModal.loading = "Uploading Data";
+      this.shareModal.view = true;
+      
+      // upload data and return URL
+      let code = await uploadData(this.nodes, this.me.display_name, this.graphType);
+      
+      this.shareModal.url = `${window.location.origin}/?share=${code}`;
+      
+      this.shareModal.loading = false;
+    }
   },
 };
 </script>

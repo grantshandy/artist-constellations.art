@@ -1,5 +1,5 @@
 <template>
-  <div class="overflow-y-auto">
+  <div class="overflow-y-auto rounded-md shadow-md">
     <div class="rounded-md bg-base03 shadow-md py-2 space-y-2 text-center">
       <a
         v-bind:href="'https://open.spotify.com/artist/' + artist.id"
@@ -33,7 +33,7 @@
 </template>
 
 <script>
-import { getArtistsTopTracks } from "../api.js";
+import { getArtistsTopTracks } from "../spotifyApi.js";
 
 export default {
   name: "ArtistInfo",

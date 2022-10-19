@@ -5,7 +5,8 @@ export function convertArtist(artist) {
   let genres = artist.genres;
   let id = artist.id;
   let popularity = artist.popularity;
-  let img = artist?.images[0]?.url ??
+  let img =
+    artist?.images[0]?.url ??
     "https://upload.wikimedia.org/wikipedia/commons/thumb/1/11/Blue_question_mark_icon.svg/100px-Blue_question_mark_icon.svg.png";
 
   return { name, genres, id, img, popularity };
@@ -38,7 +39,7 @@ export async function getArtistsTopTracks(artist) {
       headers: {
         Authorization: `Bearer ${localStorage.getItem("userToken")}`,
       },
-    },
+    }
   );
 
   let json = await response.json();
@@ -59,8 +60,7 @@ async function getFollowingFragment(last) {
   if (last == null) {
     url = "https://api.spotify.com/v1/me/following?type=artist&limit=50";
   } else {
-    url =
-      `https://api.spotify.com/v1/me/following?type=artist&after=${last}&limit=50`;
+    url = `https://api.spotify.com/v1/me/following?type=artist&after=${last}&limit=50`;
   }
 
   let response = await fetch(url, {
@@ -121,8 +121,8 @@ export async function getLinks(nodes) {
 
   // download all relations concurrently
   let relatedArtists = await Promise.all(
-    nodes.map((artist) => limit(() => getRelated(artist))),
-  ).catch(error => {
+    nodes.map((artist) => limit(() => getRelated(artist)))
+  ).catch((error) => {
     throw error;
   });
 
@@ -160,7 +160,7 @@ export async function getRelated(artist) {
       headers: {
         Authorization: `Bearer ${localStorage.getItem("userToken")}`,
       },
-    },
+    }
   );
 
   let json = await response.json();
@@ -193,7 +193,7 @@ export async function getTopOf(timeRange) {
       headers: {
         Authorization: `Bearer ${localStorage.getItem("userToken")}`,
       },
-    },
+    }
   );
 
   let json = await response.json();

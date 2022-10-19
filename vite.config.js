@@ -5,4 +5,12 @@ import vue from "@vitejs/plugin-vue";
 export default defineConfig({
   plugins: [vue()],
   assetsInclude: ["public/screenshot.png"],
+  resolve: {
+    alias: {
+      "node-fetch": "isomorphic-fetch",
+    },
+  },
+  define: {
+    "global": {},
+  },
 });
