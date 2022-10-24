@@ -414,7 +414,7 @@ export default {
       this.shareModal.view = true;
       
       // upload data and return URL
-      let code = await uploadData(this.nodes, this.me.display_name, this.graphType);
+      let code = await uploadData(this.nodes, this.me.display_name, this.me.id, this.graphType);
       
       this.shareModal.url = `${window.location.origin}/?share=${code}`;
       
