@@ -17,9 +17,17 @@
           class="filter hidden md:inline-flex rounded-tl-md"
         >
           <option value="following">Artists You Follow</option>
+          <option v-if="share && share.data && share.data.graphType == 'following'" value="combine-following">You and {{ share.data.displayName }}'s Top Artists of the Month</option>
           <option value="short_term">Top Artists of the Month</option>
+          <option v-if="share && share.data && share.data.graphType == 'short_term'" value="combine-short_term">You and {{ share.data.displayName }}'s Top Artists of the Month</option>
           <option value="medium_term">Top Artists of the Year</option>
+          <option v-if="share && share.data && share.data.graphType == 'medium_term'" value="combine-medium_term">You and {{ share.data.displayName }}'s Top Artists of the Year</option>
           <option value="long_term">Top Artists of All Time</option>
+          <option v-if="share && share.data && share.data.graphType == 'long_term'" value="combine-long_term">You and {{ share.data.displayName }}'s Top Artists of All Time</option>
+          <option v-if="share && share.data && share.data.graphType == 'following'" value="share-following">Artists {{ share.data.displayName }} Follows</option>
+          <option v-if="share && share.data && share.data.graphType == 'short_term'" value="share-short_term">{{ share.data.displayName }}'s Top Artists of the Month</option>
+          <option v-if="share && share.data && share.data.graphType == 'medium_term'" value="share-medium_term">{{ share.data.displayName }}'s Top Artists of the Year</option>
+          <option v-if="share && share.data && share.data.graphType == 'long_term'" value="share-long_term">{{ share.data.displayName }}'s Top Artists of All Time</option>
         </select>
         <select
           v-model="nodeType"
@@ -166,7 +174,7 @@ import {
   getTopOf,
   logout,
 } from "../spotifyApi.js";
-import { uploadData } from "../dbApi.js";
+import { uploadData, getShareData } from "../dbApi.js";
 
 import ForceGraph3D from "3d-force-graph";
 
@@ -198,9 +206,22 @@ export default {
         url: null,
         loading: null,
       },
+      share: {
+        code: null,
+        data: null,
+      }
     };
   },
   async mounted() {
+    this.share.code = localStorage.getItem("shareCode");
+    
+    if (this.share.code) {
+      getShareData(this.share.code)
+        .then((obj) => {
+          this.share.data = obj;
+        });
+    }
+  
     if (localStorage.getItem("userToken") != null) {
       getMe()
         .then((me) => {

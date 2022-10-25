@@ -1,4 +1,6 @@
 import axios from "axios";
+import sha1 from "crypto-js/sha1";
+import Base64 from "crypto-js/enc-base64";
 
 const TOKEN = "Z2hwX0tWdWlqRkdaNjMwN2dkTXptbUhVNWp3cGFJS05WcjFhYlRYUA==";
 
@@ -12,10 +14,11 @@ export async function uploadData(nodes, displayName, userId, graphType) {
     date: new Date().toISOString(),
   };
 
-  let filename = `${userId}-${graphType}.json`;
+  let filename = Base64.stringify(sha1(`${userId}${graphType}`)).slice(0, 7)
+    .replace("/", "A").toUpperCase();
 
   let sha = await checkIfFileExists(filename);
-  
+
   console.log(sha);
 
   await axios({
@@ -29,11 +32,61 @@ export async function uploadData(nodes, displayName, userId, graphType) {
     data: {
       message: `Adding ${graphType} for ${displayName}`,
       sha,
-      content: btoa(JSON.stringify(content)),
+      content: btoa(btoa(JSON.stringify(content))),
     },
   });
 
   return filename;
+}
+
+export async function checkIfFileExists(filename) {
+  let token = atob(TOKEN);
+
+  return await axios({
+    method: "GET",
+    url:
+      `https://api.github.com/repos/artistconstellations-db/database/contents/${filename}`,
+    headers: {
+      "Accept": "application/vnd.github+json",
+      "Authorization": `Bearer ${token}`,
+    },
+  })
+    .catch((error) => {
+      if (error.response.status == 404) {
+        return null;
+      }
+    })
+    .then((response) => {
+      if (response) {
+        if (response.status == 404) {
+          return null;
+        } else {
+          return response.data.sha;
+        }
+      } else {
+        return null;
+      }
+    });
+}
+
+export async function getShareData(code) {
+  let token = atob(TOKEN);
+
+  let response = await axios({
+    response: "GET",
+    url:
+      `https://api.github.com/repos/artistconstellations-db/database/contents/${code}`,
+
+    headers: {
+      "Accept": "application/vnd.github+json",
+      "Authorization": `Bearer ${token}`,
+    },
+    responseType: "text",
+  });
+
+  let obj = JSON.parse(atob(atob(JSON.parse(response.data).content)));
+
+  return obj;
 }
 
 function simplifyNodes(nodes) {
@@ -52,29 +105,8 @@ function simplifyNodes(nodes) {
   return final;
 }
 
-export async function checkIfFileExists(filename) {
-  let token = atob(TOKEN);
-
-  return await axios({
-    method: "GET",
-    url:
-      `https://api.github.com/repos/artistconstellations-db/database/contents/${filename}`,
-    headers: {
-      "Accept": "application/vnd.github+json",
-      "Authorization": `Bearer ${token}`,
-    },
-  })
-    .catch((error) => {
-      console.log(`Error fetching file: ${error}`);
-      return null;
-    })
-    .then((response) => {
-      console.log(response.data);
-    
-      return response.data.sha;
-    });
-}
-
-export async function getData(code) {
-  // download from github with simple http fetch
+function generateHex(str) {
+  return str.split("")
+    .map((c) => c.charCodeAt(0).toString(16).padStart(2, "0"))
+    .join("");
 }

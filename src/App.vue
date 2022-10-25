@@ -4,16 +4,16 @@
     The site always takes up the full size of the screen.
   -->
   <div class="w-screen h-screen flex">
-    <!-- main page -->
-    <MainPage v-if="userToken" class="grow" />
-    <!-- login page -->
-    <LoginPage v-else class="grow" />
+    <LoginPage v-if="!userToken && !shareCode" class="grow" />
+    <ShareCodePage v-if="shareCode && !userToken && !viewOnly" :shareCode="shareCode" v-on:view-only="viewOnly = true" class="grow" />
+    <MainPage v-if="userToken || viewOnly" class="grow" />
   </div>
 </template>
 
 <script>
 import LoginPage from "./components/LoginPage.vue";
 import MainPage from "./components/MainPage.vue";
+import ShareCodePage from "./components/ShareCodePage.vue";
 
 import { logout } from "./spotifyApi.js";
 
@@ -22,10 +22,13 @@ export default {
   components: {
     LoginPage,
     MainPage,
+    ShareCodePage,
   },
   data() {
     return {
       userToken: null,
+      shareCode: null,
+      viewOnly: false,
     };
   },
   created() {
@@ -48,7 +51,6 @@ export default {
     // if we have a user token from a hash put it in local storage and reload page to clean up URL.
     // a bit hacky but whatever
     let hash = window.location.hash.split("&")[0].split("=")[1];
-    console.log(`Url Hash: ${hash}`);
 
     // redirect
     if (hash) {
@@ -62,7 +64,20 @@ export default {
     }
 
     // print the user token in the console
-    console.log(`Temporary User Token: ${this.userToken}`);
-  },
+    console.log(`User Token: ${this.userToken}`);
+    
+    // get sharecode from url
+    let shareCode = window.location.search.split("=")[1];
+
+    if (shareCode) {
+      shareCode = shareCode.slice(0, 7);
+
+      console.log(`Share Code: ${shareCode}`);
+    
+      localStorage.setItem("shareCode", shareCode);
+      this.shareCode = shareCode;
+    }
+    
+  }
 };
 </script>
