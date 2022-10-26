@@ -5,8 +5,8 @@
   -->
   <div class="w-screen h-screen flex">
     <LoginPage v-if="!userToken && !shareCode" class="grow" />
-    <ShareCodePage v-if="shareCode && !userToken && !viewOnly" :shareCode="shareCode" v-on:view-only="viewOnly = true" class="grow" />
-    <MainPage v-if="userToken || viewOnly" class="grow" />
+    <ShareCodePage v-if="shareCode && !userToken" :shareCode="shareCode" class="grow" />
+    <MainPage v-if="userToken" class="grow" />
   </div>
 </template>
 
@@ -28,7 +28,6 @@ export default {
     return {
       userToken: null,
       shareCode: null,
-      viewOnly: false,
     };
   },
   created() {

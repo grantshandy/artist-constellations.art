@@ -62,7 +62,7 @@ async function getFollowingFragment(last) {
   } else {
     url = `https://api.spotify.com/v1/me/following?type=artist&after=${last}&limit=50`;
   }
-
+  
   let response = await fetch(url, {
     headers: {
       Authorization: `Bearer ${localStorage.getItem("userToken")}`,
@@ -117,7 +117,7 @@ export async function getLinks(nodes) {
     idArray.push(artist.id);
   });
 
-  let limit = pLimit(3);
+  let limit = pLimit(2);
 
   // download all relations concurrently
   let relatedArtists = await Promise.all(

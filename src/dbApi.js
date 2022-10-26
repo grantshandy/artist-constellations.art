@@ -89,7 +89,7 @@ export async function getShareData(code) {
   return obj;
 }
 
-function simplifyNodes(nodes) {
+export function simplifyNodes(nodes) {
   let final = [];
 
   nodes.forEach((node) => {

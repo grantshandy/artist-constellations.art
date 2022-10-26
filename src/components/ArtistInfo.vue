@@ -15,10 +15,16 @@
         />
       </a>
       <p class="text-sm italic">Popularity: {{ artist.popularity }}%</p>
+      <div v-if="artist.owners.length > 0">
+        <p class="font-bold">Owners:</p>
+        <div v-for="owner in artist.owners" :key="owner">
+          <p class="text-sm">• {{ owner }}</p>
+        </div>
+      </div>
       <div v-if="artist.genres.length > 0">
         <p class="font-bold">Genres:</p>
         <div v-for="genre in artist.genres" :key="genre">
-          <p class="text-sm ml-2">• {{ genre }}</p>
+          <p class="text-sm">• {{ genre }}</p>
         </div>
       </div>
       <!-- <button v-if="!topTracks" v-on:click="revealTopTracks()" class="rounded-md bg-base02 hover:bg-base02-tint shadow-md px-2 py-1 font-semibold text-sm">Reveal Top Tracks</button>
