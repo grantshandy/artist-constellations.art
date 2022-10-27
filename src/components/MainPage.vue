@@ -17,17 +17,57 @@
           class="filter hidden md:inline-flex rounded-tl-md"
         >
           <option value="following">Artists You Follow</option>
-          <option v-if="share.data && share.data.graphType == 'following'" value="combine-following">You and {{ share.data.displayName }}'s Top Artists of the Month</option>
+          <option
+            v-if="share.data && share.data.graphType == 'following'"
+            value="combine-following"
+          >
+            You and {{ share.data.displayName }}'s Top Artists of the Month
+          </option>
           <option value="short_term">Top Artists of the Month</option>
-          <option v-if="share.data && share.data.graphType == 'short_term'" value="combine-short_term">You and {{ share.data.displayName }}'s Top Artists of the Month</option>
+          <option
+            v-if="share.data && share.data.graphType == 'short_term'"
+            value="combine-short_term"
+          >
+            You and {{ share.data.displayName }}'s Top Artists of the Month
+          </option>
           <option value="medium_term">Top Artists of the Year</option>
-          <option v-if="share.data && share.data.graphType == 'medium_term'" value="combine-medium_term">You and {{ share.data.displayName }}'s Top Artists of the Year</option>
+          <option
+            v-if="share.data && share.data.graphType == 'medium_term'"
+            value="combine-medium_term"
+          >
+            You and {{ share.data.displayName }}'s Top Artists of the Year
+          </option>
           <option value="long_term">Top Artists of All Time</option>
-          <option v-if="share.data && share.data.graphType == 'long_term'" value="combine-long_term">You and {{ share.data.displayName }}'s Top Artists of All Time</option>
-          <option v-if="share.data && share.data.graphType == 'following'" value="share">Artists {{ share.data.displayName }} Follows</option>
-          <option v-if="share.data && share.data.graphType == 'short_term'" value="share">{{ share.data.displayName }}'s Top Artists of the Month</option>
-          <option v-if="share.data && share.data.graphType == 'medium_term'" value="share">{{ share.data.displayName }}'s Top Artists of the Year</option>
-          <option v-if="share.data && share.data.graphType == 'long_term'" value="share">{{ share.data.displayName }}'s Top Artists of All Time</option>
+          <option
+            v-if="share.data && share.data.graphType == 'long_term'"
+            value="combine-long_term"
+          >
+            You and {{ share.data.displayName }}'s Top Artists of All Time
+          </option>
+          <option
+            v-if="share.data && share.data.graphType == 'following'"
+            value="share"
+          >
+            Artists {{ share.data.displayName }} Follows
+          </option>
+          <option
+            v-if="share.data && share.data.graphType == 'short_term'"
+            value="share"
+          >
+            {{ share.data.displayName }}'s Top Artists of the Month
+          </option>
+          <option
+            v-if="share.data && share.data.graphType == 'medium_term'"
+            value="share"
+          >
+            {{ share.data.displayName }}'s Top Artists of the Year
+          </option>
+          <option
+            v-if="share.data && share.data.graphType == 'long_term'"
+            value="share"
+          >
+            {{ share.data.displayName }}'s Top Artists of All Time
+          </option>
         </select>
         <select
           v-model="nodeType"
@@ -87,8 +127,8 @@
             Average Artist Popularity: {{ avgPopularity() }}%
           </p>
           <!-- just shows the logged in person/the other person' name -->
-          <UserInfo v-if="share.data" :me="share.data" />
           <UserInfo v-if="me" :me="me" />
+          <UserInfo v-if="share.data" :me="share.data" />
           <!--
             color by popularity button
           
@@ -107,7 +147,7 @@
                   type="checkbox"
                   id="toggleB"
                   v-model="colorByPopularity"
-                  @change="updateNodeColor"
+                  @change="updateNodeColor('popularity')"
                   class="sr-only"
                 />
                 <div class="block bg-base03 w-10 h-6 rounded-full"></div>
@@ -125,6 +165,50 @@
             >
               <p class="text-left">Less Popular</p>
               <p class="text-right">More Popular</p>
+            </div>
+          </div>
+          <!--
+            Color By User Toggle Switch
+          -->
+          <div
+            v-if="graph && nodeType != 'image' && share.data"
+            class="space-y-2 select-none flex flex-col"
+          >
+            <label
+              for="toggleC"
+              class="flex items-center cursor-pointer bg-base02 hover:bg-base02-tint py-1 px-2 rounded-md shadow-md"
+            >
+              <div class="relative">
+                <input
+                  type="checkbox"
+                  id="toggleC"
+                  v-model="colorByUser"
+                  @change="updateNodeColor('user') && updateNodeType()"
+                  class="sr-only"
+                />
+                <div class="block bg-base03 w-10 h-6 rounded-full"></div>
+                <div
+                  class="dot absolute left-1 top-1 bg-[#1f4a54] w-4 h-4 rounded-full transition"
+                ></div>
+              </div>
+              <div class="ml-3 font-semibold text-xs md:text-base">
+                Color by User
+              </div>
+            </label>
+            <div
+              v-if="colorByUser"
+              class="px-3 py-1 space-y-2 text-xs md:text-base bg-base02 rounded-md shadow-md"
+            >
+              <div class="flow-root">
+                <p class="text-left float-left">{{ this.me.display_name }}</p>
+                <div class="float-right rounded-full bg-yellow h-6 w-6"></div>
+              </div>
+              <div class="flow-root">
+                <p class="text-left float-left">
+                  {{ this.share.data.displayName }}
+                </p>
+                <div class="float-right rounded-full bg-cyan h-6 w-6"></div>
+              </div>
             </div>
           </div>
         </div>
@@ -146,9 +230,19 @@
           Logout
         </button>
       </div>
+      <button
+        v-if="share.code"
+        v-on:click="removeShareCode"
+        class="px-2 py-1 rounded-md bg-base01 text-base02 font-bold w-full shadow-md hover:shadow-lg"
+      >
+        Remove Share Code
+      </button>
     </div>
     <!-- share modal dialog -->
-    <div v-if="shareModal.view" class="fixed top-0 left-0 w-screen h-screen bg-[rgba(0,0,0,0.5)] grid place-items-center">
+    <div
+      v-if="shareModal.view"
+      class="fixed top-0 left-0 w-screen h-screen bg-[rgba(0,0,0,0.5)] grid place-items-center"
+    >
       <div class="rounded-md shadow-lg bg-base03 p-3 text-center text-base1">
         <h1 class="text-xl font-semibold">Share Your Graph</h1>
         <div v-if="shareModal.loading">
@@ -156,9 +250,16 @@
         </div>
         <div v-else>
           <p>Your graph is now available at</p>
-          <a class="select-none underline" :href="shareModal.url">{{ shareModal.url }}</a>
+          <a class="select-none underline" :href="shareModal.url">{{
+            shareModal.url
+          }}</a>
         </div>
-        <button class="bg-base02 mt-4 px-2 py-1 rounded-md" v-on:click="shareModal.view = false">Close</button>
+        <button
+          class="bg-base02 mt-4 px-2 py-1 rounded-md"
+          v-on:click="shareModal.view = false"
+        >
+          Close
+        </button>
       </div>
     </div>
   </div>
@@ -201,6 +302,7 @@ export default {
       graphType: "medium_term", // following | short_term | medium_term | long_term
       nodeType: "dot", // dot | image | text
       colorByPopularity: false,
+      colorByUser: false,
       currentArtist: null,
       shareModal: {
         view: false,
@@ -210,7 +312,7 @@ export default {
       share: {
         code: null,
         data: null,
-      }
+      },
     };
   },
   async mounted() {
@@ -222,27 +324,27 @@ export default {
         .catch((error) => {
           this.error = error;
         });
-
     }
-  
+
     this.share.code = localStorage.getItem("shareCode");
-    
+
     if (this.share.code) {
+      this.colorByUser = true;
+
       this.loading = "Loading... getting share data";
-      this.share.data = await getShareData(this.share.code)
-        .catch((error) => {
-          this.error = error;
-        });
+      this.share.data = await getShareData(this.share.code).catch((error) => {
+        this.error = error;
+      });
       this.loading = null;
-      
+
       if (this.share.data.displayName == this.me.display_name) {
         console.log(`You are viewing your own share code!`);
-      
+
         this.share.data = null;
         this.share.code = null;
+      } else {
+        this.graphType = `combine-${this.share.data.graphType}`;
       }
-
-      this.graphType = `combine-${this.share.data.graphType}`;
     }
 
     if (this.share.data || localStorage.getItem("userToken")) {
@@ -264,7 +366,7 @@ export default {
       document.getElementById("graph").innerHTML = null;
       this.currentArtist = null;
       this.genreToSortBy = null;
-      
+
       if (this.graphType == "following") {
         this.loading = "Loading... Getting the Users You Follow";
         this.nodes = await getFollowing().catch((error) => {
@@ -272,37 +374,46 @@ export default {
         });
       } else if (this.graphType.includes("_term")) {
         this.loading = "Loading... Getting Your Top Items";
-        this.nodes = await getTopOf(this.graphType.replace("combine-", "")).catch((error) => {
+        this.nodes = await getTopOf(
+          this.graphType.replace("combine-", "")
+        ).catch((error) => {
           this.error = error.message;
         });
       }
-      
+
       // add the current user's display name to all of their nodes
       if (this.nodes) {
         this.nodes.forEach((artist) => {
           artist.owners = [this.me.display_name];
         });
       }
-      
-      if (this.share.data && (this.graphType.includes("combine") || this.graphType.includes("share"))) {
+
+      if (
+        this.share.data &&
+        (this.graphType.includes("combine") || this.graphType.includes("share"))
+      ) {
         if (!this.nodes) {
           this.share.data.nodes.forEach((artist) => {
             artist.owners = [this.share.data.displayName];
           });
-        
+
           this.nodes = this.share.data.nodes;
         } else {
-          let shareIds = this.share.data.nodes.map((x) => { return x.id });
-        
+          let shareIds = this.share.data.nodes.map((x) => {
+            return x.id;
+          });
+
           // add owners to artists that you both share
           this.nodes.forEach((artist) => {
             if (shareIds.includes(artist.id)) {
               artist.owners.push(this.share.data.displayName);
             }
           });
-          
-          let nodeIds = this.nodes.map((x) => { return x.id; });
-          
+
+          let nodeIds = this.nodes.map((x) => {
+            return x.id;
+          });
+
           // add the other persons nodes if they aren't shared
           this.share.data.nodes.forEach((artist) => {
             if (!nodeIds.includes(artist.id)) {
@@ -317,10 +428,9 @@ export default {
       this.genres = this.buildGenreList(this.nodes);
 
       this.loading = "Loading... Building Links";
-      this.links = await getLinks(this.nodes)
-        .catch((error) => {
-          this.error = error;
-        });
+      this.links = await getLinks(this.nodes).catch((error) => {
+        this.error = error;
+      });
 
       this.loading = null;
       this.graph = ForceGraph3D();
@@ -377,9 +487,27 @@ export default {
       } else if (this.nodeType == "text") {
         this.graph.nodeThreeObject((node) => {
           const sprite = new SpriteText(node.name);
-          sprite.color = "#ffffff";
-          sprite.borderColor = "#002b36";
-          sprite.backgroundColor = "#002b36";
+
+          if (this.colorByUser) {
+            if (node.owners.length > 1) {
+              sprite.color = "#ffffff";
+              sprite.borderColor = "#859900";
+              sprite.backgroundColor = "#859900";
+            } else if (node.owners[0] == this.me.display_name) {
+              sprite.color = "#ffffff";
+              sprite.borderColor = "#b58900";
+              sprite.backgroundColor = "#b58900";
+            } else if (node.owners[0] == this.share.data.displayName) {
+              sprite.color = "#ffffff";
+              sprite.borderColor = "#2aa198";
+              sprite.backgroundColor = "#2aa198";
+            }
+          } else {
+            sprite.color = "#ffffff";
+            sprite.borderColor = "#002b36";
+            sprite.backgroundColor = "#002b36";
+          }
+
           sprite.borderWidth = 4;
           sprite.borderRadius = 4;
           sprite.textHeight = 8;
@@ -390,13 +518,27 @@ export default {
       }
     },
 
-    updateNodeColor() {
+    updateNodeColor(from) {
+      if (from == "popularity") {
+        this.colorByUser = false;
+      } else if (from == "user") {
+        this.colorByPopularity = false;
+      }
+
       this.graph.nodeColor((node) => {
         if (this.colorByPopularity) {
           let saturation = node.popularity;
           let hue = (saturation / 100) * 360;
 
           return `hsl(${hue},${saturation}%,50%)`;
+        } else if (this.colorByUser) {
+          if (node.owners.length > 1) {
+            return "#859900";
+          } else if (node.owners[0] == this.me.display_name) {
+            return "#b58900";
+          } else if (node.owners[0] == this.share.data.displayName) {
+            return "#2aa198";
+          }
         } else {
           return "#ffffff";
         }
@@ -429,7 +571,7 @@ export default {
 
       return commonGenres;
     },
-    
+
     updateGenreSort() {
       if (
         this.genreToSortBy == "null" ||
@@ -485,17 +627,28 @@ export default {
 
       return Math.round(average);
     },
-    
+
     async shareGraph() {
       this.shareModal.loading = "Uploading Data";
       this.shareModal.view = true;
-      
+
       // upload data and return URL
-      let code = await uploadData(this.nodes, this.me.display_name, this.me.id, this.graphType);
-      
+      let code = await uploadData(
+        this.nodes,
+        this.me.display_name,
+        this.me.id,
+        this.graphType
+      );
+
       this.shareModal.url = `${window.location.origin}/?share=${code}`;
       this.shareModal.loading = null;
-    }
+    },
+
+    removeShareCode() {
+      localStorage.removeItem("shareCode");
+
+      window.location = window.location.origin;
+    },
   },
 };
 </script>

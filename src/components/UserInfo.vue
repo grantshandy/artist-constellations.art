@@ -23,15 +23,15 @@ export default {
     return {
       displayName: null,
       share: false,
-    }
+    };
   },
   created() {
     if (this.me.displayName) {
-      this.displayName = this.me.displayName;  
+      this.displayName = this.me.displayName;
       this.share = true;
     } else if (this.me.display_name) {
       this.displayName = this.me.display_name;
     }
-  }
+  },
 };
 </script>

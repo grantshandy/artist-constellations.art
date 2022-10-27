@@ -62,7 +62,7 @@ async function getFollowingFragment(last) {
   } else {
     url = `https://api.spotify.com/v1/me/following?type=artist&after=${last}&limit=50`;
   }
-  
+
   let response = await fetch(url, {
     headers: {
       Authorization: `Bearer ${localStorage.getItem("userToken")}`,

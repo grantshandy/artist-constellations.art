@@ -14,8 +14,10 @@ export async function uploadData(nodes, displayName, userId, graphType) {
     date: new Date().toISOString(),
   };
 
-  let filename = Base64.stringify(sha1(`${userId}${graphType}`)).slice(0, 7)
-    .replace("/", "A").toUpperCase();
+  let filename = Base64.stringify(sha1(`${userId}${graphType}`))
+    .slice(0, 7)
+    .replace("/", "A")
+    .toUpperCase();
 
   let sha = await checkIfFileExists(filename);
 
@@ -23,11 +25,10 @@ export async function uploadData(nodes, displayName, userId, graphType) {
 
   await axios({
     method: "PUT",
-    url:
-      `https://api.github.com/repos/artistconstellations-db/database/contents/${filename}`,
+    url: `https://api.github.com/repos/artistconstellations-db/database/contents/${filename}`,
     headers: {
-      "Accept": "application/vnd.github+json",
-      "Authorization": `Bearer ${token}`,
+      Accept: "application/vnd.github+json",
+      Authorization: `Bearer ${token}`,
     },
     data: {
       message: `Adding ${graphType} for ${displayName}`,
@@ -44,11 +45,10 @@ export async function checkIfFileExists(filename) {
 
   return await axios({
     method: "GET",
-    url:
-      `https://api.github.com/repos/artistconstellations-db/database/contents/${filename}`,
+    url: `https://api.github.com/repos/artistconstellations-db/database/contents/${filename}`,
     headers: {
-      "Accept": "application/vnd.github+json",
-      "Authorization": `Bearer ${token}`,
+      Accept: "application/vnd.github+json",
+      Authorization: `Bearer ${token}`,
     },
   })
     .catch((error) => {
@@ -74,12 +74,11 @@ export async function getShareData(code) {
 
   let response = await axios({
     response: "GET",
-    url:
-      `https://api.github.com/repos/artistconstellations-db/database/contents/${code}`,
+    url: `https://api.github.com/repos/artistconstellations-db/database/contents/${code}`,
 
     headers: {
-      "Accept": "application/vnd.github+json",
-      "Authorization": `Bearer ${token}`,
+      Accept: "application/vnd.github+json",
+      Authorization: `Bearer ${token}`,
     },
     responseType: "text",
   });
@@ -106,7 +105,8 @@ export function simplifyNodes(nodes) {
 }
 
 function generateHex(str) {
-  return str.split("")
+  return str
+    .split("")
     .map((c) => c.charCodeAt(0).toString(16).padStart(2, "0"))
     .join("");
 }

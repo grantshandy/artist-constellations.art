@@ -5,7 +5,11 @@
   -->
   <div class="w-screen h-screen flex">
     <LoginPage v-if="!userToken && !shareCode" class="grow" />
-    <ShareCodePage v-if="shareCode && !userToken" :shareCode="shareCode" class="grow" />
+    <ShareCodePage
+      v-if="shareCode && !userToken"
+      :shareCode="shareCode"
+      class="grow"
+    />
     <MainPage v-if="userToken" class="grow" />
   </div>
 </template>
@@ -64,7 +68,7 @@ export default {
 
     // print the user token in the console
     console.log(`User Token: ${this.userToken}`);
-    
+
     // get sharecode from url
     let shareCode = window.location.search.split("=")[1];
 
@@ -72,11 +76,10 @@ export default {
       shareCode = shareCode.slice(0, 7);
 
       console.log(`Share Code: ${shareCode}`);
-    
+
       localStorage.setItem("shareCode", shareCode);
       this.shareCode = shareCode;
     }
-    
-  }
+  },
 };
 </script>
