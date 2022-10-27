@@ -1,16 +1,18 @@
 <template>
   <div
-    class="w-full flow-root px-2 py-1 rounded-md bg-base02 space-x-3 select-none shadow-md items-center"
+    class="w-full inline-flex px-2 py-1 rounded-md bg-base02 space-x-3 select-none shadow-md items-center"
   >
-    <p class="float-left align-middle font-bold text-sm md:text-base">
-      <span v-if="share">Other</span> User:
-      {{ displayName.charAt(0).toUpperCase() + displayName.slice(1) }}
-    </p>
+    <div class="h-full flex-1">
+      <p class="align-middle font-bold text-sm md:text-base">
+        <span v-if="share">Other</span> User:
+        {{ displayName.charAt(0).toUpperCase() + displayName.slice(1) }}
+      </p>
+    </div>
     <img
       v-if="me.images"
       :src="me.images[0].url"
       alt="Profile Picture"
-      class="float-right w-6 h-6 rounded-full"
+      class="w-6 h-6 rounded-full"
     />
   </div>
 </template>

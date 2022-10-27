@@ -1,6 +1,6 @@
 <template>
   <div
-    class="flex bg-base03 text-base0 grid grid-cols-1 md:grid-cols-5 grid-rows-6 md:grid-rows-1 p-3 md:p-4 lg:p-6 xl:p-10 gap-3 md:gap-4 lg:gap-6 xl:gap-10"
+    class="flex bg-base03 text-base0 grid grid-cols-1 md:grid-cols-5 grid-rows-6 md:grid-rows-1 p-2 md:p-4 lg:p-6 xl:p-10 gap-3 md:gap-4 lg:gap-6 xl:gap-10"
   >
     <!-- main block -->
     <div
@@ -10,65 +10,7 @@
       <div
         class="grow-0 gap-0.5 w-full h-8 md:h-10 lg:h-12 grid grid-cols-2 md:grid-cols-3 text-sm md:text-md bg-transparent"
       >
-        <select
-          v-model="graphType"
-          v-on:change="buildGraph()"
-          name="graphType"
-          class="filter hidden md:inline-flex rounded-tl-md"
-        >
-          <option value="following">Artists You Follow</option>
-          <option
-            v-if="share.data && share.data.graphType == 'following'"
-            value="combine-following"
-          >
-            You and {{ share.data.displayName }}'s Top Artists of the Month
-          </option>
-          <option value="short_term">Top Artists of the Month</option>
-          <option
-            v-if="share.data && share.data.graphType == 'short_term'"
-            value="combine-short_term"
-          >
-            You and {{ share.data.displayName }}'s Top Artists of the Month
-          </option>
-          <option value="medium_term">Top Artists of the Year</option>
-          <option
-            v-if="share.data && share.data.graphType == 'medium_term'"
-            value="combine-medium_term"
-          >
-            You and {{ share.data.displayName }}'s Top Artists of the Year
-          </option>
-          <option value="long_term">Top Artists of All Time</option>
-          <option
-            v-if="share.data && share.data.graphType == 'long_term'"
-            value="combine-long_term"
-          >
-            You and {{ share.data.displayName }}'s Top Artists of All Time
-          </option>
-          <option
-            v-if="share.data && share.data.graphType == 'following'"
-            value="share"
-          >
-            Artists {{ share.data.displayName }} Follows
-          </option>
-          <option
-            v-if="share.data && share.data.graphType == 'short_term'"
-            value="share"
-          >
-            {{ share.data.displayName }}'s Top Artists of the Month
-          </option>
-          <option
-            v-if="share.data && share.data.graphType == 'medium_term'"
-            value="share"
-          >
-            {{ share.data.displayName }}'s Top Artists of the Year
-          </option>
-          <option
-            v-if="share.data && share.data.graphType == 'long_term'"
-            value="share"
-          >
-            {{ share.data.displayName }}'s Top Artists of All Time
-          </option>
-        </select>
+        <GraphTypeFilter :share="share" :graph-type="graphType" v-on:update="updateGraphType" class="hidden md:inline-flex rounded-tl-md" />
         <select
           v-model="nodeType"
           v-on:change="updateNodeType()"
@@ -97,16 +39,7 @@
         <div ref="graph" id="graph" class="grow select-none"></div>
       </div>
       <!-- bottom filter -->
-      <select
-        v-model="graphType"
-        v-on:change="buildGraph()"
-        class="grow-0 filter md:hidden w-full h-8 rounded-br-md rounded-bl-md"
-      >
-        <option value="following">Artists You Follow</option>
-        <option value="short_term">Top Artists of the past Month</option>
-        <option value="medium_term">Top Artists of the past Year</option>
-        <option value="long_term">Top Artists of All Time</option>
-      </select>
+      <GraphTypeFilter :share="share" :graph-type="graphType" v-on:update="updateGraphType" class="md:hidden h-8 rounded-br-md rounded-bl-md" />
     </div>
     <!-- details block -->
     <div
@@ -122,10 +55,6 @@
         <div
           class="bg-base03 rounded-md p-2 space-y-2 rounded-md shadow-md overflow-y-auto"
         >
-          <!-- artist popularity text -->
-          <p class="text-sm md:text-base text-center font-bold mx-1 mb-2">
-            Average Artist Popularity: {{ avgPopularity() }}%
-          </p>
           <!-- just shows the logged in person/the other person' name -->
           <UserInfo v-if="me" :me="me" />
           <UserInfo v-if="share.data" :me="share.data" />
@@ -240,35 +169,16 @@
       </div>
     </div>
     <!-- share modal dialog -->
-    <div
-      v-if="shareModal.view"
-      class="fixed top-0 left-0 w-screen h-screen bg-[rgba(0,0,0,0.5)] grid place-items-center"
-    >
-      <div class="rounded-md shadow-lg bg-base03 p-3 text-center text-base1">
-        <h1 class="text-xl font-semibold">Share Your Graph</h1>
-        <div v-if="shareModal.loading">
-          <p>Loading: {{ shareModal.loading }}...</p>
-        </div>
-        <div v-else>
-          <p>Your graph is now available at</p>
-          <a class="select-none underline" :href="shareModal.url">{{
-            shareModal.url
-          }}</a>
-        </div>
-        <button
-          class="bg-base02 mt-4 px-2 py-1 rounded-md"
-          v-on:click="shareModal.view = false"
-        >
-          Close
-        </button>
-      </div>
-    </div>
+    <ShareModal v-if="shareModal.view" :share-modal="shareModal" v-on:close="shareModal.view = false"/>
   </div>
 </template>
 
 <script>
 import UserInfo from "./UserInfo.vue";
 import ArtistInfo from "./ArtistInfo.vue";
+
+import ShareModal from "./ShareModal.vue";
+import GraphTypeFilter from "./GraphTypeFilter.vue";
 
 import {
   getFollowing,
@@ -289,6 +199,8 @@ export default {
   components: {
     UserInfo,
     ArtistInfo,
+    GraphTypeFilter,
+    ShareModal,
   },
   data() {
     return {
@@ -300,7 +212,7 @@ export default {
       genres: [],
       genreToSortBy: null,
       graph: null,
-      graphType: "medium_term", // following | short_term | medium_term | long_term
+      graphType: "medium_term", // following | short_term | medium_term | long_term | available
       nodeType: "dot", // dot | image | text
       colorByPopularity: false,
       colorByUser: false,
@@ -368,7 +280,7 @@ export default {
       this.currentArtist = null;
       this.genreToSortBy = null;
 
-      if (this.graphType == "following") {
+      if (this.graphType.includes("following")) {
         this.loading = "Loading... Getting the Users You Follow";
         this.nodes = await getFollowing().catch((error) => {
           this.error = error.message;
@@ -380,6 +292,33 @@ export default {
         ).catch((error) => {
           this.error = error.message;
         });
+      } else if (this.graphType.includes("available")) {
+        this.loading = "Loading... Getting Following";
+        let following = await getFollowing().catch((error) => {
+          this.error = error.message;
+        });
+        
+        this.loading = "Loading... Getting Top Artists of the Past Month";
+        let shortTerm = await getTopOf("short_term").catch((error) => {
+          this.error = error.message;
+        });
+        
+        
+        this.loading = "Loading... Getting Top Artists of the Past Year";
+        let mediumTerm = await getTopOf("medium_term").catch((error) => {
+          this.error = error.message;
+        });
+        
+        
+        this.loading = "Loading... Getting Top Artists of All Time";
+        let longTerm = await getTopOf("long_term").catch((error) => {
+          this.error = error.message;
+        });
+        
+        this.loading = null;
+        this.nodes = dedupArray([...following, ...shortTerm, ...mediumTerm, ...longTerm], "id");
+        
+        console.log(this.nodes.length);
       }
 
       // add the current user's display name to all of their nodes
@@ -411,13 +350,13 @@ export default {
             }
           });
 
-          let nodeIds = this.nodes.map((x) => {
+          let userIds = this.nodes.map((x) => {
             return x.id;
           });
 
           // add the other persons nodes if they aren't shared
           this.share.data.nodes.forEach((artist) => {
-            if (!nodeIds.includes(artist.id)) {
+            if (!userIds.includes(artist.id)) {
               artist.owners = [this.share.data.displayName];
 
               this.nodes.push(artist);
@@ -650,8 +589,23 @@ export default {
 
       window.location = window.location.origin;
     },
+    
+    updateGraphType(type) {
+      this.graphType = type;
+      this.buildGraph();
+    }
   },
 };
+
+// thank you stack overflow!
+function dedupArray(array, field) {
+  const dedupArray = array.filter((value, index, self) =>
+    index === self.findIndex((t) => (
+      t[field] === value[field]
+    ))
+  )
+  return dedupArray;
+}
 </script>
 
 <style scoped>
