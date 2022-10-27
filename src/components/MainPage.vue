@@ -218,10 +218,18 @@
       <!-- logout/share button -->
       <div class="grid grid-cols-2 md:grid-cols-1 gap-2">
         <button
+          v-if="!share.code"
           v-on:click="shareGraph"
           class="px-2 py-1 rounded-md bg-base01 text-base03 font-bold w-full shadow-md hover:shadow-lg"
         >
           Share
+        </button>
+        <button
+          v-if="share.code"
+          v-on:click="removeShareCode"
+          class="px-2 py-1 rounded-md bg-base01 text-base03 font-bold w-full shadow-md hover:shadow-lg"
+        >
+          Remove Share Code
         </button>
         <button
           v-on:click="logout"
@@ -230,13 +238,6 @@
           Logout
         </button>
       </div>
-      <button
-        v-if="share.code"
-        v-on:click="removeShareCode"
-        class="px-2 py-1 rounded-md bg-base01 text-base02 font-bold w-full shadow-md hover:shadow-lg"
-      >
-        Remove Share Code
-      </button>
     </div>
     <!-- share modal dialog -->
     <div
