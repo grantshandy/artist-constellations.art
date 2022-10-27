@@ -10,7 +10,12 @@
       <div
         class="grow-0 gap-0.5 w-full h-8 md:h-10 lg:h-12 grid grid-cols-2 md:grid-cols-3 text-sm md:text-md bg-transparent"
       >
-        <GraphTypeFilter :share="share" :graph-type="graphType" v-on:update="updateGraphType" class="hidden md:inline-flex rounded-tl-md" />
+        <GraphTypeFilter
+          :share="share"
+          :graph-type="graphType"
+          v-on:update="updateGraphType"
+          class="hidden md:inline-flex rounded-tl-md"
+        />
         <select
           v-model="nodeType"
           v-on:change="updateNodeType()"
@@ -39,7 +44,12 @@
         <div ref="graph" id="graph" class="grow select-none"></div>
       </div>
       <!-- bottom filter -->
-      <GraphTypeFilter :share="share" :graph-type="graphType" v-on:update="updateGraphType" class="md:hidden h-8 rounded-br-md rounded-bl-md" />
+      <GraphTypeFilter
+        :share="share"
+        :graph-type="graphType"
+        v-on:update="updateGraphType"
+        class="md:hidden h-8 rounded-br-md rounded-bl-md"
+      />
     </div>
     <!-- details block -->
     <div
@@ -147,18 +157,18 @@
       <!-- logout/share button -->
       <div class="grid grid-cols-2 md:grid-cols-1 gap-2">
         <button
-          v-if="!share.code"
-          v-on:click="shareGraph"
-          class="px-2 py-1 rounded-md bg-base01 text-base03 font-bold w-full shadow-md hover:shadow-lg"
-        >
-          Share
-        </button>
-        <button
           v-if="share.code"
           v-on:click="removeShareCode"
           class="px-2 py-1 rounded-md bg-base01 text-base03 font-bold w-full shadow-md hover:shadow-lg"
         >
           Remove Share Code
+        </button>
+        <button
+          v-else
+          v-on:click="shareGraph"
+          class="px-2 py-1 rounded-md bg-base01 text-base03 font-bold w-full shadow-md hover:shadow-lg"
+        >
+          Share
         </button>
         <button
           v-on:click="logout"
@@ -169,7 +179,11 @@
       </div>
     </div>
     <!-- share modal dialog -->
-    <ShareModal v-if="shareModal.view" :share-modal="shareModal" v-on:close="shareModal.view = false"/>
+    <ShareModal
+      v-if="shareModal.view"
+      :share-modal="shareModal"
+      v-on:close="shareModal.view = false"
+    />
   </div>
 </template>
 
@@ -297,28 +311,27 @@ export default {
         let following = await getFollowing().catch((error) => {
           this.error = error.message;
         });
-        
+
         this.loading = "Loading... Getting Top Artists of the Past Month";
         let shortTerm = await getTopOf("short_term").catch((error) => {
           this.error = error.message;
         });
-        
-        
+
         this.loading = "Loading... Getting Top Artists of the Past Year";
         let mediumTerm = await getTopOf("medium_term").catch((error) => {
           this.error = error.message;
         });
-        
-        
+
         this.loading = "Loading... Getting Top Artists of All Time";
         let longTerm = await getTopOf("long_term").catch((error) => {
           this.error = error.message;
         });
-        
+
         this.loading = null;
-        this.nodes = dedupArray([...following, ...shortTerm, ...mediumTerm, ...longTerm], "id");
-        
-        console.log(this.nodes.length);
+        this.nodes = dedupArray(
+          [...following, ...shortTerm, ...mediumTerm, ...longTerm],
+          "id"
+        );
       }
 
       // add the current user's display name to all of their nodes
@@ -589,21 +602,20 @@ export default {
 
       window.location = window.location.origin;
     },
-    
+
     updateGraphType(type) {
       this.graphType = type;
       this.buildGraph();
-    }
+    },
   },
 };
 
 // thank you stack overflow!
 function dedupArray(array, field) {
-  const dedupArray = array.filter((value, index, self) =>
-    index === self.findIndex((t) => (
-      t[field] === value[field]
-    ))
-  )
+  const dedupArray = array.filter(
+    (value, index, self) =>
+      index === self.findIndex((t) => t[field] === value[field])
+  );
   return dedupArray;
 }
 </script>

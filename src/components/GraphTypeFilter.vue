@@ -38,7 +38,7 @@
     <option value="available">All Available Artists</option>
     <option
       v-if="share && share.data && share.data.graphType == 'long_term'"
-      value="available"
+      value="combine-available"
     >
       You and {{ capitalize(share.data.displayName) }}'s Available Artists
     </option>
@@ -65,6 +65,12 @@
       value="share"
     >
       {{ capitalize(share.data.displayName) }}'s Top Artists of All Time
+    </option>
+    <option
+      v-if="share && share.data && share.data.graphType == 'available'"
+      value="share"
+    >
+      All of {{ capitalize(share.data.displayName) }}'s Available Artist
     </option>
   </select>
 </template>
