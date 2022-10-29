@@ -24,11 +24,7 @@ module.exports = {
       green: "#859900",
     },
     fontFamily: {
-      sans: [
-        '"Segoe UI"',
-        'Roboto',
-        'sans-serif',
-      ],
+      sans: ['"Segoe UI"', "Roboto", "sans-serif"],
     },
   },
   plugins: [require("tailwind-scrollbar")],

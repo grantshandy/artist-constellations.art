@@ -20,7 +20,12 @@
         <p v-if="userArtists.length > 0">{{ userArtists.length }} Artists</p>
         <p v-if="me">Average Popularity: {{ avgPopularity(userArtists) }}%</p>
       </div>
-      <div v-if="(me.graphType.includes('combine') || me.graphType == 'share') && share.displayName">
+      <div
+        v-if="
+          (me.graphType.includes('combine') || me.graphType == 'share') &&
+          share.displayName
+        "
+      >
         <h2 class="text-xl font-semibold">
           Information About
           {{
@@ -62,7 +67,7 @@
           Where is the Code!?
         </h3>
         <p class="text-sm md:text-base">
-          On 
+          On
           <a
             class="underline"
             href="https://github.com/grantshandy/artist-constellations.art"

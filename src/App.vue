@@ -4,20 +4,14 @@
     The site always takes up the full size of the screen.
   -->
   <div class="w-screen h-screen flex">
-    <LoginPage v-if="!userToken && !shareCode" class="grow" />
-    <ShareCodePage
-      v-if="shareCode && !userToken"
-      :shareCode="shareCode"
-      class="grow"
-    />
-    <MainPage v-if="userToken" class="grow" />
+    <LoginPage v-if="!userToken" :share-code="shareCode" class="grow" />
+    <MainPage v-else class="grow" />
   </div>
 </template>
 
 <script>
 import LoginPage from "./components/LoginPage.vue";
 import MainPage from "./components/MainPage.vue";
-import ShareCodePage from "./components/ShareCodePage.vue";
 
 import { logout } from "./spotifyApi.js";
 
@@ -26,7 +20,6 @@ export default {
   components: {
     LoginPage,
     MainPage,
-    ShareCodePage,
   },
   data() {
     return {
