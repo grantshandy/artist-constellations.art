@@ -39,7 +39,6 @@ export default {
   },
   methods: {
     linkToClipboard() {
-      console.log("Copying to the clipboard!");
       navigator.clipboard.writeText(this.shareModal.url);
     },
   },

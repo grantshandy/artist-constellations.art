@@ -1,5 +1,5 @@
 <template>
-  <div class="overflow-y-auto rounded-md shadow-md">
+  <div class="overflow-y-auto custom-scrollbar rounded-md shadow-md">
     <div class="rounded-md bg-base03 shadow-md py-2 space-y-2 text-center">
       <a
         v-bind:href="'https://open.spotify.com/artist/' + artist.id"
@@ -15,7 +15,7 @@
         />
       </a>
       <p class="text-sm italic">Popularity: {{ artist.popularity }}%</p>
-      <div v-if="artist.owners.length > 0">
+      <div v-if="isShare && artist.owners.length > 0">
         <p class="font-bold">Owners:</p>
         <div v-for="owner in artist.owners" :key="owner">
           <p class="text-sm">• {{ owner }}</p>
@@ -49,7 +49,11 @@ export default {
   data() {
     return {
       topTracks: null,
+      isShare: null,
     };
+  },
+  mounted() {
+    this.isShare = localStorage.getItem("shareCode");
   },
   methods: {
     async revealTopTracks() {

@@ -117,12 +117,14 @@ export async function getLinks(nodes) {
     idArray.push(artist.id);
   });
 
-  let limit = pLimit(2);
+  let limit = pLimit(1);
 
   // download all relations concurrently
   let relatedArtists = await Promise.all(
     nodes.map((artist) => limit(() => getRelated(artist)))
   ).catch((error) => {
+    console.log(error);
+
     throw error;
   });
 

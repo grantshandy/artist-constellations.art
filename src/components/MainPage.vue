@@ -59,13 +59,13 @@
       <p v-if="error" class="font-bold text-sm text-red grow">{{ error }}</p>
       <div
         v-if="graph"
-        class="grow gap-2 rounded-md grid grid-cols-2 md:flex md:flex-col overflow-y-auto"
+        class="grow gap-2 rounded-md grid grid-cols-2 md:flex md:flex-col overflow-y-auto custom-scrollbar"
       >
         <!-- info block -->
         <div
-          class="bg-base03 rounded-md p-2 space-y-2 rounded-md shadow-md overflow-y-auto"
+          class="bg-base03 rounded-md p-2 space-y-2 rounded-md shadow-md overflow-y-auto custom-scrollbar"
         >
-          <!-- just shows the logged in person/the other person' name -->
+          <!-- just shows the logged in the other person' name -->
           <UserInfo v-if="me" :me="me" />
           <UserInfo v-if="share.data" :me="share.data" />
           <!--
@@ -110,7 +110,7 @@
             Color By User Toggle Switch
           -->
           <div
-            v-if="graph && nodeType != 'image' && share.data"
+            v-if="graph && nodeType != 'image' && graphType.includes('combine')"
             class="space-y-2 select-none flex flex-col"
           >
             <label
@@ -155,7 +155,13 @@
         <ArtistInfo v-if="currentArtist" :artist="currentArtist" />
       </div>
       <!-- logout/share button -->
-      <div class="grid grid-cols-2 md:grid-cols-1 gap-2">
+      <div class="grid grid-cols-3 md:grid-cols-1 gap-2">
+        <button
+          v-on:click="infoModal = true"
+          class="px-2 py-1 rounded-md bg-base01 text-base03 font-bold w-full shadow-md hover:shadow-lg"
+        >
+          Info
+        </button>
         <button
           v-if="share.code"
           v-on:click="removeShareCode"
@@ -184,15 +190,24 @@
       :share-modal="shareModal"
       v-on:close="shareModal.view = false"
     />
+    <!-- info modal dialog -->
+    <InfoModal
+      v-if="infoModal"
+      :share="share.data"
+      :me="me"
+      :nodes="nodes"
+      v-on:close="infoModal = false"
+    />
   </div>
 </template>
 
 <script>
 import UserInfo from "./UserInfo.vue";
 import ArtistInfo from "./ArtistInfo.vue";
+import GraphTypeFilter from "./GraphTypeFilter.vue";
 
 import ShareModal from "./ShareModal.vue";
-import GraphTypeFilter from "./GraphTypeFilter.vue";
+import InfoModal from "./InfoModal.vue";
 
 import {
   getFollowing,
@@ -215,6 +230,7 @@ export default {
     ArtistInfo,
     GraphTypeFilter,
     ShareModal,
+    InfoModal,
   },
   data() {
     return {
@@ -240,6 +256,7 @@ export default {
         code: null,
         data: null,
       },
+      infoModal: false,
     };
   },
   async mounted() {
@@ -340,6 +357,9 @@ export default {
           artist.owners = [this.me.display_name];
         });
       }
+
+      // add all the user's nodes to me.nodes for the info stats section
+      this.me.graphType = this.graphType;
 
       if (
         this.share.data &&
