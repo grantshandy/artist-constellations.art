@@ -20,7 +20,7 @@
         <p v-if="userArtists.length > 0">{{ userArtists.length }} Artists</p>
         <p v-if="me">Average Popularity: {{ avgPopularity(userArtists) }}%</p>
       </div>
-      <div v-if="me.graphType.includes('combine') || me.graphType == 'share'">
+      <div v-if="(me.graphType.includes('combine') || me.graphType == 'share') && share.displayName">
         <h2 class="text-xl font-semibold">
           Information About
           {{
@@ -62,7 +62,7 @@
           Where is the Code!?
         </h3>
         <p class="text-sm md:text-base">
-          On the
+          On 
           <a
             class="underline"
             href="https://github.com/grantshandy/artist-constellations.art"
@@ -71,7 +71,7 @@
         </p>
       </div>
       <hr class="my-2 text-base0 rounded-md" />
-      <div class="flow-root">
+      <div class="flow-root mt-auto">
         <button
           v-on:click="$emit('close')"
           class="float-right font-bold bg-base02 px-2 py-1 rounded-md"
@@ -103,7 +103,7 @@ export default {
         this.userArtists.push(artist);
       }
 
-      if (artist.owners.includes(this.share.displayName)) {
+      if (this.share && artist.owners.includes(this.share.displayName)) {
         this.shareArtists.push(artist);
       }
     });
