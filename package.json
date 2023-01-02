@@ -20,5 +20,8 @@
     "tslib": "^2.4.1",
     "typescript": "^4.9.3",
     "vite": "^4.0.0"
+  },
+  "dependencies": {
+    "@statsfm/spotify.js": "^1.10.0"
   }
 }

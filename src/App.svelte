@@ -2,12 +2,12 @@
   import LoginPage from "./LoginPage.svelte";
   import Dashboard from "./Dashboard.svelte";
 
-  import { checkAccessToken } from "./account";
+  import { manageAccessToken } from "./account";
 
-  const accessToken = checkAccessToken(window.location);
+  const accessToken = manageAccessToken(window.location);
 </script>
 
-<main>
+<main class="bg-slate-900 text-slate-100">
   {#if !accessToken}
     <LoginPage />
   {:else}

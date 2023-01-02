@@ -2,7 +2,15 @@
 @tailwind components;
 @tailwind utilities;
 
+.interactable {
+  @apply bg-slate-700 hover:bg-slate-600 border border-slate-600 hover:border-slate-500
+}
+
 .button-1 {
-  @apply bg-slate-700 hover:bg-slate-600 border border-slate-600 hover:border-slate-500 px-2 py-1 rounded-lg font-semibold
+  @apply interactable px-2 py-1 rounded-lg font-semibold select-none;
+}
+
+.panel {
+  @apply bg-slate-800 rounded-md shadow-lg h-full border border-slate-700;
 }
   
