@@ -1,56 +1,48 @@
 <script lang="ts">
-  import { logout } from "./account";
+  import { logout, spotify } from "./account";
+  import { NodeStyle, GraphType, updateGraphType, updateNodeStyle } from "./graph";
 
-  enum TimeRange {
-    Month,
-    Year,
-    All,
-    Following,
-    Available,
+  let graphType = GraphType.TopYear;
+  let nodeStyle = NodeStyle.Dot;
+
+  $: {
+    updateGraphType(graphType, $spotify);
   }
 
-  const timeRangeModel = [
-    { id: TimeRange.Month, text: "Past Month" },
-    { id: TimeRange.Year, text: "Past Year" },
-    { id: TimeRange.All, text: "All Time" },
-    { id: TimeRange.Following, text: "Following" },
-    { id: TimeRange.Available, text: "All Available" },
-  ];
-
-  enum ArtistView {
-    Dot,
-    Picture,
-    Text,
+  $: {
+    updateNodeStyle(nodeStyle);
   }
-
-  const artistViewModel = [
-    { id: ArtistView.Dot, text: "Dot" },
-    { id: ArtistView.Picture, text: "Picture" },
-    { id: ArtistView.Text, text: "Text" },
-  ];
-
-  export const artistView = ArtistView.Dot;
-  export const timeRange = TimeRange.Month;
 </script>
 
 <main class="panel flex flex-col">
   <div class="grow p-2 overflow-y-auto">
-    <div class="border p-1 rounded-lg border-slate-700">
-      <div class="inline-flex md:block">
-        <p>Time Range:</p>
-        <select class="interactable rounded-md w-full" value={timeRange}>
-          {#each timeRangeModel as option}
-            <option value={option.id}>{option.text}</option>
-          {/each}
-        </select>
-      </div>
-      <div class="inline-flex md:block">
-        <p>Artist View:</p>
-        <select class="interactable rounded-md w-full">
-          <option value={ArtistView.Dot}>Dots</option>
-          <option value={ArtistView.Picture}>Pictures</option>
-          <option value={ArtistView.Text}>Text</option>
-        </select>
+    <div class="border rounded-lg border-slate-700 space-y-1">
+      <h2 class="text-center text-xl font-semibold mt-1">Settings</h2>
+      <hr class="border-t-1 border-t-slate-700" />
+      <div class="px-2 pt-1 pb-2 space-y-1">
+        <div class="w-full inline-flex md:block">
+          <p>Artists Shown:</p>
+          <select value={graphType}>
+            <option value={GraphType.TopMonth}
+              >Your Top of the Past Month</option
+            >
+            <option value={GraphType.TopYear}>Your Top of the Past Year</option>
+            <option value={GraphType.TopAllTime}
+              >Your Top of the All Time</option
+            >
+            <option value={GraphType.Following}>Artist you Follow</option>
+            <option value={GraphType.AllAvailable}>All Available Artists</option
+            >
+          </select>
+        </div>
+        <div class="w-full inline-flex md:block">
+          <p>Artist Style:</p>
+          <select value={nodeStyle}>
+            <option value={NodeStyle.Dot}>Dots</option>
+            <option value={NodeStyle.Picture}>Pictures</option>
+            <option value={NodeStyle.Text}>Text</option>
+          </select>
+        </div>
       </div>
     </div>
   </div>

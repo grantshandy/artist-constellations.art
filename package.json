@@ -22,6 +22,7 @@
     "vite": "^4.0.0"
   },
   "dependencies": {
-    "@statsfm/spotify.js": "^1.10.0"
+    "@statsfm/spotify.js": "^1.10.0",
+    "force-graph": "^1.42.16"
   }
 }

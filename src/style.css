@@ -13,4 +13,11 @@
 .panel {
   @apply bg-slate-800 rounded-md shadow-lg h-full border border-slate-700;
 }
-  
+
+select {
+  @apply interactable rounded-md w-full md:p-1;
+}
+
+select:focus {
+  outline: 0px !important;
+}

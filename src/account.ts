@@ -1,3 +1,8 @@
+import { SpotifyAPI } from "@statsfm/spotify.js";
+import { writable } from "svelte/store";
+
+export const spotify = writable(manageAccessToken());
+
 export function login() {
   window.location.href =
     `https://accounts.spotify.com/authorize?client_id=2ed0e6e8b06842fb854cb15e1690a7b5&response_type=token&redirect_uri=${window.location.origin}&scope=user-follow-read user-top-read&show_dialog=true`;
@@ -8,9 +13,9 @@ export function logout() {
   window.location.href = window.location.origin;
 }
 
-export function manageAccessToken(location: Location): boolean {
+export function manageAccessToken(): SpotifyAPI {
   const paramsToken: string | null = new URLSearchParams(
-    location.hash.substring(1),
+    window.location.hash.substring(1),
   ).get(
     "access_token",
   );
@@ -23,11 +28,14 @@ export function manageAccessToken(location: Location): boolean {
       window.location.pathname +
         window.location.search,
     );
-
-    return true;
   }
 
-  return localStorage.getItem("access_token") ? true : false;
+  const api = new SpotifyAPI({
+    accessToken: localStorage.getItem("access_token"),
+    retry: true,
+  });
+
+  return api;
 }
 
 export function getAccessToken(): string {
