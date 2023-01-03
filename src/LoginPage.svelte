@@ -2,7 +2,7 @@
 	import { setShareCode, login } from "./account";
 </script>
 
-<main class="min-h-screen p-3 md:p-0">
+<main class="min-h-screen p-3">
 	<div
 		class="p-3 mx-auto md:w-2/3 lg:w-1/2 bg-slate-800 rounded-lg shadow-lg border border-slate-700 text-center space-y-2"
 	>

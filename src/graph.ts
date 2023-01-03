@@ -1,5 +1,5 @@
 import { writable } from "svelte/store";
-import type { SpotifyApi } from "@statsfm/spotify.js";
+import { SpotifyWebApi } from "spotify-web-api-js";
 
 export const containerID = "graphContainer";
 export const graph = writable(null);
@@ -19,8 +19,8 @@ export enum NodeStyle {
   Text,
 }
 
-export function updateGraphType(graphType: GraphType, api: SpotifyApi) {
-  api.me.top("artists").then((x) => console.log(x));
+export function updateGraphType(graphType: GraphType, api: SpotifyWebApi) {
+  api.getMe().then((me) => console.log(me));
 }
 
 export function updateNodeStyle(nodeStyle: NodeStyle) {
