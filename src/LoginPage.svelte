@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { setShareCode, login } from "./account";
+	import { setShareCode, login } from "./spotifyApi";
 </script>
 
-<main class="min-h-screen p-3">
+<main class="h-screen w-screen p-3">
 	<div
 		class="p-3 mx-auto md:w-2/3 lg:w-1/2 bg-slate-800 rounded-lg shadow-lg border border-slate-700 text-center space-y-2"
 	>

@@ -1,19 +1,35 @@
 <script lang="ts">
-  import { initSpotifyApi, spotify } from "./account";
+  import { auth } from "./spotifyApi";
+  import { fade } from "svelte/transition";
 
   import LoginPage from "./LoginPage.svelte";
   import Dashboard from "./Dashboard.svelte";
-    import { onMount } from "svelte";
 
-  onMount(() => {
-    initSpotifyApi();
-  });
+  let token = "init";
+  token = auth();
 </script>
 
-<main class="bg-slate-900 text-slate-100">
-  {#if $spotify}
-    <Dashboard />
+<main class="min-h-screen">
+  <!-- a really bad hack so the user doesn't see the login page of the first few frames of pageload -->
+  {#if token != "init"}
+    {#if token != null}
+      <div in:fade={{ duration: 1000 }} class="absolute left-0 top-0">
+        <Dashboard />
+      </div>
+    {:else}
+      <LoginPage />
+    {/if}
   {:else}
-    <LoginPage />
+    <div
+      out:fade={{ duration: 1000 }}
+      class="absolute left-0 top-0 w-screen h-screen grid place-items-center"
+    >
+      <span
+        class="h-10 w-10 block rounded-full border-4 border-slate-700 border-t-slate-100 animate-spin"
+      />
+    </div>
   {/if}
 </main>
+
+<style>
+</style>

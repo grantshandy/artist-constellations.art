@@ -1,9 +1,16 @@
-import SpotifyWebApi from "spotify-web-api-js";
 import { writable } from "svelte/store";
+import axios from "axios";
 
-export const spotify = writable(null);
+export const me = writable(null);
+export const httpClient = axios.create({
+  responseType: "json",
+  baseURL: "https://api.spotify.com/v1/",
+  headers: {
+    "Authorization": `Bearer ${localStorage.getItem("accessToken")}`,
+  },
+});
 
-export function initSpotifyApi() {
+export function auth(): string | null {
   const paramsToken: string | null = new URLSearchParams(
     window.location.hash.substring(1),
   ).get(
@@ -20,14 +27,17 @@ export function initSpotifyApi() {
     );
   }
 
-  const api = new SpotifyWebApi();
-  api.setAccessToken(localStorage.getItem("access_token"));
+  const accessToken = localStorage.getItem("access_token");
+  if (accessToken == null) {
+    return null;
+  }
 
-  return api.getMe().then((me) => { 
-    if (me.display_name) {
-      spotify.set(api);
-    }
-  });
+  httpClient.defaults.headers.common["Authorization"] = `Bearer ${accessToken}`;
+
+  return getMe().then((data) => {
+    me.set(data);
+    accessToken
+  }).catch((_) => null);
 }
 
 export function login() {
@@ -42,4 +52,8 @@ export function logout() {
 
 export function setShareCode() {
   alert("TODO: set share code");
+}
+
+export function getMe() {
+  return httpClient.get("/me").then((resp) => resp.data);
 }

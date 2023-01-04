@@ -28,7 +28,7 @@
     let container = document.getElementById(containerID);
 
     loadingInfo.set({
-      text: "Starting Graph",
+      text: "Initalizing Graph",
       current: 1,
       total: 100,
     });
@@ -49,9 +49,11 @@
   <div class="w-full h-full" id={containerID} />
   {#if $loadingInfo}
     <div class="w-full h-full rounded-md flex items-center justify-center">
-      <div>
+      <div class="space-y-3 select-none">
         <p class="text-center">Loading: {$loadingInfo.text}...</p>
-        <progress class="mx-auto w-full h-6" value={$loadingInfo.current} max={$loadingInfo.total} />
+        <div class="w-full h-4 bg-slate-900 border border-slate-700 rounded-md">
+          <div class="bg-slate-800 h-full rounded-md" style="width: {$loadingInfo.current}%" />
+        </div>
       </div>
     </div>
   {/if}

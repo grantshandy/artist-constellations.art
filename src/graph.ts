@@ -1,26 +1,25 @@
 import { writable } from "svelte/store";
-import { SpotifyWebApi } from "spotify-web-api-js";
 
 export const containerID = "graphContainer";
 export const graph = writable(null);
 export const loadingInfo = writable(null);
 
 export enum GraphType {
-  TopMonth,
-  TopYear,
-  TopAllTime,
-  Following,
-  AllAvailable,
+  TopMonth = "TOPMONTH",
+  TopYear = "TOPYEAR",
+  TopAllTime = "TOPALLTIME",
+  Following = "FOLLOWING",
+  AllAvailable = "ALLAVAILABLE",
 }
 
 export enum NodeStyle {
-  Dot,
-  Picture,
-  Text,
+  Dot = "DOT",
+  Picture = "PICTURE",
+  Text = "TEXT",
 }
 
-export function updateGraphType(graphType: GraphType, api: SpotifyWebApi) {
-  api.getMe().then((me) => console.log(me));
+export function updateGraphType(graphType: GraphType) {
+  loadingInfo.set(null);
 }
 
 export function updateNodeStyle(nodeStyle: NodeStyle) {

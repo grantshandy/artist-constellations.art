@@ -1,28 +1,54 @@
 <script lang="ts">
-  import { logout, spotify } from "./account";
-  import { NodeStyle, GraphType, updateGraphType, updateNodeStyle } from "./graph";
+  import { onMount } from "svelte";
+  import { logout, me } from "./spotifyApi";
+  import {
+    NodeStyle,
+    GraphType,
+    updateGraphType,
+    updateNodeStyle,
+  } from "./graph";
 
-  let graphType = GraphType.TopYear;
-  let nodeStyle = NodeStyle.Dot;
+  let graphType: GraphType =
+    (localStorage.getItem("graphType") as GraphType) || GraphType.TopYear;
+  let nodeStyle: NodeStyle =
+    (localStorage.getItem("nodeStyle") as NodeStyle) || NodeStyle.Dot;
 
-  $: {
-    updateGraphType(graphType, $spotify);
-  }
-
-  $: {
+  onMount(() => {
     updateNodeStyle(nodeStyle);
-  }
+    updateGraphType(graphType);
+  });
 </script>
 
 <main class="panel flex flex-col">
-  <div class="grow p-2 overflow-y-auto">
+  <div class="grow p-2 overflow-y-auto space-y-2">
+    {#if $me}
+      <a
+        href={$me.external_urls.spotify}
+        class="border rounded-lg border-slate-700 p-2 flex"
+      >
+        <p class="mx-auto text-2xl font-bold align-middle">
+          <img
+            class="inline rounded-full w-8 h-8 mr-1"
+            src={$me.images[0].url}
+            alt={$me.display_name}
+          />
+          {$me.display_name.charAt(0).toUpperCase() + $me.display_name.slice(1)}
+        </p>
+      </a>
+    {/if}
     <div class="border rounded-lg border-slate-700 space-y-1">
       <h2 class="text-center text-xl font-semibold mt-1">Settings</h2>
       <hr class="border-t-1 border-t-slate-700" />
       <div class="px-2 pt-1 pb-2 space-y-1">
         <div class="w-full inline-flex md:block">
           <p>Artists Shown:</p>
-          <select value={graphType}>
+          <select
+            bind:value={graphType}
+            on:change={() => {
+              updateGraphType(graphType);
+              localStorage.setItem("graphType", graphType.toString());
+            }}
+          >
             <option value={GraphType.TopMonth}
               >Your Top of the Past Month</option
             >
@@ -37,7 +63,13 @@
         </div>
         <div class="w-full inline-flex md:block">
           <p>Artist Style:</p>
-          <select value={nodeStyle}>
+          <select
+            bind:value={nodeStyle}
+            on:change={() => {
+              updateNodeStyle(nodeStyle);
+              localStorage.setItem("nodeStyle", nodeStyle.toString());
+            }}
+          >
             <option value={NodeStyle.Dot}>Dots</option>
             <option value={NodeStyle.Picture}>Pictures</option>
             <option value={NodeStyle.Text}>Text</option>
