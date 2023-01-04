@@ -22,7 +22,7 @@
     "vite": "^4.0.0"
   },
   "dependencies": {
-    "axios": "^1.2",
-    "force-graph": "^1.42"
+    "force-graph": "^1.42",
+    "spotify-api.js": "^9.2"
   }
 }

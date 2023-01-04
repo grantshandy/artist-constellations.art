@@ -1,16 +1,10 @@
 import { writable } from "svelte/store";
-import axios from "axios";
+import { Client } from "spotify-api.js";
 
 export const me = writable(null);
-export const httpClient = axios.create({
-  responseType: "json",
-  baseURL: "https://api.spotify.com/v1/",
-  headers: {
-    "Authorization": `Bearer ${localStorage.getItem("accessToken")}`,
-  },
-});
+export const spotifyApi = writable("init");
 
-export function auth(): string | null {
+export async function auth() {
   const paramsToken: string | null = new URLSearchParams(
     window.location.hash.substring(1),
   ).get(
@@ -29,15 +23,30 @@ export function auth(): string | null {
 
   const accessToken = localStorage.getItem("access_token");
   if (accessToken == null) {
-    return null;
+    spotifyApi.set(null);
+    return;
   }
 
-  httpClient.defaults.headers.common["Authorization"] = `Bearer ${accessToken}`;
+  const client: Client = await Client.create({
+    cacheSettings: true,
+    retryOnRateLimit: true,
+    userAuthorizedToken: true,
+    token: accessToken,
+  });
 
-  return getMe().then((data) => {
-    me.set(data);
-    accessToken
-  }).catch((_) => null);
+  try {
+    const user = client.user;
+
+    if (user.id) {
+      me.set(user);
+    }
+  } catch {
+    spotifyApi.set(null);
+    return;
+  }
+
+
+  spotifyApi.set(client);
 }
 
 export function login() {
@@ -52,8 +61,4 @@ export function logout() {
 
 export function setShareCode() {
   alert("TODO: set share code");
-}
-
-export function getMe() {
-  return httpClient.get("/me").then((resp) => resp.data);
 }

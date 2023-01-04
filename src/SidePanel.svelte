@@ -23,16 +23,20 @@
   <div class="grow p-2 overflow-y-auto space-y-2">
     {#if $me}
       <a
-        href={$me.external_urls.spotify}
+        href={$me.externalURL.spotify}
         class="border rounded-lg border-slate-700 p-2 flex"
       >
         <p class="mx-auto text-2xl font-bold align-middle">
           <img
             class="inline rounded-full w-8 h-8 mr-1"
             src={$me.images[0].url}
-            alt={$me.display_name}
+            alt={$me.displayName}
           />
-          {$me.display_name.charAt(0).toUpperCase() + $me.display_name.slice(1)}
+          {#if $me.displayName}
+            {$me.displayName.charAt(0).toUpperCase() + $me.displayName.slice(1)}
+          {:else}
+            {$me.id}
+          {/if}
         </p>
       </a>
     {/if}

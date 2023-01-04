@@ -1,18 +1,17 @@
 <script lang="ts">
-  import { auth } from "./spotifyApi";
+  import { spotifyApi, auth } from "./spotifyApi";
   import { fade } from "svelte/transition";
 
   import LoginPage from "./LoginPage.svelte";
   import Dashboard from "./Dashboard.svelte";
 
-  let token = "init";
-  token = auth();
+  auth();
 </script>
 
 <main class="min-h-screen">
   <!-- a really bad hack so the user doesn't see the login page of the first few frames of pageload -->
-  {#if token != "init"}
-    {#if token != null}
+  {#if $spotifyApi != "init"}
+    {#if $spotifyApi != null}
       <div in:fade={{ duration: 1000 }} class="absolute left-0 top-0">
         <Dashboard />
       </div>
