@@ -1,11 +1,9 @@
 import { get, type Writable, writable } from "svelte/store";
 import { me, spotifyApi } from "./spotifyApi";
 import { type Artist, type ArtistManager } from "spotify-api.js";
-import ForceGraph from "force-graph";
-import type ForceGraphInstance from "force-graph";
+import pLimit from "p-limit";
 
 export const containerID = "graphContainer";
-export const graph: Writable<ForceGraphInstance | null> = writable(null);
 export const loadingInfo = createLoadingInfo();
 
 export interface LoadingInfo {
@@ -49,21 +47,17 @@ function createLoadingInfo() {
 
         return i;
       }),
+    addOne: () =>
+      update((i: LoadingInfo) => {
+        i.value += 1;
+
+        return i;
+      }),
   };
 }
 
-
 export function init2DGraph(container: HTMLElement) {
   loadingInfo.setText("Initializing Graph");
-  graph.set(
-    ForceGraph()(container)
-      .width(container.clientWidth)
-      .height(container.clientHeight),
-  );
-}
-
-export function init3DGraph(container: HTMLElement) {
-  // TODO!
 }
 
 export enum GraphType {
@@ -71,13 +65,17 @@ export enum GraphType {
   TopYear = "medium_term",
   TopAllTime = "long_term",
   Following = "following",
-  AllAvailable = "allavailable",
+  AllAvailable = "all_available",
 }
 
 export async function updateGraphType(graphType: GraphType) {
   let artists: Artist[] = [];
 
+  loadingInfo.setShown(true);
   loadingInfo.setText("Getting Artists");
+  loadingInfo.setMax(100);
+  loadingInfo.setValue(1);
+  
   if (
     graphType == GraphType.TopMonth || graphType == GraphType.TopYear ||
     graphType == GraphType.TopAllTime
@@ -102,13 +100,7 @@ export async function updateGraphType(graphType: GraphType) {
 
   loadingInfo.setShown(false);
 
-  graph.update((graph) => {
-    if (graph) {
-      graph.graphData({ nodes: artists, links: edges });
-      
-      return graph;
-    }
-  });
+  console.log(artists, edges);
 }
 
 interface Edge {
@@ -120,15 +112,21 @@ async function getEdges(artists: Artist[]): Promise<Edge[]> {
   const api = get(spotifyApi);
 
   const idArray: string[] = artists.map((artist) => artist.id);
+  loadingInfo.setValue(0);
+  loadingInfo.setMax(idArray.length);
+  loadingInfo.setText("Downloading Related");
+
+  const limit = pLimit(3);
+
   const relatedArtists: {
     name: string;
     id: string;
     related: { name: string; id: string }[];
   }[] = await Promise.all(
-    artists.map((artist) => getRelated(artist, api)),
+    artists.map((artist) => limit(() => getRelated(artist, api))),
   );
 
-  let edges: Edge[] = [];
+  const edges: Edge[] = [];
 
   for (const artist of relatedArtists) {
     for (const related of artist.related) {
@@ -163,7 +161,11 @@ async function getRelated(
   { name: string; id: string; related: { name: string; id: string }[] }
 > {
   const related: Artist[] = await api.artists
-    .getRelatedArtists(artist.id);
+    .getRelatedArtists(artist.id).then((related: Artist[]) => {
+      loadingInfo.addOne();
+    
+      return related;
+    });
 
   const simplified: { name: string; id: string }[] = related.map(
     (artist: Artist) => {
@@ -198,7 +200,6 @@ async function getFollowing(): Promise<Artist[]> {
 
   return artists;
 }
-
 
 export enum NodeStyle {
   Dot = "DOT",

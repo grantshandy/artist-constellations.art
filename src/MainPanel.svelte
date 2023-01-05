@@ -1,15 +1,15 @@
 <script lang="ts">
-  import { graph, loadingInfo, containerID, init2DGraph, type LoadingInfo } from "./graph";
+  import { loadingInfo, containerID, init2DGraph, type LoadingInfo } from "./graph";
   import { onMount } from "svelte";
 
-  const ro = new ResizeObserver((entries) => {
-    if ($graph) {
-      const cr = entries[0].contentRect;
+  // const ro = new ResizeObserver((entries) => {
+  //   if ($graph) {
+  //     const cr = entries[0].contentRect;
 
-      $graph.width(cr.width);
-      $graph.height(cr.height);
-    }
-  });
+  //     $graph.width(cr.width);
+  //     $graph.height(cr.height);
+  //   }
+  // });
 
   loadingInfo.subscribe((lt: LoadingInfo) => {
     if (!document.getElementById(containerID)) {
@@ -26,11 +26,11 @@
   onMount(() => {
     let container = document.getElementById(containerID);
     init2DGraph(container);
-    ro.observe(container);
+    // ro.observe(container);
 
     // >;)
-    container.firstElementChild.classList.add("rounded-md");
-    container.firstElementChild.firstElementChild.classList.add("rounded-md");
+    // container.firstElementChild.classList.add("rounded-md");
+    // container.firstElementChild.firstElementChild.classList.add("rounded-md");
   });
 </script>
 
