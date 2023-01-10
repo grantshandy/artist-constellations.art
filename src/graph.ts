@@ -1,14 +1,17 @@
 import { get, type Writable, writable } from "svelte/store";
-import { me, spotifyApi } from "./spotifyApi";
+import { me, spotifyApi, catchSpotifyApiError } from "./spotifyApi";
 import { type Artist, type ArtistManager } from "spotify-api.js";
 import pLimit from "p-limit";
 
 export const containerID = "graphContainer";
 export const loadingInfo = createLoadingInfo();
+export const graphDimensions: Writable<number> = writable(2);
+export const graphData: Writable<{ nodes: Artist[], edges: Edge[] }> = writable({ nodes: [], edges: [] });
 
 export interface LoadingInfo {
   shown: boolean;
   text: string;
+  artist: string | null;
   value: number;
   max: number;
 }
@@ -17,6 +20,7 @@ function createLoadingInfo() {
   const { subscribe, update }: Writable<LoadingInfo> = writable({
     shown: true,
     text: "Starting",
+    artist: null,
     value: 0,
     max: 100,
   });
@@ -33,6 +37,12 @@ function createLoadingInfo() {
       update((i: LoadingInfo) => {
         i.text = text;
 
+        return i;
+      }),
+    setArtist: (artist: string | null) => 
+      update((i: LoadingInfo) => {
+        i.artist = artist;
+        
         return i;
       }),
     setValue: (value: number) =>
@@ -96,6 +106,31 @@ export async function updateGraphType(graphType: GraphType) {
     );
   }
 
+  if (graphType == GraphType.AllAvailable) {
+    artists = artists.concat(await getFollowing());
+
+    let localMe = get(me);
+
+    artists = artists.concat(
+      await localMe.getTopArtists({
+        timeRange: "short_term",
+        limit: 50,
+      }),
+    );
+    artists = artists.concat(
+      await localMe.getTopArtists({
+        timeRange: "medium_term",
+        limit: 50,
+      }),
+    );
+    artists = artists.concat(
+      await localMe.getTopArtists({
+        timeRange: "long_term",
+        limit: 50,
+      }),
+    );
+  }
+
   const edges = await getEdges(artists);
 
   loadingInfo.setShown(false);
@@ -116,7 +151,7 @@ async function getEdges(artists: Artist[]): Promise<Edge[]> {
   loadingInfo.setMax(idArray.length);
   loadingInfo.setText("Downloading Related");
 
-  const limit = pLimit(3);
+  const limit = pLimit(4);
 
   const relatedArtists: {
     name: string;
@@ -151,6 +186,8 @@ async function getEdges(artists: Artist[]): Promise<Edge[]> {
     }
   }
 
+  loadingInfo.setArtist(null);
+
   return edges;
 }
 
@@ -163,9 +200,10 @@ async function getRelated(
   const related: Artist[] = await api.artists
     .getRelatedArtists(artist.id).then((related: Artist[]) => {
       loadingInfo.addOne();
+      loadingInfo.setArtist(artist.name);
     
       return related;
-    });
+    }).catch((err) => catchSpotifyApiError(error));
 
   const simplified: { name: string; id: string }[] = related.map(
     (artist: Artist) => {

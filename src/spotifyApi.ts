@@ -32,7 +32,7 @@ export async function auth() {
     retryOnRateLimit: true,
     userAuthorizedToken: true,
     token: accessToken,
-  });
+  }).catch((err) => catchSpotifyApiError(err));
 
   try {
     const user = client.user;
@@ -61,4 +61,12 @@ export function logout() {
 
 export function setShareCode() {
   alert("TODO: set share code");
+}
+
+export function catchSpotifyApiError(error: Any) {
+  if (error.status == 401) {
+    logout();  
+  }
+
+  console.log(error);
 }

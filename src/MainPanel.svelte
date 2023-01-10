@@ -1,15 +1,9 @@
 <script lang="ts">
-  import { loadingInfo, containerID, init2DGraph, type LoadingInfo } from "./graph";
+  import { graphDimensions, loadingInfo, containerID, init2DGraph, type LoadingInfo, type GraphDimensions } from "./graph";
   import { onMount } from "svelte";
 
-  // const ro = new ResizeObserver((entries) => {
-  //   if ($graph) {
-  //     const cr = entries[0].contentRect;
-
-  //     $graph.width(cr.width);
-  //     $graph.height(cr.height);
-  //   }
-  // });
+  import Graph2D from "./Graph2D.svelte";
+  import Graph3D from "./Graph3D.svelte";
 
   loadingInfo.subscribe((lt: LoadingInfo) => {
     if (!document.getElementById(containerID)) {
@@ -24,25 +18,29 @@
   });
 
   onMount(() => {
-    let container = document.getElementById(containerID);
-    init2DGraph(container);
-    // ro.observe(container);
-
-    // >;)
-    // container.firstElementChild.classList.add("rounded-md");
-    // container.firstElementChild.firstElementChild.classList.add("rounded-md");
+    init2DGraph(document.getElementById(containerID));
   });
 </script>
 
 <main class="panel">
-  <div class="w-full h-full" id={containerID} />
+  {#if $graphDimensions == 2 }
+    <Graph2D />
+  {:else if $graphDimensions == 3 }
+    <Graph3D />
+  {/if}
   {#if $loadingInfo.shown}
     <div class="w-full h-full rounded-md flex items-center justify-center">
       <div class="space-y-3 select-none">
-        <p class="text-center">Loading: {$loadingInfo.text}...</p>
-        <div class="w-full h-4 bg-slate-900 border border-slate-700 rounded-md">
-          <div class="bg-slate-700 h-full rounded-md" style="width: {($loadingInfo.value / $loadingInfo.max) * 100}%" />
+        <div>
+          <p class="text-center">Loading: {$loadingInfo.text}...</p>
+          {#if $loadingInfo.artist}
+          <p class="text-center italic">{$loadingInfo.artist}</p>
+          {/if}
         </div>
+        <div class="w-full h-4 bg-slate-900 border border-slate-700 rounded-md">
+          <div class="bg-slate-600 h-full rounded-md" style="width: {($loadingInfo.value / $loadingInfo.max) * 100}%" />
+        </div>
+        <p class="text-center">{$loadingInfo.value}/{$loadingInfo.max}</p>
       </div>
     </div>
   {/if}
