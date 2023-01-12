@@ -136,6 +136,10 @@ export async function updateGraphType(graphType: GraphType) {
   loadingInfo.setShown(false);
 
   console.log(artists, edges);
+
+  graphData.update((_) => {
+    return { nodes: artists, edges, };
+  });
 }
 
 interface Edge {
