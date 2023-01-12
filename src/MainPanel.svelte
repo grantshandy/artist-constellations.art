@@ -1,6 +1,14 @@
 <script lang="ts">
-  import { graphDimensions, loadingInfo, containerID, init2DGraph, type LoadingInfo, type GraphDimensions } from "./graph";
+  import {
+    graphDimensions,
+    loadingInfo,
+    containerID,
+    init2DGraph,
+    type LoadingInfo,
+    type GraphDimensions,
+  } from "./graph";
   import { onMount } from "svelte";
+  import { fade } from "svelte/transition";
 
   import Graph2D from "./Graph2D.svelte";
   import Graph3D from "./Graph3D.svelte";
@@ -22,26 +30,35 @@
   });
 </script>
 
-<main class="panel">
-  {#if $graphDimensions == 2 }
-    <Graph2D />
-  {:else if $graphDimensions == 3 }
-    <Graph3D />
-  {/if}
+<main class="panel relative">
   {#if $loadingInfo.shown}
-    <div class="w-full h-full rounded-md flex items-center justify-center">
+    <div
+      transition:fade
+      class="absolute top-0 w-full h-full rounded-md flex items-center justify-center"
+    >
       <div class="space-y-3 select-none">
         <div>
           <p class="text-center">Loading: {$loadingInfo.text}...</p>
           {#if $loadingInfo.artist}
-          <p class="text-center italic">{$loadingInfo.artist}</p>
+            <p class="text-center italic">{$loadingInfo.artist}</p>
           {/if}
         </div>
         <div class="w-full h-4 bg-slate-900 border border-slate-700 rounded-md">
-          <div class="bg-slate-600 h-full rounded-md" style="width: {($loadingInfo.value / $loadingInfo.max) * 100}%" />
+          <div
+            class="bg-slate-600 h-full rounded-md"
+            style="width: {($loadingInfo.value / $loadingInfo.max) * 100}%"
+          />
         </div>
         <p class="text-center">{$loadingInfo.value}/{$loadingInfo.max}</p>
       </div>
+    </div>
+  {:else}
+    <div class="w-full h-full">
+      {#if $graphDimensions == 2}
+        <Graph2D />
+      {:else if $graphDimensions == 3}
+        <Graph3D />
+      {/if}
     </div>
   {/if}
 </main>
