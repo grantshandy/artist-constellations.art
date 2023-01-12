@@ -1,12 +1,23 @@
 import { get, type Writable, writable } from "svelte/store";
-import { me, spotifyApi, catchSpotifyApiError } from "./spotifyApi";
+import { catchSpotifyApiError, me, spotifyApi } from "./spotifyApi";
 import { type Artist, type ArtistManager } from "spotify-api.js";
 import pLimit from "p-limit";
 
-export const containerID = "graphContainer";
 export const loadingInfo = createLoadingInfo();
 export const graphDimensions: Writable<number> = writable(2);
-export const graphData: Writable<{ nodes: Artist[], edges: Edge[] }> = writable({ nodes: [], edges: [] });
+export const graphData: Writable<{ nodes: Artist[]; edges: Edge[] }> = writable(
+  { nodes: [], edges: [] },
+);
+
+export enum NodeStyle {
+  Dot = "DOT",
+  Picture = "PICTURE",
+  Text = "TEXT",
+}
+
+export const nodeStyle: Writable<NodeStyle> = writable(
+  (localStorage.getItem("nodeStyle") as NodeStyle) || NodeStyle.Dot,
+);
 
 export interface LoadingInfo {
   shown: boolean;
@@ -39,10 +50,10 @@ function createLoadingInfo() {
 
         return i;
       }),
-    setArtist: (artist: string | null) => 
+    setArtist: (artist: string | null) =>
       update((i: LoadingInfo) => {
         i.artist = artist;
-        
+
         return i;
       }),
     setValue: (value: number) =>
@@ -85,7 +96,7 @@ export async function updateGraphType(graphType: GraphType) {
   loadingInfo.setText("Getting Artists");
   loadingInfo.setMax(100);
   loadingInfo.setValue(1);
-  
+
   if (
     graphType == GraphType.TopMonth || graphType == GraphType.TopYear ||
     graphType == GraphType.TopAllTime
@@ -109,7 +120,7 @@ export async function updateGraphType(graphType: GraphType) {
   if (graphType == GraphType.AllAvailable) {
     artists = artists.concat(await getFollowing());
 
-    let localMe = get(me);
+    const localMe = get(me);
 
     artists = artists.concat(
       await localMe.getTopArtists({
@@ -133,12 +144,22 @@ export async function updateGraphType(graphType: GraphType) {
 
   const edges = await getEdges(artists);
 
+  loadingInfo.setText("Getting Profile Pictures");
+  artists.forEach((node) => {
+    if (node.images[0].url) {
+      const img = new Image();
+      img.src= node.images[0].url;
+
+      node.img = img;
+    }
+  });
+
   loadingInfo.setShown(false);
 
   console.log(artists, edges);
 
   graphData.update((_) => {
-    return { nodes: artists, edges, };
+    return { nodes: artists, edges };
   });
 }
 
@@ -151,9 +172,9 @@ async function getEdges(artists: Artist[]): Promise<Edge[]> {
   const api = get(spotifyApi);
 
   const idArray: string[] = artists.map((artist) => artist.id);
-  loadingInfo.setValue(0);
+  loadingInfo.setValue(1);
   loadingInfo.setMax(idArray.length);
-  loadingInfo.setText("Downloading Related");
+  loadingInfo.setText("Downloading Artists");
 
   const limit = pLimit(4);
 
@@ -205,7 +226,7 @@ async function getRelated(
     .getRelatedArtists(artist.id).then((related: Artist[]) => {
       loadingInfo.addOne();
       loadingInfo.setArtist(artist.name);
-    
+
       return related;
     }).catch((err) => catchSpotifyApiError(error));
 
@@ -241,13 +262,4 @@ async function getFollowing(): Promise<Artist[]> {
   }
 
   return artists;
-}
-
-export enum NodeStyle {
-  Dot = "DOT",
-  Picture = "PICTURE",
-  Text = "TEXT",
-}
-
-export function updateNodeStyle(nodeStyle: NodeStyle) {
 }

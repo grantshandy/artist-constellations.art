@@ -12,7 +12,7 @@
   <!-- a really bad hack so the user doesn't see the login page of the first few frames of pageload -->
   {#if $spotifyApi != "init"}
     {#if $spotifyApi != null}
-      <div in:fade={{ duration: 1000 }} class="absolute left-0 top-0">
+      <div in:fade class="absolute left-0 top-0">
         <Dashboard />
       </div>
     {:else}

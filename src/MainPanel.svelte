@@ -2,7 +2,6 @@
   import {
     graphDimensions,
     loadingInfo,
-    containerID,
     init2DGraph,
     type LoadingInfo,
     type GraphDimensions,
@@ -12,6 +11,8 @@
 
   import Graph2D from "./Graph2D.svelte";
   import Graph3D from "./Graph3D.svelte";
+
+  const containerID = "graphContainer";
 
   loadingInfo.subscribe((lt: LoadingInfo) => {
     if (!document.getElementById(containerID)) {
@@ -53,7 +54,7 @@
       </div>
     </div>
   {:else}
-    <div class="w-full h-full">
+    <div id={containerID} class="w-full h-full">
       {#if $graphDimensions == 2}
         <Graph2D />
       {:else if $graphDimensions == 3}

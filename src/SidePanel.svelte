@@ -1,20 +1,12 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import { logout, me } from "./spotifyApi";
-  import {
-    NodeStyle,
-    GraphType,
-    updateGraphType,
-    updateNodeStyle,
-  } from "./graph";
+  import { NodeStyle, GraphType, updateGraphType, nodeStyle } from "./graph";
 
   let graphType: GraphType =
     (localStorage.getItem("graphType") as GraphType) || GraphType.TopYear;
-  let nodeStyle: NodeStyle =
-    (localStorage.getItem("nodeStyle") as NodeStyle) || NodeStyle.Dot;
 
   onMount(() => {
-    updateNodeStyle(nodeStyle);
     updateGraphType(graphType);
   });
 </script>
@@ -68,10 +60,9 @@
         <div class="w-full inline-flex md:block">
           <p>Artist Style:</p>
           <select
-            bind:value={nodeStyle}
+            bind:value={$nodeStyle}
             on:change={() => {
-              updateNodeStyle(nodeStyle);
-              localStorage.setItem("nodeStyle", nodeStyle.toString());
+              localStorage.setItem("nodeStyle", $nodeStyle.toString());
             }}
           >
             <option value={NodeStyle.Dot}>Dots</option>

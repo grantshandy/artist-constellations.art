@@ -23,6 +23,8 @@
     "vite-plugin-singlefile": "^0.13.2"
   },
   "dependencies": {
+    "d3-force": "^3.0.0",
+    "force-graph": "^1.42.18",
     "p-limit": "^4.0.0",
     "spotify-api.js": "^9.2"
   }
