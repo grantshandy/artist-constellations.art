@@ -3,20 +3,21 @@ import { catchSpotifyApiError, me, spotifyApi } from "./spotifyApi";
 import { type Artist, type ArtistManager } from "spotify-api.js";
 import pLimit from "p-limit";
 
-export const loadingInfo = createLoadingInfo();
-export const graphDimensions: Writable<number> = writable(2);
-export const graphData: Writable<{ nodes: Artist[]; edges: Edge[] }> = writable(
-  { nodes: [], edges: [] },
-);
-
 export enum NodeStyle {
   Dot = "DOT",
   Picture = "PICTURE",
   Text = "TEXT",
 }
 
-export const nodeStyle: Writable<NodeStyle> = writable(
-  (localStorage.getItem("nodeStyle") as NodeStyle) || NodeStyle.Dot,
+export const loadingInfo = createLoadingInfo();
+export const graphMetadata: Writable<
+  { dimensions: number; nodeStyle: NodeStyle }
+> = writable({
+  dimensions: 2,
+  nodeStyle: localStorage.getItem("nodeStyle") as NodeStyle || NodeStyle.Dot,
+});
+export const graphData: Writable<{ nodes: Artist[]; edges: Edge[] }> = writable(
+  { nodes: [], edges: [] },
 );
 
 export interface LoadingInfo {
@@ -75,10 +76,6 @@ function createLoadingInfo() {
         return i;
       }),
   };
-}
-
-export function init2DGraph(container: HTMLElement) {
-  loadingInfo.setText("Initializing Graph");
 }
 
 export enum GraphType {
@@ -148,7 +145,7 @@ export async function updateGraphType(graphType: GraphType) {
   artists.forEach((node) => {
     if (node.images[0].url) {
       const img = new Image();
-      img.src= node.images[0].url;
+      img.src = node.images[0].url;
 
       node.img = img;
     }

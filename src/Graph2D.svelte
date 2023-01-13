@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { graphData, NodeStyle, nodeStyle } from "./graph";
+	import { graphData, NodeStyle, graphMetadata} from "./graph";
 	import ForceGraph from "force-graph";
 	import * as d3 from "d3-force";
 	import { onMount } from "svelte";
@@ -20,20 +20,21 @@
 		const elem = document.getElementById(elemID);
 
 		graph = ForceGraph()(elem)
-			.d3Force("radial", d3.forceRadial(50))
+			.d3Force("radial", d3.forceRadial(0))
 			.width(elem.clientWidth)
 			.height(elem.clientHeight)
 			.nodeColor(() => "#94a3b8")
-			.linkColor(() => "#64748b");
+			.linkColor(() => "#64748b")
+			.linkWidth(() => 2);
 		ro.observe(elem);
 
 		elem.firstElementChild.classList.add("rounded-md");
 		elem.firstElementChild.firstElementChild.classList.add("rounded-md");
 
-		updateNodeStyle($nodeStyle);
+		updateNodeStyle($graphMetadata.nodeStyle);
 	});
 
-	nodeStyle.subscribe((nodeStyle: NodeStyle) => updateNodeStyle(nodeStyle));
+	graphMetadata.subscribe((meta) => updateNodeStyle(meta.nodeStyle));
 
 	$: if (graph) {
 		graph.graphData({ nodes: $graphData.nodes, links: $graphData.edges });
@@ -42,8 +43,11 @@
 	function updateNodeStyle(nodeStyle: NodeStyle) {
 		if (graph) {
 			if (nodeStyle == NodeStyle.Dot) {
-				graph.nodeLabel((node) => node.name);
-			} else if ($nodeStyle == NodeStyle.Picture) {
+				graph
+					.nodeLabel((node) => node.name)
+					.nodeCanvasObject(null)
+					.nodePointerAreaPaint(null);
+			} else if ($graphMetadata.nodeStyle == NodeStyle.Picture) {
 				const size = 12;
 
 				graph

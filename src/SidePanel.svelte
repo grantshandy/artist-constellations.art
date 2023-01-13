@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import { logout, me } from "./spotifyApi";
-  import { NodeStyle, GraphType, updateGraphType, nodeStyle } from "./graph";
+  import { NodeStyle, GraphType, updateGraphType, graphMetadata } from "./graph";
 
   let graphType: GraphType =
     (localStorage.getItem("graphType") as GraphType) || GraphType.TopYear;
@@ -60,9 +60,9 @@
         <div class="w-full inline-flex md:block">
           <p>Artist Style:</p>
           <select
-            bind:value={$nodeStyle}
+            bind:value={$graphMetadata.nodeStyle}
             on:change={() => {
-              localStorage.setItem("nodeStyle", $nodeStyle.toString());
+              localStorage.setItem("nodeStyle", $graphMetadata.nodeStyle.toString());
             }}
           >
             <option value={NodeStyle.Dot}>Dots</option>

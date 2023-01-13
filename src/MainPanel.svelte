@@ -1,10 +1,8 @@
 <script lang="ts">
   import {
-    graphDimensions,
     loadingInfo,
-    init2DGraph,
     type LoadingInfo,
-    type GraphDimensions,
+    graphMetadata,
   } from "./graph";
   import { onMount } from "svelte";
   import { fade } from "svelte/transition";
@@ -24,10 +22,6 @@
     } else {
       document.getElementById(containerID).classList.remove("hidden");
     }
-  });
-
-  onMount(() => {
-    init2DGraph(document.getElementById(containerID));
   });
 </script>
 
@@ -55,9 +49,9 @@
     </div>
   {:else}
     <div id={containerID} class="w-full h-full">
-      {#if $graphDimensions == 2}
+      {#if $graphMetadata.dimensions == 2}
         <Graph2D />
-      {:else if $graphDimensions == 3}
+      {:else if $graphMetadata.dimensions == 3}
         <Graph3D />
       {/if}
     </div>
