@@ -21,6 +21,9 @@ jobs:
 
       - name: Build
         run: npm install && npm run build
+        
+      - name: CNAME
+        run: echo "artist-constellations.art" > ./dist/CNAME
 
       - name: Deploy to gh-pages
         uses: peaceiris/actions-gh-pages@v3
