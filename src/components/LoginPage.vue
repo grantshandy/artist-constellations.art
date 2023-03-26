@@ -7,7 +7,7 @@
         <div class="rounded-md shadow-2xl text-center p-4 bg-base03">
           <h1 class="text-3xl font-bold text-base1">Artist Constellations</h1>
           <p class="text-base0">
-            View the artists you listen to on Spotify in a 3D constellations!
+            View the artists you listen to on Spotify in 3D constellations!
           </p>
           <a
             href="https://github.com/grantshandy/artist-constellations.art"
@@ -39,7 +39,7 @@
             class="grow px-2 py-1 text-xl select-none rounded-md bg-base03 hover:bg-base02-tint font-semibold text-base1 hover:text-base01-tint"
           >
             <span v-if="shareCode">Login to Compare Artists</span>
-            <span v-else>Login</span>
+            <span v-else>Connect Spotify</span>
           </button>
         </div>
       </div>
