@@ -400,7 +400,7 @@ export default {
 
       this.genres = this.buildGenreList(this.nodes);
 
-      this.loading = "Loading... Building Links";
+      this.loading = "Loading... Building Links. This might take a while.";
       this.links = await getLinks(this.nodes).catch((error) => {
         this.error = error;
       });

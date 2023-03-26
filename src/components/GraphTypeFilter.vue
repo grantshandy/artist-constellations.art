@@ -1,6 +1,6 @@
 <template>
   <select
-    :value="graphType"
+    v-model="graphType"
     v-on:change="$emit('update', graphType)"
     name="graphType"
     class="filter"
