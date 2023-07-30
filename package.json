@@ -27,7 +27,6 @@
 	},
 	"type": "module",
 	"dependencies": {
-		"3d-force-graph": "^1.71.5",
-		"svelte-local-storage-store": "^0.5.0"
+		"3d-force-graph": "^1.71.5"
 	}
 }
