@@ -3,7 +3,7 @@
 	import ArtistGraph from '$lib/ArtistGraph.svelte';
 	import UserBubble from '$lib/UserBubble.svelte';
 
-	import { GraphType } from '../../graphutils';
+	import { GraphType } from '$lib/graph_utils';
 
 	const sdk = SpotifyApi.withUserAuthorization(
 		'2ed0e6e8b06842fb854cb15e1690a7b5',

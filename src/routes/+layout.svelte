@@ -1,3 +1,5 @@
-<div class="w-screen min-h-screen">
-	<slot />
-</div>
+<script>
+  import "../app.css"
+</script>
+
+<slot />

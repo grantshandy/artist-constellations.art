@@ -1,8 +1,6 @@
 <script lang="ts">
 	import { onDestroy, onMount } from 'svelte';
 	import ForceGraph3D, { type ForceGraph3DInstance } from '3d-force-graph';
-	import resolveConfig from 'tailwindcss/resolveConfig';
-	import tailwindConfig from '../../tailwind.config.js';
 
 	export let data: { nodes: Array<any>; links: Array<{ source: string; target: string }> };
 	export let demo: boolean = false;
@@ -12,25 +10,16 @@
 
 	$: if (graph) graph.graphData(data);
 
-	const theme = resolveConfig(tailwindConfig).theme;
+	let width: number;
+	let height: number;
 
-	const updateGraphSize = () => {
-		if (!graph) {
-			return;
-		}
-
-		graph.height(graphElem.clientHeight)
-		graph.width(graphElem.clientWidth);
-	};
+	$: if (graph) graph.width(width);
+	$: if (graph) graph.height(height);
 
 	// init the graph when the DOM is added
 	onMount(() => {
 		if (graph) {
-			graph(graphElem)
-				.backgroundColor('#00000000')
-				// .nodeColor(() => theme.colors.primary['200'])
-				// .linkColor(() => theme.colors.primary['900'])
-				.graphData(data);
+			graph(graphElem).backgroundColor('#00000000').graphData(data);
 		}
 
 		if (demo && graph) {
@@ -52,8 +41,6 @@
 			}, 10);
 		}
 
-		updateGraphSize();
-
 		graphElem.classList.remove('invisible');
 	});
 
@@ -61,9 +48,8 @@
 	onDestroy(() => {
 		graph = null;
 	});
-
-	// 3d-force-graph is a nice lib, but it requires some hacks.
-	window.onresize = updateGraphSize;
 </script>
 
-<div class="grow rounded-md" bind:this={graphElem} />
+<div class="rounded-md" bind:clientWidth={width} bind:clientHeight={height}>
+	<div bind:this={graphElem} />
+</div>
