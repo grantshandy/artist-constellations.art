@@ -2,13 +2,15 @@
 	import type { Artist, SpotifyApi } from '@spotify/web-api-ts-sdk';
 	import Graph from './Graph.svelte';
 	import { fade } from 'svelte/transition';
-	import type { GraphType } from './graphutils';
+	import type { NodeStyle, GraphType } from '$lib/graph_utils';
 
 	export let sdk: SpotifyApi;
 
 	export let data: { nodes: any[]; links: { source: string; target: string }[] };
 	export let loading: { text: string; percentage: number } | null;
+
 	export let graphType: GraphType;
+	export let nodeStyle: NodeStyle;
 
 	/// automatically generates `links` for a set of Artist[] `nodes`.
 	const buildLinks = async (artists: Artist[]): Promise<{ source: string; target: string }[]> => {
@@ -91,16 +93,14 @@
 <div class="relative">
 	{#if loading}
 		<div
-			class="absolute top-0 left-0 w-full h-full flex justify-center items-center"
+			class="absolute top-0 left-0 z-50 w-screen h-screen flex justify-center items-center bg-primary"
 			transition:fade={{ delay: 100, duration: 500 }}
 		>
 			<div class="text-center space-y-3">
 				<p class="text-lg font-bold">{loading.text}</p>
-				<div class="rounded-full overflow-hidden w-72 h-6">
-					<div class="h-full" style={'width: ' + loading.percentage + '%;'} />
-				</div>
+				<progress class="progress w-56" value={loading.percentage} max="100" />
 			</div>
 		</div>
 	{/if}
-	<Graph {data} />
+	<Graph {data} {nodeStyle} />
 </div>

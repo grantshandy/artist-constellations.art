@@ -5,12 +5,12 @@
 
 <div class="hero min-h-screen bg-base-200">
   <div class="hero-content flex-col lg:flex-row">
-		<div class="max-w-sm rounded-lg shadow-2xl">
+		<div class="max-w-xs rounded-lg shadow-2xl h-96">
 			<Graph data={sampleData} demo={true} />
 		</div>
     <div>
       <h1 class="text-5xl font-bold">Artist Constellations</h1>
-      <p class="py-6">Provident cupiditate voluptatem et in. Quaerat fugiat ut assumenda excepturi exercitationem quasi. In deleniti eaque aut repudiandae et a id nisi.</p>
+      <p class="py-6">View the artists you listen to on Spotify in 3D constellations.</p>
       <a href="/dashboard" class="btn btn-primary">Get Started</a>
     </div>
   </div>

@@ -6,3 +6,9 @@ export enum GraphType {
 	All = "all",
 }
 
+export enum NodeStyle {
+	Dot = "dot",
+	Picture = "picture",
+	Text = "text",
+}
+

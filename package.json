@@ -29,6 +29,9 @@
 	"type": "module",
 	"dependencies": {
 		"@spotify/web-api-ts-sdk": "^1.0.3",
-		"3d-force-graph": "^1.71.5"
+		"3d-force-graph": "^1.71.5",
+		"daisyui": "^3.5.0",
+		"three": "^0.155.0",
+		"three-spritetext": "^1.8.1"
 	}
 }
