@@ -93,7 +93,7 @@
 <div class="relative">
 	{#if loading}
 		<div
-			class="absolute top-0 left-0 z-50 w-screen h-screen flex justify-center items-center bg-primary"
+			class="absolute top-0 left-0 z-10 w-screen h-screen flex justify-center items-center bg-base-100"
 			transition:fade={{ delay: 100, duration: 500 }}
 		>
 			<div class="text-center space-y-3">
@@ -102,5 +102,7 @@
 			</div>
 		</div>
 	{/if}
-	<Graph {data} {nodeStyle} />
+	<div class="w-full h-full z-0">
+		<Graph {data} {nodeStyle} />
+	</div>
 </div>

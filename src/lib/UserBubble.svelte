@@ -5,7 +5,7 @@
 </script>
 
 {#await profile then profile}
-	<div class="tooltip tooltip-bottom" data-tip={profile.display_name}>
+	<div class="tooltip tooltip-bottom select-none" data-tip={profile.display_name}>
 		<div class="avatar">
 			<a
 				class="w-12 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2 overflow-hidden"

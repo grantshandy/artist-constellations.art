@@ -2,9 +2,10 @@
 	import { onDestroy, onMount } from 'svelte';
 	import ForceGraph3D, { type ForceGraph3DInstance } from '3d-force-graph';
 	import { NodeStyle } from '$lib/graph_utils';
-	import type { Artist } from '@spotify/web-api-ts-sdk';
 	import * as THREE from 'three';
 	import SpriteText from 'three-spritetext';
+
+	import noProfile from '$lib/../assets/question.png';
 
 	export let data: { nodes: Array<any>; links: Array<{ source: string; target: string }> };
 	export let demo: boolean = false;
@@ -18,16 +19,15 @@
 	$: if (graph)
 		switch (nodeStyle) {
 			case NodeStyle.Dot:
-				console.log('view as dot');
 				graph.nodeThreeObject((_: any) => {});
 				graph.nodeLabel((node: any) => node.name);
 				break;
 
 			case NodeStyle.Picture:
 				graph.nodeThreeObject((node: any) => {
-					console.log(node);
-
-					let imgTexture = new THREE.TextureLoader().load(node.images.slice(-1)[0].url);
+					let imgTexture = new THREE.TextureLoader().load(
+						node.images?.slice(-1)[0]?.url ?? noProfile
+					);
 					let material = new THREE.SpriteMaterial({ map: imgTexture });
 					let sprite = new THREE.Sprite(material);
 					sprite.scale.set(25, 25);
@@ -71,9 +71,16 @@
 		}
 
 	const updateGraphSize = () => {
-		if (graph && graphElem.parentElement) {
+		if (!graph) {
+			return;
+		}
+
+		if (demo && graphElem.parentElement) {
 			graph.width(graphElem.parentElement.clientWidth);
 			graph.height(graphElem.parentElement.clientHeight);
+		} else {
+			graph.width(document.documentElement.clientWidth);
+			graph.height(document.documentElement.clientHeight);
 		}
 	};
 
@@ -83,7 +90,9 @@
 			// const style = getComputedStyle(document.body);
 
 			graph(graphElem)
-				.linkColor(() => '#303030')
+				.showNavInfo(false)
+				.enableNodeDrag(false)
+				// .linkColor(() => '#303030')
 				// .nodeColor(() => '#ffffff')
 				.backgroundColor('#00000000')
 				.graphData(data);
@@ -94,10 +103,7 @@
 			let angle = 0;
 
 			graph
-				.cameraPosition({ z: dist })
-				.showNavInfo(false)
-				.enableNodeDrag(false)
-				.enableNavigationControls(false);
+				.cameraPosition({ z: dist });
 
 			setInterval(() => {
 				graph?.cameraPosition({
