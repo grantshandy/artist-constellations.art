@@ -1,21 +1,20 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { fade } from 'svelte/transition';
 	import { themeChange } from 'theme-change';
-
-	export let lightClass: string;
-	export let darkClass: string;
+	import { darkTheme, lightTheme } from '$lib/utils';
 
 	const iconBoiler: string = ' fill-current w-8 h-8';
 	let dark: boolean = false;
 
 	onMount(() => {
 		themeChange(false);
-		dark = document.documentElement.getAttribute('data-theme') == darkClass;
+		dark = document.documentElement.getAttribute('data-theme') == darkTheme;
 	});
 </script>
 
-<label class="swap swap-rotate btn btn-circle btn-primary">
-	<input type="checkbox" data-toggle-theme={lightClass + ',' + darkClass} />
+<label transition:fade={{ duration: 900 }} class="swap swap-rotate btn btn-circle btn-primary">
+	<input type="checkbox" data-toggle-theme={lightTheme + ',' + darkTheme} />
 	<svg
 		class={(dark ? 'swap-on' : 'swap-off') + iconBoiler}
 		xmlns="http://www.w3.org/2000/svg"

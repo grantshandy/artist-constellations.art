@@ -3,7 +3,7 @@
 	import ArtistGraph from '$lib/ArtistGraph.svelte';
 	import UserBubble from '$lib/UserBubble.svelte';
 
-	import { GraphType, NodeStyle } from '$lib/graph_utils';
+	import { globalError, GraphType, NodeStyle } from '$lib/utils';
 	import ThemeSwitcher from '$lib/ThemeSwitcher.svelte';
 	import { fade } from 'svelte/transition';
 
@@ -18,7 +18,6 @@
 		links: []
 	};
 	let loading: { text: string; percentage: number } | null = null;
-	let error: string | null = null;
 
 	let graphType: GraphType =
 		(localStorage.getItem('graphType') as GraphType) ?? GraphType.ShortTerm;
@@ -29,43 +28,40 @@
 </script>
 
 <div class="drawer w-screen h-screen">
-	<!-- invisible checkbox to control drawer -->
 	<input id="my-drawer" type="checkbox" class="drawer-toggle" />
 	<div class="drawer-content relative">
-		<!-- background artist graph -->
+		<!-- graph (covers whole background) -->
 		<ArtistGraph {sdk} {data} {loading} {graphType} {nodeStyle} />
 
-		<!-- top-right items -->
-		<div class="z-20 absolute top-4 right-4 flex flex-col justify-center space-y-3">
-			<UserBubble profile={sdk.currentUser.profile()} />
-			<ThemeSwitcher darkClass={'dracula'} lightClass={'pastel'} />
+		<!-- buttons n stuff -->
+		<div class="z-20 absolute top-0 right-0 pt-4 pr-4 flex flex-col items-end space-y-3">
+			{#await sdk.currentUser.profile() then profile}
+				<UserBubble {profile} />
+			{/await}
+			<ThemeSwitcher />
 		</div>
 
-		<!-- bottom-right items -->
-		<div class="z-20 absolute bottom-2 right-2 space-y-3 flex flex-col items-end">
-			<!-- error message box -->
-			{#if error}
-				<div transition:fade={{ duration: 200 }} class="items-center">
-					<div class="alert alert-error flow-root space-x-3">
-						<span class="float-left">Error: {error}</span>
-						<button on:click={() => (error = null)} class="float-right">
-							<svg
-								xmlns="http://www.w3.org/2000/svg"
-								class="stroke-current shrink-0 h-6 w-6"
-								fill="none"
-								viewBox="0 0 24 24"
-								><path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
-								/></svg
-							>
-						</button>
-					</div>
+		<div class="z-20 absolute bottom-0 right-0 pr-4 pb-4 flex flex-col items-end space-y-3">
+			{#if $globalError}
+				<div transition:fade={{ duration: 200 }} class="alert alert-error flow-root space-x-3">
+					<span class="float-left"><span class="font-bold">Error:</span> {$globalError}</span>
+					<button on:click={() => ($globalError = null)} class="float-right">
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							class="stroke-current shrink-0 h-6 w-6"
+							fill="none"
+							viewBox="0 0 24 24"
+							><path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+							/></svg
+						>
+					</button>
 				</div>
 			{/if}
-			<!-- cool-looking button for opening the drawer -->
+
 			<label class="btn btn-circle btn-primary swap swap-rotate" for="my-drawer">
 				<input type="checkbox" class="drawer-toggle" />
 				<svg
@@ -89,23 +85,22 @@
 	<!-- drawer contents -->
 	<div class="drawer-side z-50">
 		<label for="my-drawer" class="drawer-overlay" />
-		<ul class="menu p-4 w-64 md:w-80 space-y-2 h-full bg-base-200 text-base-content">
-			<select
-				class="select select-bordered bg-primary w-full"
-				bind:value={graphType}
-				title="data"
-			>
+		<ul class="menu p-4 w-64 md:w-80 space-y-2 h-full bg-base-200 text-base-content flex flex-col">
+			<h1 class="text-xl">Preferences</h1>
+			<select class="select select-bordered w-full" bind:value={graphType}>
 				<option value={GraphType.ShortTerm}>Top of The Past Month</option>
 				<option value={GraphType.MediumTerm}>Top of The Past Year</option>
 				<option value={GraphType.LongTerm}>Top of All Time</option>
 				<option value={GraphType.Following}>Following</option>
 				<option value={GraphType.All}>All Available</option>
 			</select>
-			<select class="select select-bordered bg-primary" bind:value={nodeStyle}>
+			<select class="select select-bordered w-full" bind:value={nodeStyle}>
 				<option value={NodeStyle.Dot}>View as Dots</option>
 				<option value={NodeStyle.Picture}>View as Pictures</option>
 				<option value={NodeStyle.Text}>View as Names</option>
 			</select>
+			<div class="flex-grow"/>
+			<button class="btn btn-primary">Log Out</button>
 		</ul>
 	</div>
 </div>

@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { onDestroy, onMount } from 'svelte';
 	import ForceGraph3D, { type ForceGraph3DInstance } from '3d-force-graph';
-	import { NodeStyle } from '$lib/graph_utils';
+	import { NodeStyle, darkTheme } from '$lib/utils';
 	import * as THREE from 'three';
 	import SpriteText from 'three-spritetext';
-
 	import noProfile from '$lib/../assets/question.png';
+	import daisyuiColors from 'daisyui/src/theming/themes';
 
 	export let data: { nodes: Array<any>; links: Array<{ source: string; target: string }> };
 	export let demo: boolean = false;
@@ -15,60 +15,54 @@
 	let graphElem: HTMLElement;
 	let graph: ForceGraph3DInstance | null = ForceGraph3D();
 
+	const getTheme = (): any => {
+		return daisyuiColors[`[data-theme=${localStorage.getItem('theme')}]`];
+	};
+
 	$: if (graph) graph.graphData(data);
+
 	$: if (graph)
-		switch (nodeStyle) {
-			case NodeStyle.Dot:
-				graph.nodeThreeObject((_: any) => {});
-				graph.nodeLabel((node: any) => node.name);
-				break;
+		graph.linkColor(() => (localStorage.getItem('theme') == darkTheme ? '#ffffff' : '#000000'));
 
-			case NodeStyle.Picture:
-				graph.nodeThreeObject((node: any) => {
-					let imgTexture = new THREE.TextureLoader().load(
-						node.images?.slice(-1)[0]?.url ?? noProfile
-					);
-					let material = new THREE.SpriteMaterial({ map: imgTexture });
-					let sprite = new THREE.Sprite(material);
-					sprite.scale.set(25, 25);
-					return sprite;
-				});
-				graph.nodeLabel((node: any) => node.name);
-				break;
+	$: if (graph)
+		graph.nodeColor(() => (localStorage.getItem('theme') == darkTheme ? '#ffffff' : '#000000'));
 
-			case NodeStyle.Text:
-				graph.nodeThreeObject((node: any) => {
-					const sprite = new SpriteText(node.name);
+	$: if (graph && nodeStyle == NodeStyle.Dot) {
+		graph.nodeThreeObject((_: any) => {});
+		graph.nodeLabel((node: any) => node.name);
+	}
 
-					// if (this.colorByUser) {
-					// if (node.owners.length > 1) {
-					// 	sprite.color = '#ffffff';
-					// 	sprite.borderColor = '#859900';
-					// 	sprite.backgroundColor = '#859900';
-					// } else if (node.owners[0] == this.me.display_name) {
-					// 	sprite.color = '#ffffff';
-					// 	sprite.borderColor = '#b58900';
-					// 	sprite.backgroundColor = '#b58900';
-					// } else if (node.owners[0] == this.share.data.displayName) {
-					// 	sprite.color = '#ffffff';
-					// 	sprite.borderColor = '#2aa198';
-					// 	sprite.backgroundColor = '#2aa198';
-					// }
-					// } else {
-					sprite.color = '#ffffff';
-					sprite.borderColor = '#002b36';
-					sprite.backgroundColor = '#002b36';
-					// }
+	$: if (graph && nodeStyle == NodeStyle.Picture) {
+		graph.nodeThreeObject((node: any) => {
+			const imgTexture = new THREE.TextureLoader().load(
+				node.images?.slice(-1)[0]?.url ?? noProfile
+			);
+			const material = new THREE.SpriteMaterial({ map: imgTexture });
+			let sprite = new THREE.Sprite(material);
+			sprite.scale.set(25, 25);
+			return sprite;
+		});
+		graph.nodeLabel((node: any) => node.name);
+	}
 
-					sprite.borderWidth = 4;
-					sprite.borderRadius = 4;
-					sprite.textHeight = 8;
+	$: if (graph && nodeStyle == NodeStyle.Text) {
+		const theme = getTheme();
 
-					return sprite;
-				});
-				graph.nodeLabel('');
-				break;
-		}
+		graph.nodeThreeObject((node: any) => {
+			const sprite = new SpriteText(node.name);
+
+			sprite.color = theme.neutral;
+			sprite.borderColor = theme.primary;
+			sprite.backgroundColor = theme.primary;
+
+			sprite.borderWidth = 4;
+			sprite.borderRadius = 4;
+			sprite.textHeight = 8;
+
+			return sprite;
+		});
+		graph.nodeLabel('');
+	}
 
 	const updateGraphSize = () => {
 		if (!graph) {
@@ -87,13 +81,10 @@
 	// init the graph when the DOM is added
 	onMount(() => {
 		if (graph) {
-			// const style = getComputedStyle(document.body);
-
 			graph(graphElem)
 				.showNavInfo(false)
 				.enableNodeDrag(false)
-				// .linkColor(() => '#303030')
-				// .nodeColor(() => '#ffffff')
+				.linkWidth(3)
 				.backgroundColor('#00000000')
 				.graphData(data);
 		}
@@ -102,8 +93,7 @@
 			const dist = 900;
 			let angle = 0;
 
-			graph
-				.cameraPosition({ z: dist });
+			graph.cameraPosition({ z: dist }).enableNavigationControls(false);
 
 			setInterval(() => {
 				graph?.cameraPosition({

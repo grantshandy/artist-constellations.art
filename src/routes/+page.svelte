@@ -1,13 +1,13 @@
 <script lang="ts">
 	import Graph from '$lib/Graph.svelte';
 	import sampleData from '$lib/../assets/sample.json';
-	import { NodeStyle } from '$lib/graph_utils';
+	import { NodeStyle } from '$lib/utils';
 	import ThemeSwitcher from '$lib/ThemeSwitcher.svelte';
 </script>
 
 <div class="hero min-h-screen bg-base-200">
 	<div class="hero-content flex-col lg:flex-row">
-		<div class="max-w-xs rounded-lg shadow-2xl h-64 md:h-1/2">
+		<div class="max-w-xs rounded-lg h-64 md:h-96">
 			<Graph data={sampleData} demo={true} nodeStyle={NodeStyle.Dot} />
 		</div>
 		<div>
@@ -23,7 +23,7 @@
 						class="btn">View on Github</a
 					>
 				</div>
-				<ThemeSwitcher darkClass="dracula" lightClass="pastel" />
+				<ThemeSwitcher />
 			</div>
 		</div>
 	</div>

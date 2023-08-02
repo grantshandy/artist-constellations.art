@@ -2,7 +2,8 @@
 	import type { Artist, SpotifyApi } from '@spotify/web-api-ts-sdk';
 	import Graph from './Graph.svelte';
 	import { fade } from 'svelte/transition';
-	import type { NodeStyle, GraphType } from '$lib/graph_utils';
+	import type { NodeStyle, GraphType } from '$lib/utils';
+	import { globalError } from '$lib/utils';
 
 	export let sdk: SpotifyApi;
 
@@ -77,14 +78,18 @@
 	};
 
 	const populateGraph = async (graphType: string) => {
-		loading = { text: 'Downloading Artists', percentage: 10 };
-		const nodes = await getArtists(graphType);
+		try {
+			loading = { text: 'Downloading Artists', percentage: 10 };
+			const nodes = await getArtists(graphType);
 
-		loading = { text: 'Building Links', percentage: 20 };
-		const links = await buildLinks(nodes);
+			loading = { text: 'Building Links', percentage: 20 };
+			const links = await buildLinks(nodes);
 
-		loading = null;
-		data = { nodes, links };
+			loading = null;
+			data = { nodes, links };
+		} catch (msg) {
+			$globalError = msg;
+		}
 	};
 
 	$: populateGraph(graphType);
