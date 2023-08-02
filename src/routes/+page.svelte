@@ -1,7 +1,7 @@
 <script lang="ts">
 	import Graph from '$lib/Graph.svelte';
 	import sampleData from '$lib/../assets/sample.json';
-	import { NodeStyle } from '$lib/utils';
+	import { NodeStyle } from '$lib';
 	import ThemeSwitcher from '$lib/ThemeSwitcher.svelte';
 </script>
 

@@ -2,8 +2,8 @@
 	import type { Artist, SpotifyApi } from '@spotify/web-api-ts-sdk';
 	import Graph from './Graph.svelte';
 	import { fade } from 'svelte/transition';
-	import type { NodeStyle, GraphType } from '$lib/utils';
-	import { globalError } from '$lib/utils';
+	import type { NodeStyle, GraphType } from '$lib';
+	import { globalError } from '$lib';
 
 	export let sdk: SpotifyApi;
 
@@ -106,8 +106,9 @@
 				<progress class="progress w-56" value={loading.percentage} max="100" />
 			</div>
 		</div>
+	{:else}
+		<div class="w-full h-full z-0">
+			<Graph {data} {nodeStyle} />
+		</div>
 	{/if}
-	<div class="w-full h-full z-0">
-		<Graph {data} {nodeStyle} />
-	</div>
 </div>

@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import { themeChange } from 'theme-change';
-	import { darkTheme, lightTheme } from '$lib/utils';
+	import { darkTheme, lightTheme } from '$lib';
 
 	const iconBoiler: string = ' fill-current w-8 h-8';
 	let dark: boolean = false;
@@ -10,13 +10,18 @@
 	onMount(() => {
 		themeChange(false);
 		dark = document.documentElement.getAttribute('data-theme') == darkTheme;
+		window.dispatchEvent(new Event('themeChange'));
 	});
 </script>
 
 <label transition:fade={{ duration: 900 }} class="swap swap-rotate btn btn-circle btn-primary">
-	<input type="checkbox" data-toggle-theme={lightTheme + ',' + darkTheme} />
+	<input
+		type="checkbox"
+		data-toggle-theme={lightTheme + ',' + darkTheme}
+		on:change={() => window.dispatchEvent(new Event('themeChange'))}
+	/>
 	<svg
-		class={(dark ? 'swap-on' : 'swap-off') + iconBoiler}
+		class={(dark ? 'swap-off' : 'swap-on') + iconBoiler}
 		xmlns="http://www.w3.org/2000/svg"
 		viewBox="0 0 24 24"
 		><path
@@ -24,7 +29,7 @@
 		/></svg
 	>
 	<svg
-		class={(dark ? 'swap-off' : 'swap-on') + iconBoiler}
+		class={(dark ? 'swap-on' : 'swap-off') + iconBoiler}
 		xmlns="http://www.w3.org/2000/svg"
 		viewBox="0 0 24 24"
 		><path

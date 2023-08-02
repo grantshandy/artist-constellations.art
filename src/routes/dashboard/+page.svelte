@@ -3,15 +3,16 @@
 	import ArtistGraph from '$lib/ArtistGraph.svelte';
 	import UserBubble from '$lib/UserBubble.svelte';
 
-	import { globalError, GraphType, NodeStyle } from '$lib/utils';
+	import { globalError, GraphType, NodeStyle } from '$lib';
 	import ThemeSwitcher from '$lib/ThemeSwitcher.svelte';
 	import { fade } from 'svelte/transition';
 
-	const sdk = SpotifyApi.withUserAuthorization(
+	const sdk: SpotifyApi = SpotifyApi.withUserAuthorization(
 		'2ed0e6e8b06842fb854cb15e1690a7b5',
 		window.location.origin + '/dashboard',
 		['user-follow-read', 'user-top-read']
 	);
+	sdk.authenticate();
 
 	let data: { nodes: { id: string }[]; links: { source: string; target: string }[] } = {
 		nodes: [],
@@ -99,8 +100,15 @@
 				<option value={NodeStyle.Picture}>View as Pictures</option>
 				<option value={NodeStyle.Text}>View as Names</option>
 			</select>
-			<div class="flex-grow"/>
-			<button class="btn btn-primary">Log Out</button>
+			<div class="flex-grow" />
+			<button
+				class="btn btn-primary"
+				on:click={() => {
+					localStorage.removeItem('spotify-sdk:AuthorizationCodeWithPKCEStrategy:token');
+					localStorage.removeItem('spotify-sdk:verifier');
+					window.location.href = '/';
+				}}>Log Out</button
+			>
 		</ul>
 	</div>
 </div>

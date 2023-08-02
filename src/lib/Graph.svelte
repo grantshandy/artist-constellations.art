@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onDestroy, onMount } from 'svelte';
 	import ForceGraph3D, { type ForceGraph3DInstance } from '3d-force-graph';
-	import { NodeStyle, darkTheme } from '$lib/utils';
+	import { NodeStyle, darkTheme } from '$lib';
 	import * as THREE from 'three';
 	import SpriteText from 'three-spritetext';
 	import noProfile from '$lib/../assets/question.png';
@@ -19,50 +19,51 @@
 		return daisyuiColors[`[data-theme=${localStorage.getItem('theme')}]`];
 	};
 
-	$: if (graph) graph.graphData(data);
+	const updateNodeStyle = (style: NodeStyle) => {
+		if (!graph || !style) return;
 
-	$: if (graph)
-		graph.linkColor(() => (localStorage.getItem('theme') == darkTheme ? '#ffffff' : '#000000'));
+		const color = localStorage.getItem('theme') == darkTheme ? '#ffffff' : '#000000';
 
-	$: if (graph)
-		graph.nodeColor(() => (localStorage.getItem('theme') == darkTheme ? '#ffffff' : '#000000'));
+		graph.nodeColor(() => color);
+		graph.linkColor(() => color);
 
-	$: if (graph && nodeStyle == NodeStyle.Dot) {
-		graph.nodeThreeObject((_: any) => {});
-		graph.nodeLabel((node: any) => node.name);
-	}
+		if (style == NodeStyle.Dot) {
+			graph.nodeThreeObject((_: any) => {});
+			graph.nodeLabel((node: any) => node.name);
+		}
 
-	$: if (graph && nodeStyle == NodeStyle.Picture) {
-		graph.nodeThreeObject((node: any) => {
-			const imgTexture = new THREE.TextureLoader().load(
-				node.images?.slice(-1)[0]?.url ?? noProfile
-			);
-			const material = new THREE.SpriteMaterial({ map: imgTexture });
-			let sprite = new THREE.Sprite(material);
-			sprite.scale.set(25, 25);
-			return sprite;
-		});
-		graph.nodeLabel((node: any) => node.name);
-	}
+		if (style == NodeStyle.Picture) {
+			graph.nodeThreeObject((node: any) => {
+				const imgTexture = new THREE.TextureLoader().load(
+					node.images?.slice(-1)[0]?.url ?? noProfile
+				);
+				const material = new THREE.SpriteMaterial({ map: imgTexture });
+				let sprite = new THREE.Sprite(material);
+				sprite.scale.set(25, 25);
+				return sprite;
+			});
+			graph.nodeLabel((node: any) => node.name);
+		}
 
-	$: if (graph && nodeStyle == NodeStyle.Text) {
-		const theme = getTheme();
+		if (style == NodeStyle.Text) {
+			const theme = getTheme();
 
-		graph.nodeThreeObject((node: any) => {
-			const sprite = new SpriteText(node.name);
+			graph.nodeThreeObject((node: any) => {
+				const sprite = new SpriteText(node.name);
 
-			sprite.color = theme.neutral;
-			sprite.borderColor = theme.primary;
-			sprite.backgroundColor = theme.primary;
+				sprite.color = localStorage.getItem('theme') == darkTheme ? '#000000' : '#ffffff';
+				sprite.borderColor = theme.primary;
+				sprite.backgroundColor = theme.primary;
 
-			sprite.borderWidth = 4;
-			sprite.borderRadius = 4;
-			sprite.textHeight = 8;
+				sprite.borderWidth = 4;
+				sprite.borderRadius = 4;
+				sprite.textHeight = 8;
 
-			return sprite;
-		});
-		graph.nodeLabel('');
-	}
+				return sprite;
+			});
+			graph.nodeLabel('');
+		}
+	};
 
 	const updateGraphSize = () => {
 		if (!graph) {
@@ -109,12 +110,16 @@
 		graphElem.classList.remove('invisible');
 	});
 
-	// just to be sure
+	// just to be sure ;)
 	onDestroy(() => {
 		graph = null;
 	});
 
 	window.onresize = updateGraphSize;
+	window.addEventListener('themeChange', (_) => updateNodeStyle(nodeStyle), false);
+
+	$: if (graph) graph.graphData(data);
+	$: updateNodeStyle(nodeStyle);
 </script>
 
 <div bind:this={graphElem} />
