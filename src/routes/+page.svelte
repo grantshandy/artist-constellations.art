@@ -1,13 +1,13 @@
-<svelte:head>
-	<title>Artist Constellations</title>
-</svelte:head>
-
 <script lang="ts">
 	import Graph from '$lib/Graph.svelte';
 	import sampleData from '$lib/../assets/sample.json';
 	import { NodeStyle } from '$lib';
 	import ThemeSwitcher from '$lib/ThemeSwitcher.svelte';
 </script>
+
+<svelte:head>
+	<title>Artist Constellations</title>
+</svelte:head>
 
 <div class="hero min-h-screen bg-base-200">
 	<div class="hero-content flex-col lg:flex-row">

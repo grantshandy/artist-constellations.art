@@ -1,7 +1,3 @@
-<svelte:head>
-	<title>Artist Constellations - Dashboard</title>
-</svelte:head>
-
 <script lang="ts">
 	import { SpotifyApi } from '@spotify/web-api-ts-sdk';
 	import ArtistGraph from '$lib/ArtistGraph.svelte';
@@ -20,7 +16,11 @@
 	);
 </script>
 
-<div class="drawer w-screen h-screen">
+<svelte:head>
+	<title>Artist Constellations - Dashboard</title>
+</svelte:head>
+
+<div class="drawer">
 	<input id="my-drawer" type="checkbox" class="drawer-toggle" />
 	<div class="drawer-content relative">
 		<ArtistGraph {sdk} />
@@ -79,3 +79,10 @@
 
 	<Drawer {sdk} />
 </div>
+
+<style>
+	html,
+	body {
+		height: 100%;
+	}
+</style>
