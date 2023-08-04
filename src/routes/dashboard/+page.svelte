@@ -3,7 +3,8 @@
 	import ArtistGraph from '$lib/ArtistGraph.svelte';
 	import UserBubble from '$lib/UserBubble.svelte';
 
-	import { globalError, GraphType, NodeStyle } from '$lib';
+	import { globalError, currentArtist, GraphType, NodeStyle } from '$lib';
+	import noProfile from '$lib/../assets/question.png';
 	import ThemeSwitcher from '$lib/ThemeSwitcher.svelte';
 	import { fade } from 'svelte/transition';
 	import Drawer from '$lib/Drawer.svelte';
@@ -25,6 +26,34 @@
 	<input id="my-drawer" type="checkbox" class="drawer-toggle" />
 	<div class="drawer-content relative">
 		<ArtistGraph {sdk} {data} {loading} />
+
+		{#if $currentArtist}
+			<div
+				transition:fade={{ duration: 100 }}
+				class="z-20 absolute top-4 left-4 w-48 md:w-64 flex shadow-2xl rounded-xl bg-cover bg-center"
+				style={`background-image: url(${$currentArtist.images[0]?.url ?? noProfile})`}
+			>
+				<div class="flex-grow p-4 backdrop-brightness-50 rounded-xl text-white space-y-2">
+					<div>
+						<h2 class="card-title">{$currentArtist.name}</h2>
+						<p class="text-sm">
+							<span class="italic">
+								Popularity: {$currentArtist.popularity}% &middot;
+							</span>
+							<a
+								href={$currentArtist.external_urls.spotify}
+								class="link"
+								target="_blank"
+								rel="noreferrer noopener">Link</a
+							>
+						</p>
+					</div>
+					{#if $currentArtist.genres.length > 0}
+						<p class="text-xs">Genres: {$currentArtist.genres.slice(0, 4).join(', ')}.</p>
+					{/if}
+				</div>
+			</div>
+		{/if}
 
 		<div class="z-20 absolute top-0 right-0 pt-4 pr-4 flex flex-col items-end space-y-3">
 			{#await sdk.currentUser.profile() then profile}

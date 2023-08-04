@@ -1,6 +1,7 @@
 // place files you want to import through the `$lib` alias in this folder.
 
 import { writable } from 'svelte/store';
+import type { Artist } from '@spotify/web-api-ts-sdk';
 
 export enum GraphType {
 	ShortTerm = 'short_term',
@@ -34,6 +35,7 @@ colorByPopularity.subscribe((value: boolean) =>
 );
 
 export const globalError: writable<string | null> = writable(null);
+export const currentArtist: writable<Artist | null> = writable(null);
 
 export const darkTheme = 'night';
 export const lightTheme = 'autumn';

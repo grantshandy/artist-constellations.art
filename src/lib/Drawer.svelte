@@ -46,8 +46,19 @@
 			class="btn btn-primary"
 			on:click={() => {
 				sdk.logOut();
+				localStorage.clear();
 				window.location.href = '/';
 			}}>Log Out</button
 		>
+		<p class="text-xs text-center">
+			<i
+				>&copy; 2023 Grant Handy &middot; <a
+					href="/LICENSE.txt"
+					class="link"
+					target="_blank"
+					rel="noreferrer noopener">License</a
+				>
+			</i>
+		</p>
 	</div>
 </div>

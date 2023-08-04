@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onDestroy, onMount } from 'svelte';
 	import ForceGraph3D, { type ForceGraph3DInstance } from '3d-force-graph';
-	import { NodeStyle, colorByPopularity, darkTheme } from '$lib';
+	import { NodeStyle, colorByPopularity, currentArtist, darkTheme } from '$lib';
 	import * as THREE from 'three';
 	import SpriteText from 'three-spritetext';
 	import noProfile from '$lib/../assets/question.png';
@@ -53,7 +53,6 @@
 
 						return sprite;
 					});
-					graph.nodeLabel('');
 
 					break;
 			}
@@ -64,7 +63,6 @@
 		switch (style) {
 			case NodeStyle.Dot:
 				graph.nodeThreeObject((_: any) => {});
-				graph.nodeLabel((node: any) => node.name);
 				break;
 
 			case NodeStyle.Picture:
@@ -77,7 +75,6 @@
 					sprite.scale.set(25, 25);
 					return sprite;
 				});
-				graph.nodeLabel((node: any) => node.name);
 				break;
 
 			case NodeStyle.Text:
@@ -97,7 +94,6 @@
 
 					return sprite;
 				});
-				graph.nodeLabel('');
 				break;
 		}
 	};
@@ -124,7 +120,11 @@
 				.enableNodeDrag(false)
 				.linkWidth(2)
 				.nodeRelSize(6)
+				.nodeLabel('')
 				.backgroundColor('#00000000')
+				.onNodeHover((node) => {
+					if (node) $currentArtist = node;
+				})
 				.graphData(data);
 		}
 
