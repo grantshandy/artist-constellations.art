@@ -34,6 +34,7 @@
 			switch (style) {
 				case NodeStyle.Dot:
 					graph.nodeColor(getPopularityColor);
+					graph.nodeThreeObject((node: any) => {});
 					break;
 
 				case NodeStyle.Text:
@@ -85,8 +86,8 @@
 					const sprite = new SpriteText(node.name);
 
 					sprite.color = color;
-					sprite.borderColor = theme.primary;
-					sprite.backgroundColor = theme.primary;
+					sprite.borderColor = theme.secondary;
+					sprite.backgroundColor = theme.secondary;
 
 					sprite.borderWidth = 4;
 					sprite.borderRadius = 4;
@@ -124,6 +125,21 @@
 				.backgroundColor('#00000000')
 				.onNodeHover((node) => {
 					if (node) $currentArtist = node;
+				})
+				.onNodeRightClick((node: any) => {
+					const distance = 450;
+					const distRatio = 1 + distance / Math.hypot(node.x, node.y, node.z);
+
+					const newPos =
+						node.x || node.y || node.z
+							? { x: node.x * distRatio, y: node.y * distRatio, z: node.z * distRatio }
+							: { x: 0, y: 0, z: distance }; // special case if node is in (0,0,0)
+
+					graph?.cameraPosition(
+						newPos, // new position
+						node, // lookAt ({ x, y, z })
+						3000 // ms transition duration
+					);
 				})
 				.graphData(data);
 		}

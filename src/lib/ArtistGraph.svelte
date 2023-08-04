@@ -2,12 +2,9 @@
 	import type { Artist, SpotifyApi } from '@spotify/web-api-ts-sdk';
 	import Graph from './Graph.svelte';
 	import { fade } from 'svelte/transition';
-	import { globalError, nodeStyle, graphType } from '$lib';
+	import { globalError, nodeStyle, graphType, graphData, loading } from '$lib';
 
 	export let sdk: SpotifyApi;
-
-	export let data: { nodes: any[]; links: { source: string; target: string }[] };
-	export let loading: { text: string; percentage: number } | null;
 
 	/// automatically generates `links` for a set of Artist[] `nodes`.
 	const buildLinks = async (artists: Artist[]): Promise<{ source: string; target: string }[]> => {
@@ -22,8 +19,8 @@
 		for (const artist of artists) {
 			const related = await sdk.artists.relatedArtists(artist.id);
 
-			if (loading) {
-				loading.percentage += loadingBarDelta;
+			if ($loading) {
+				$loading.percentage += loadingBarDelta;
 			}
 
 			// loop through all second-level related artists
@@ -75,14 +72,14 @@
 
 	const populateGraph = async (graphType: string) => {
 		try {
-			loading = { text: 'Downloading Artists', percentage: 10 };
+			$loading = { text: 'Downloading Artists', percentage: 10 };
 			const nodes = await getArtists(graphType);
 
-			loading = { text: 'Building Links', percentage: 20 };
+			$loading = { text: 'Building Links', percentage: 20 };
 			const links = await buildLinks(nodes);
 
-			loading = null;
-			data = { nodes, links };
+			$loading = null;
+			$graphData = { nodes, links };
 		} catch (msg) {
 			$globalError = msg;
 		}
@@ -92,19 +89,19 @@
 </script>
 
 <div class="relative">
-	{#if loading}
+	{#if $loading}
 		<div
 			class="absolute top-0 left-0 z-10 w-screen h-screen flex justify-center items-center bg-base-100"
 			transition:fade={{ delay: 100, duration: 500 }}
 		>
 			<div class="text-center space-y-3">
-				<p class="text-lg font-bold">{loading.text}</p>
-				<progress class="progress w-56" value={loading.percentage} max="100" />
+				<p class="text-lg font-bold">{$loading.text}</p>
+				<progress class="progress w-56" value={$loading.percentage} max="100" />
 			</div>
 		</div>
 	{:else}
 		<div class="w-full h-full z-0">
-			<Graph {data} nodeStyle={$nodeStyle} />
+			<Graph data={$graphData} nodeStyle={$nodeStyle} />
 		</div>
 	{/if}
 </div>

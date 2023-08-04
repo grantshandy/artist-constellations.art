@@ -8,7 +8,7 @@
 
 <div class="drawer-side z-50">
 	<label for="my-drawer" class="drawer-overlay" />
-	<div class="menu p-4 w-64 md:w-80 h-full bg-base-200 text-base-content space-y-2 flex flex-col">
+	<div class="menu p-4 w-64 md:w-80 h-full bg-base-200 text-base-content space-y-2 flex flex-col bg-secondary-content">
 		<h1 class="text-xl">Preferences</h1>
 		<select class="select select-bordered w-full" bind:value={$graphType}>
 			<option value={GraphType.ShortTerm}>Top of The Past Month</option>
