@@ -2,16 +2,12 @@
 	import type { Artist, SpotifyApi } from '@spotify/web-api-ts-sdk';
 	import Graph from './Graph.svelte';
 	import { fade } from 'svelte/transition';
-	import type { NodeStyle, GraphType } from '$lib';
-	import { globalError } from '$lib';
+	import { globalError, nodeStyle, graphType } from '$lib';
 
 	export let sdk: SpotifyApi;
 
 	export let data: { nodes: any[]; links: { source: string; target: string }[] };
 	export let loading: { text: string; percentage: number } | null;
-
-	export let graphType: GraphType;
-	export let nodeStyle: NodeStyle;
 
 	/// automatically generates `links` for a set of Artist[] `nodes`.
 	const buildLinks = async (artists: Artist[]): Promise<{ source: string; target: string }[]> => {
@@ -92,7 +88,7 @@
 		}
 	};
 
-	$: populateGraph(graphType);
+	graphType.subscribe(populateGraph);
 </script>
 
 <div class="relative">
@@ -108,7 +104,7 @@
 		</div>
 	{:else}
 		<div class="w-full h-full z-0">
-			<Graph {data} {nodeStyle} />
+			<Graph {data} nodeStyle={$nodeStyle} />
 		</div>
 	{/if}
 </div>

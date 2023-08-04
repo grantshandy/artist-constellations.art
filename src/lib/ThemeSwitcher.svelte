@@ -9,7 +9,14 @@
 
 	onMount(() => {
 		themeChange(false);
-		dark = document.documentElement.getAttribute('data-theme') == darkTheme;
+
+		if (document.documentElement.getAttribute('data-theme')) {
+			dark = document.documentElement.getAttribute('data-theme') == darkTheme;
+		} else {
+			dark = true;
+			localStorage.setItem('theme', darkTheme);
+		}
+
 		window.dispatchEvent(new Event('themeChange'));
 	});
 </script>

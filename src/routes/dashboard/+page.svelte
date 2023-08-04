@@ -6,35 +6,26 @@
 	import { globalError, GraphType, NodeStyle } from '$lib';
 	import ThemeSwitcher from '$lib/ThemeSwitcher.svelte';
 	import { fade } from 'svelte/transition';
+	import Drawer from '$lib/Drawer.svelte';
 
 	const sdk: SpotifyApi = SpotifyApi.withUserAuthorization(
 		'2ed0e6e8b06842fb854cb15e1690a7b5',
 		window.location.origin + '/dashboard',
 		['user-follow-read', 'user-top-read']
 	);
-	sdk.authenticate();
 
 	let data: { nodes: { id: string }[]; links: { source: string; target: string }[] } = {
 		nodes: [],
 		links: []
 	};
 	let loading: { text: string; percentage: number } | null = null;
-
-	let graphType: GraphType =
-		(localStorage.getItem('graphType') as GraphType) ?? GraphType.ShortTerm;
-	$: localStorage.setItem('graphType', graphType);
-
-	let nodeStyle: NodeStyle = (localStorage.getItem('nodeStyle') as NodeStyle) ?? NodeStyle.Dot;
-	$: localStorage.setItem('nodeStyle', nodeStyle);
 </script>
 
 <div class="drawer w-screen h-screen">
 	<input id="my-drawer" type="checkbox" class="drawer-toggle" />
 	<div class="drawer-content relative">
-		<!-- graph (covers whole background) -->
-		<ArtistGraph {sdk} {data} {loading} {graphType} {nodeStyle} />
+		<ArtistGraph {sdk} {data} {loading} />
 
-		<!-- buttons n stuff -->
 		<div class="z-20 absolute top-0 right-0 pt-4 pr-4 flex flex-col items-end space-y-3">
 			{#await sdk.currentUser.profile() then profile}
 				<UserBubble {profile} />
@@ -43,6 +34,7 @@
 		</div>
 
 		<div class="z-20 absolute bottom-0 right-0 pr-4 pb-4 flex flex-col items-end space-y-3">
+			<!-- error message -->
 			{#if $globalError}
 				<div transition:fade={{ duration: 200 }} class="alert alert-error flow-root space-x-3">
 					<span class="float-left"><span class="font-bold">Error:</span> {$globalError}</span>
@@ -63,6 +55,7 @@
 				</div>
 			{/if}
 
+			<!-- open drawer button -->
 			<label class="btn btn-circle btn-primary swap swap-rotate" for="my-drawer">
 				<input type="checkbox" class="drawer-toggle" />
 				<svg
@@ -83,32 +76,5 @@
 		</div>
 	</div>
 
-	<!-- drawer contents -->
-	<div class="drawer-side z-50">
-		<label for="my-drawer" class="drawer-overlay" />
-		<ul class="menu p-4 w-64 md:w-80 space-y-2 h-full bg-base-200 text-base-content flex flex-col">
-			<h1 class="text-xl">Preferences</h1>
-			<select class="select select-bordered w-full" bind:value={graphType}>
-				<option value={GraphType.ShortTerm}>Top of The Past Month</option>
-				<option value={GraphType.MediumTerm}>Top of The Past Year</option>
-				<option value={GraphType.LongTerm}>Top of All Time</option>
-				<option value={GraphType.Following}>Following</option>
-				<option value={GraphType.All}>All Available</option>
-			</select>
-			<select class="select select-bordered w-full" bind:value={nodeStyle}>
-				<option value={NodeStyle.Dot}>View as Dots</option>
-				<option value={NodeStyle.Picture}>View as Pictures</option>
-				<option value={NodeStyle.Text}>View as Names</option>
-			</select>
-			<div class="flex-grow" />
-			<button
-				class="btn btn-primary"
-				on:click={() => {
-					localStorage.removeItem('spotify-sdk:AuthorizationCodeWithPKCEStrategy:token');
-					localStorage.removeItem('spotify-sdk:verifier');
-					window.location.href = '/';
-				}}>Log Out</button
-			>
-		</ul>
-	</div>
+	<Drawer {sdk} />
 </div>

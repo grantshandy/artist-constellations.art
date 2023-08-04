@@ -1,11 +1,12 @@
 <script lang="ts">
 	import { onDestroy, onMount } from 'svelte';
 	import ForceGraph3D, { type ForceGraph3DInstance } from '3d-force-graph';
-	import { NodeStyle, darkTheme } from '$lib';
+	import { NodeStyle, colorByPopularity, darkTheme } from '$lib';
 	import * as THREE from 'three';
 	import SpriteText from 'three-spritetext';
 	import noProfile from '$lib/../assets/question.png';
 	import daisyuiColors from 'daisyui/src/theming/themes';
+	import type { Artist } from '@spotify/web-api-ts-sdk';
 
 	export let data: { nodes: Array<any>; links: Array<{ source: string; target: string }> };
 	export let demo: boolean = false;
@@ -15,53 +16,89 @@
 	let graphElem: HTMLElement;
 	let graph: ForceGraph3DInstance | null = ForceGraph3D();
 
-	const getTheme = (): any => {
-		return daisyuiColors[`[data-theme=${localStorage.getItem('theme')}]`];
-	};
+	const getTheme = (): any => daisyuiColors[`[data-theme=${localStorage.getItem('theme')}]`];
+
+	const getPopularityColor = (artist: any) =>
+		`hsl(${(artist.popularity / 100) * 360},${artist.popularity}%,50%)`;
 
 	const updateNodeStyle = (style: NodeStyle) => {
 		if (!graph || !style) return;
+		if ($colorByPopularity && style == NodeStyle.Picture) $colorByPopularity = false;
 
-		const color = localStorage.getItem('theme') == darkTheme ? '#ffffff' : '#000000';
+		const color = localStorage.getItem('theme') == darkTheme ? '#ffffff' : '#363636';
 
 		graph.nodeColor(() => color);
 		graph.linkColor(() => color);
 
-		if (style == NodeStyle.Dot) {
-			graph.nodeThreeObject((_: any) => {});
-			graph.nodeLabel((node: any) => node.name);
+		if ($colorByPopularity && !demo) {
+			switch (style) {
+				case NodeStyle.Dot:
+					graph.nodeColor(getPopularityColor);
+					break;
+
+				case NodeStyle.Text:
+					const color = localStorage.getItem('theme') == darkTheme ? '#000000' : '#ffffff';
+
+					graph.nodeThreeObject((node: any) => {
+						const sprite = new SpriteText(node.name);
+						const backgroundColor = getPopularityColor(node);
+
+						sprite.color = color;
+						sprite.borderColor = backgroundColor;
+						sprite.backgroundColor = backgroundColor;
+
+						sprite.borderWidth = 4;
+						sprite.borderRadius = 4;
+						sprite.textHeight = 8;
+
+						return sprite;
+					});
+					graph.nodeLabel('');
+
+					break;
+			}
+
+			return;
 		}
 
-		if (style == NodeStyle.Picture) {
-			graph.nodeThreeObject((node: any) => {
-				const imgTexture = new THREE.TextureLoader().load(
-					node.images?.slice(-1)[0]?.url ?? noProfile
-				);
-				const material = new THREE.SpriteMaterial({ map: imgTexture });
-				let sprite = new THREE.Sprite(material);
-				sprite.scale.set(25, 25);
-				return sprite;
-			});
-			graph.nodeLabel((node: any) => node.name);
-		}
+		switch (style) {
+			case NodeStyle.Dot:
+				graph.nodeThreeObject((_: any) => {});
+				graph.nodeLabel((node: any) => node.name);
+				break;
 
-		if (style == NodeStyle.Text) {
-			const theme = getTheme();
+			case NodeStyle.Picture:
+				graph.nodeThreeObject((node: any) => {
+					const imgTexture = new THREE.TextureLoader().load(
+						node.images?.slice(-1)[0]?.url ?? noProfile
+					);
+					const material = new THREE.SpriteMaterial({ map: imgTexture });
+					let sprite = new THREE.Sprite(material);
+					sprite.scale.set(25, 25);
+					return sprite;
+				});
+				graph.nodeLabel((node: any) => node.name);
+				break;
 
-			graph.nodeThreeObject((node: any) => {
-				const sprite = new SpriteText(node.name);
+			case NodeStyle.Text:
+				const theme = getTheme();
+				const color = localStorage.getItem('theme') == darkTheme ? '#000000' : '#ffffff';
 
-				sprite.color = localStorage.getItem('theme') == darkTheme ? '#000000' : '#ffffff';
-				sprite.borderColor = theme.primary;
-				sprite.backgroundColor = theme.primary;
+				graph.nodeThreeObject((node: any) => {
+					const sprite = new SpriteText(node.name);
 
-				sprite.borderWidth = 4;
-				sprite.borderRadius = 4;
-				sprite.textHeight = 8;
+					sprite.color = color;
+					sprite.borderColor = theme.primary;
+					sprite.backgroundColor = theme.primary;
 
-				return sprite;
-			});
-			graph.nodeLabel('');
+					sprite.borderWidth = 4;
+					sprite.borderRadius = 4;
+					sprite.textHeight = 8;
+
+					return sprite;
+				});
+				graph.nodeLabel('');
+				break;
 		}
 	};
 
@@ -85,7 +122,8 @@
 			graph(graphElem)
 				.showNavInfo(false)
 				.enableNodeDrag(false)
-				.linkWidth(3)
+				.linkWidth(2)
+				.nodeRelSize(6)
 				.backgroundColor('#00000000')
 				.graphData(data);
 		}
@@ -120,6 +158,8 @@
 
 	$: if (graph) graph.graphData(data);
 	$: updateNodeStyle(nodeStyle);
+
+	colorByPopularity.subscribe(() => updateNodeStyle(nodeStyle));
 </script>
 
 <div bind:this={graphElem} />
