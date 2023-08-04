@@ -1,3 +1,7 @@
+<svelte:head>
+	<title>Artist Constellations - Dashboard</title>
+</svelte:head>
+
 <script lang="ts">
 	import { SpotifyApi } from '@spotify/web-api-ts-sdk';
 	import ArtistGraph from '$lib/ArtistGraph.svelte';

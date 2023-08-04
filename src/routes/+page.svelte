@@ -1,3 +1,7 @@
+<svelte:head>
+	<title>Artist Constellations</title>
+</svelte:head>
+
 <script lang="ts">
 	import Graph from '$lib/Graph.svelte';
 	import sampleData from '$lib/../assets/sample.json';
