@@ -2,7 +2,7 @@ import axios from "axios";
 import sha1 from "crypto-js/sha1";
 import Base64 from "crypto-js/enc-base64";
 
-const TOKEN = "Z2hwX0tWdWlqRkdaNjMwN2dkTXptbUhVNWp3cGFJS05WcjFhYlRYUA==";
+const TOKEN = "Z2hwX3R4bWcxMzJJdEMxcWRudHpYU3FaQ0xjREV1dUFvQzFsY0d2cA==";
 
 export async function uploadData(nodes, displayName, userId, graphType) {
   let token = atob(TOKEN);
