@@ -16,7 +16,7 @@
 		"@sveltejs/kit": "^1.20.4",
 		"autoprefixer": "^10.4.14",
 		"daisyui": "^3.5.0",
-		"postcss": "^8.4.27",
+		"postcss": "^8.4.31",
 		"prettier": "^2.8.0",
 		"prettier-plugin-svelte": "^2.10.1",
 		"svelte": "^4.0.5",
